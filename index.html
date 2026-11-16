@@ -316,7 +316,7 @@ async function askCoach(text){
       store.messages.push({from:'coach',move:reply.move,text:reply.text});
     }
   }catch(error){
-    store.messages.push({from:'coach',text:'這次未能取得 Gemini 回覆，學習階段沒有前進。請稍後再送出你的回答。'});
+    store.messages.push({from:'coach',text:'Gemini 回覆失敗：'+String(error.message||'未知錯誤').slice(0,300)+'。學習階段沒有前進，請依錯誤提示處理後重試。'});
     toast(error.name==='TimeoutError'?'Gemini 回覆逾時，請重試。':error.message);
   }finally{
     coachBusy=false;
