@@ -41,7 +41,7 @@ jobs:
           WORKER_URL: ${{ steps.deploy.outputs.deployment-url }}
         with:
           script: |
-            const url = process.env.WORKER_URL.replace(/\\/$/, "");
+            const url = new URL(process.env.WORKER_URL).origin;
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const name = "GEMINI_API_ENDPOINT";
