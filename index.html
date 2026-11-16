@@ -259,7 +259,27 @@ function stageLabel(){return talkMoves[currentTask().stage].title;}
 function initialMessages(){return [{from:'coach',move:'Welcome',text:`題目：${store.config.topic}\n\n我會一步一步指引你構思立場、分論點及合適的事例。`},{from:'coach',text:taskQuestion()}];}
 function ensureMessages(){if(!store.messages.length)store.messages=initialMessages();}
 function infer(text){const t=currentTask(),value=text.trim();if(t.stage===0)store.draft.position=value;else if(t.stage===1)store.draft.points[t.index].claim=value;else if(t.stage===2)store.draft.points[t.index].evidence=value;else if(t.stage===3&&t.index===0){const m=value.match(/^(?:有人認為|反方認為|有人會說|有人或會認為)?[：:，,\s]*(.+?)(?:；|。|，)?(?:然而|但是|不過|可是|但)[，,]?(.*)$/);if(m){store.draft.rebuttal.opposing=m[1].trim();store.draft.rebuttal.response=m[2].trim();}else store.draft.rebuttal.opposing=value;}else if(t.stage===3)store.draft.rebuttal.response=value;}
-function coachReply(text){infer(text);store.stage=currentTask().stage;return {move:talkMoves[store.stage].label,text:taskQuestion()};}
+function angleFeedback(text){
+ const q=normalizedQuery(text);
+ const replies=[
+  [/工作|就業|職業|出路|收入|前途/,'你選的是「職涯選擇」角度。把主張寫成「學習能提供部分職業所需的知識或資格」，避免說讀書一定帶來工作或高薪。可用OECD就業資料支持趨勢，並交代地區和科目差異。'],
+  [/解難|解決問題|問題解決|創意|創新|實踐/,'你選的是「解難與創意」角度。可說明學習如何讓人提出、檢視和改良方法；OECD的PISA創意思考評估包含科學及社會解難情境，但不能把評估結果說成某種課堂必然造成的效果。'],
+  [/資訊|資料|批判|判斷|真假|辨別|證據|讀寫|閱讀理解/,'你選的是「判斷資訊」角度。請舉出需要比較來源、理解數據或檢查證據的情境。OECD成人技能調查測量讀寫、數理和適應性解難，資料反映群體能力，不是學校教育的單一因果證明。'],
+  [/適應|變化|科技|轉型|持續學習|終身|長遠|未來|更新技能/,'你選的是「適應變化與持續學習」角度。可把長遠價值說具體，例如工作內容改變時更新技能。UNESCO資料支持終身學習的重要性，屬政策綜述，不代表人人必然獲得同一職涯結果。'],
+  [/興趣|長處|自我認識|目標|方向|自信/,'你選的是「自我認識」角度。可用自己接觸學科、活動或實作後發現興趣的經歷；這類個人例子能說明可能性，不宜推論所有學生都會有相同經歷。'],
+  [/社會流動|家庭背景|公平|平等|機會|弱勢|資源|貧富/,'你選的是「教育機會與社會流動」角度。可同時指出教育能打開部分升學和職業路徑，以及家庭資源仍造成差距。OECD 2025的跨國數據可作背景，但不是香港個別學生的預測。'],
+  [/健康|生活|身心|風險|健康素養/,'你選的是「健康與生活素養」角度。請說明讀寫、數據理解或健康知識怎樣幫助人作知情選擇；不要把教育說成健康結果的唯一原因。'],
+  [/公民|社會參與|社區|公共|責任|全球議題|合作/,'你選的是「公民參與與社會責任」角度。可說明學習如何幫助理解公共議題、評估不同立場或參與社區。UNESCO資料顯示相關學習活動與學生的議題認識及行動力有關，屬觀察關聯。'],
+  [/學費|成本|壓力|補習|考試|學歷不等於|文憑|課程|不實用|脫節/,'你提出的是對教育限制的角度。把範圍說清楚：你批評的是學費、考試壓力、只重文憑，還是課程和實際需要不匹配？OECD也提醒，資格提升不必然代表成人技能同步提升；論證時避免把「部分教育無效」說成「所有學習無用」。']
+ ];
+ const found=replies.find(([pattern])=>pattern.test(q));
+ return found?found[1]:'這個角度可以再收窄：指出哪一類人、哪種學習或哪項具體影響，再選一件能支持它的事例或資料。';
+}
+function coachReply(text){
+ const before=currentTask();infer(text);store.stage=currentTask().stage;
+ const feedback=before.stage===1?angleFeedback(text):'';
+ return {move:talkMoves[store.stage].label,text:(feedback?feedback+'\\n\\n':'')+taskQuestion()};
+}
 
 
 const STATIC_KNOWLEDGE=[
@@ -365,7 +385,7 @@ function supportReply(){
   store.helpLevel=Math.min(4,Math.max(store.stage===2?3:1,store.helpLevel+1));
   const evidence=supportMaterial().evidence;
   let question=taskQuestion();
-  if(store.stage===1&&store.helpLevel===1)question=/讀書無用/.test(store.config.topic)?'可從八個角度選兩個：工作選擇、解難創意、判斷資訊、適應變化、自我認識、社會流動、健康生活素養、公民參與。試寫「學習能幫助＿＿，因為＿＿」。':'先選一個受影響的對象，指出這個做法對他有哪一項具體好處或限制。'
+  if(store.stage===1&&store.helpLevel===1)question=/讀書無用/.test(store.config.topic)?'可從八個角度選兩個：工作選擇、解難創意、判斷資訊、適應變化、自我認識、社會流動、健康生活素養、公民參與。若你主張讀書未必有用，也可談學費與壓力、學歷不等於能力、課程與實際需要脫節或教育資源不平等。試寫「在＿＿情況下，學習／學校教育能（或未必能）＿＿，因為＿＿」。':'先選一個受影響的對象，指出這個做法對他有哪一項具體好處或限制。'
   if(store.helpLevel===2)question=store.stage===0?'請完成這句：「我（同意／不同意／部分同意）題目的說法，因為＿＿。」先寫你的看法即可。':'先選一種具體影響（機會、能力或限制），完成「這能／未必能幫助＿＿做到＿＿」。';
   if(store.helpLevel>=3)question=evidence.length?'先讀下面的已核實材料，選出與目前想法相關的一件事或一項發現，用自己的話記下「對象、事情或發現、來源」。':'目前沒有切合這個分論點的已核實閱讀材料。請先指出例子需要呈現哪一項具體影響，並請老師協助尋找原文。';
   return {from:'coach',text:question,support:{level:store.helpLevel,evidenceIds:evidence.map(e=>e.id)}};
