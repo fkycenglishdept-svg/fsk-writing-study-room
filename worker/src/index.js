@@ -113,7 +113,7 @@ export default {
     const body = {
       systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
       contents,
-      generationConfig: { temperature: 0.55, maxOutputTokens: 850 }
+      generationConfig: { maxOutputTokens: 850 }
     };
     if (needsSearch) body.tools = [{ google_search: {} }];
 
