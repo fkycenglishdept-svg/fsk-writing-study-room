@@ -29,7 +29,7 @@ jobs:
 
       - name: Add Gemini service URL
         env:
-          GEMINI_API_ENDPOINT: ${{ vars.GEMINI_API_ENDPOINT }}
+          GEMINI_API_ENDPOINT: https://fsk-writing-study-room-gemini.fkycenglishdept.workers.dev
         run: |
           printf 'window.GEMINI_API_BASE = "%s";\n' "$GEMINI_API_ENDPOINT" > gemini-config.js
 
