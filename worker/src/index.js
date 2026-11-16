@@ -130,8 +130,15 @@ export default {
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const status = response.status === 429 ? 429 : 502;
-        return json({ error: status === 429 ? "Gemini 暫時繁忙，請稍後再試。" : "Gemini 暫時未能回答，請稍後再試。" }, status, corsOrigin);
+        const providerMessage = String(result.error?.message || `HTTP ${response.status}`)
+          .replaceAll(env.GEMINI_API_KEY, "[已隱藏]")
+          .replace(/\\s+/g, " ")
+          .slice(0, 260);
+        let error = `Gemini API 請求失敗（HTTP ${response.status}）`;
+        if (response.status === 401 || response.status === 403) error = `Gemini API Key 或權限有問題（HTTP ${response.status}）`;
+        else if (response.status === 404) error = "Gemini 模型或 API 路徑不存在（HTTP 404）";
+        else if (response.status === 429) error = "Gemini 額度或速率限制（HTTP 429）";
+        return json({ error: `${error}：${providerMessage}` }, response.status === 429 ? 429 : 502, corsOrigin);
       }
 
       const candidate = result.candidates?.[0];
