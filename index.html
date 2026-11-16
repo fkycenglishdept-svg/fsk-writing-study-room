@@ -278,10 +278,10 @@ function historicalEvidenceAnswer(text){
 function answerStudentQuestion(text){
  const s=String(text||"").trim();
  const eventAsk=/論據|事例|例子|事件|史實|歷史|真實材料|證據/.test(s);
- const asks=/[？?]|請問|請解釋|請說明|請介紹|請提供|可以嗎|可否|能否|如何|怎樣|為甚麼|為什麼|點解|有甚麼|有什麼|我想知道|幫我/.test(s);
- if(eventAsk)return historicalEvidenceAnswer(s);
- if(!asks)return "";
+ const asks=/[？?]|嗎|請問|解釋|說明|介紹|提供|可否|能否|如何|怎樣|為甚麼|為什麼|點解|有甚麼|有什麼|有沒有|是否|何謂|我想知道|我不懂|幫我/.test(s);
  const found=findStaticKnowledge(s);
+ if(eventAsk)return historicalEvidenceAnswer(s);
+ if(!asks&&!(s.length<=20&&found))return "";
  if(found)return found.item.answer+"\n\n"+found.item.next;
  return "我目前是本機靜態寫作知識庫，沒有即時生成或網絡搜尋功能。我可以協助立場、分論點、論據配對、段落分析、駁論、引用和修改；未載入的學科或時事問題，我不會猜答。請補上題目或你卡住的句子。";
 }
