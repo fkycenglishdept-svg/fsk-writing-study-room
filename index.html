@@ -278,7 +278,7 @@ function angleFeedback(text){
 function coachReply(text){
  const before=currentTask();infer(text);store.stage=currentTask().stage;
  const feedback=before.stage===1?angleFeedback(text):'';
- return {move:talkMoves[store.stage].label,text:(feedback?feedback+'\\n\\n':'')+taskQuestion()};
+ return {move:talkMoves[store.stage].label,text:(feedback?feedback+'\n\n':'')+taskQuestion()};
 }
 
 
