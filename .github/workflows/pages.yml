@@ -27,6 +27,12 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Add Gemini service URL
+        env:
+          GEMINI_API_ENDPOINT: ${{ vars.GEMINI_API_ENDPOINT }}
+        run: |
+          printf 'window.GEMINI_API_BASE = "%s";\n' "$GEMINI_API_ENDPOINT" > gemini-config.js
+
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
         with:
