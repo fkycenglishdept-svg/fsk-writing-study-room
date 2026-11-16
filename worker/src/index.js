@@ -1,4 +1,4 @@
-const MODEL = "gemini-3.8-flash";
+const MODEL = "gemini-flash-latest";
 const ORIGIN = "https://fkycenglishdept-svg.github.io";
 const API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models/";
 
