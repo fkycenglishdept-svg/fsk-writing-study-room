@@ -43,11 +43,17 @@ function rateAllowed(ip) {
 }
 function cleanHistory(value) {
   if (!Array.isArray(value)) return [];
-  return value.slice(-12).flatMap((m) => {
-    if (!m || typeof m.text !== "string") return [];
+  const turns = [];
+  for (const m of value.slice(-12)) {
+    if (!m || typeof m.text !== "string") continue;
+    const role = m.from === "coach" ? "model" : "user";
     const text = m.text.slice(0, 3000);
-    return [{ role: m.from === "coach" ? "model" : "user", parts: [{ text }] }];
-  });
+    if (turns.length === 0 && role === "model") continue;
+    const last = turns[turns.length - 1];
+    if (last && last.role === role) last.parts[0].text += "\n" + text;
+    else turns.push({ role, parts: [{ text }] });
+  }
+  return turns;
 }
 function hasChineseHistoricalRequest(text) {
   return /中國|西方|古代|歷史|事件|真實|論據|事例|例子|最新|最近|今天|今年/.test(text);
@@ -99,13 +105,11 @@ export default {
       draft: input.draft && typeof input.draft === "object" ? input.draft : {}
     };
     const contents = cleanHistory(input.messages);
-    contents.push({
-      role: "user",
-      parts: [{
-        text: "【目前寫作脈絡】\n" + JSON.stringify(context) +
-          "\n\n【學生現在的訊息】\n" + message
-      }]
-    });
+    const currentText = "【目前寫作脈絡】\\n" + JSON.stringify(context) +
+      "\\n\\n【學生現在的訊息】\\n" + message;
+    const lastTurn = contents[contents.length - 1];
+    if (lastTurn && lastTurn.role === "user") lastTurn.parts[0].text += "\\n\\n" + currentText;
+    else contents.push({ role: "user", parts: [{ text: currentText }] });
 
     const needsSearch = eventRequest(message) || hasChineseHistoricalRequest(message);
     const asksForHelp = /[？?]|請問|可否|能否|怎樣|如何|為甚麼|為什麼|點解|解釋|介紹|提供|有甚麼|有什麼/.test(message);
