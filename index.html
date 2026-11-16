@@ -189,12 +189,6 @@ let saved;
 try{saved=JSON.parse(localStorage.getItem(ESSAY_STORE))||{};}catch{saved={};}
 const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],view:'coach',role:'student',expandedReport:null};
 const talkMoves=[
- {title:'表明立場',label:'Position',prompt:'你對題目有甚麼看法？請先用一句話表明立場。'},
- {title:'構思分論點',label:'Claim',prompt:'哪一個理由可以支持你的立場？'},
- {title:'配對合適事例',label:'Example',prompt:'可以用甚麼具體事例支持這個分論點？'},
- {title:'完成大綱',label:'Complete',prompt:'請檢查立場、兩個分論點及各自事例，並完成駁論。'}
-];
-const talkMoves=[
  {title:'表明立場',label:'Position',prompt:'請先用一句話表明立場。'},
  {title:'構思分論點',label:'Claim',prompt:'請先提出第一個支持你立場的分論點。'},
  {title:'配對事例',label:'Example',prompt:'請找一件真實事件支持這個分論點。'},
