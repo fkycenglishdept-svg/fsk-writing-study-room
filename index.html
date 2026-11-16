@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>�g�@��߫ǡU�������u�զ�</title>
+<style>
+:root{--ink:#173f3a;--ink-2:#28645b;--cream:#f6f4ed;--paper:#fffdf8;--line:#dfe5da;--muted:#6f7d77;--gold:#bf8c3b;--gold-soft:#f8ecd3;--mint:#e4f0e9;--rose:#f8e7e2;--shadow:0 18px 44px rgba(25,59,50,.08);font-family:Inter,"Noto Sans TC","PingFang HK","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--cream)}
+*{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(circle at 80% 0,#fffdf5 0,transparent 30%),var(--cream)}button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit}
+.app-shell{min-height:100vh}.topbar{height:76px;background:rgba(255,253,248,.92);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,4vw,64px);position:sticky;top:0;z-index:5;backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:11px}.brand-mark{width:39px;height:39px;border-radius:13px;background:var(--ink);color:#fff9ec;display:grid;place-items:center;font-family:Georgia,serif;font-size:19px;box-shadow:4px 4px 0 #d0dbc9}.brand small{display:block;color:var(--muted);font-size:10px;letter-spacing:.14em;text-transform:uppercase}.brand strong{display:block;font-family:Georgia,"Noto Serif TC",serif;font-size:18px;letter-spacing:.04em}.top-actions{display:flex;align-items:center;gap:10px}.mode-switch{display:flex;background:#edf1eb;padding:3px;border-radius:999px}.mode-switch button{border:0;background:transparent;color:var(--muted);padding:7px 12px;border-radius:999px;font-size:12px}.mode-switch button.active{background:var(--ink);color:#fff}.top-link{font-size:12px;color:var(--muted);text-decoration:none;padding:8px 10px}.top-link:hover{color:var(--ink)}
+.layout{display:grid;grid-template-columns:246px minmax(0,1fr);max-width:1520px;margin:auto}.sidebar{padding:28px 18px;border-right:1px solid var(--line);min-height:calc(100vh - 76px)}.side-kicker{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin:0 10px 9px}.side-nav{display:grid;gap:5px}.side-nav button{border:0;background:transparent;text-align:left;padding:12px 12px;border-radius:12px;color:#62726b;font-size:13px;display:flex;gap:10px;align-items:center}.side-nav button:hover,.side-nav button.active{background:var(--mint);color:var(--ink);font-weight:700}.side-nav button.active{box-shadow:inset 3px 0 var(--gold)}.side-note{margin:36px 10px 0;padding:16px 14px;border:1px solid var(--line);border-radius:16px;background:rgba(255,253,248,.68);font-size:12px;line-height:1.7;color:var(--muted)}.side-note strong{display:block;color:var(--ink);font-family:Georgia,serif;font-size:16px;margin-bottom:4px}
+.main{min-width:0;padding:38px clamp(18px,4vw,56px) 70px}.page-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:28px}.eyebrow{font-size:11px;letter-spacing:.14em;color:var(--gold);font-weight:800;text-transform:uppercase}.page-head h1{font-family:Georgia,"Noto Serif TC",serif;font-size:clamp(28px,4vw,45px);font-weight:500;margin:8px 0 8px;letter-spacing:.03em}.page-head p{margin:0;color:var(--muted);font-size:14px}.head-meta{text-align:right;color:var(--muted);font-size:12px}.head-meta strong{display:block;color:var(--ink);font-size:18px;margin-bottom:4px}
+.btn{border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);padding:10px 14px;font-size:12px;font-weight:700}.btn:hover{transform:translateY(-1px);box-shadow:0 6px 15px rgba(23,63,58,.08)}.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}.btn.gold{background:var(--gold);color:#fff;border-color:var(--gold)}.btn.ghost{background:transparent}.btn.danger{color:#9a4d3f;border-color:#e9c3ba}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.panel{background:rgba(255,253,248,.88);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}.panel-pad{padding:22px}.grid-2{display:grid;grid-template-columns:minmax(320px,.78fr) minmax(0,1.32fr);gap:20px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:20px}.stat{padding:17px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}.stat span{font-size:11px;color:var(--muted)}.stat strong{display:block;font-size:27px;margin:5px 0 2px}.stat small{color:var(--muted);font-size:11px}
+.assignment{padding:18px 20px;background:linear-gradient(120deg,#edf4e9,#fffaf0);border:1px solid #d9e6d5;border-radius:16px;margin-bottom:16px}.assignment h3{margin:7px 0 6px;font-family:Georgia,serif;font-size:20px;font-weight:500}.assignment p{margin:0;color:#5f6f69;font-size:12px;line-height:1.7}.assignment-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.tag{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:11px;padding:5px 9px}.tag.active{color:var(--ink);border-color:#b4cdbd;background:#edf6f0}
+.steps{display:flex;gap:6px;margin:0 0 15px;overflow:auto;padding-bottom:3px}.step{flex:1;min-width:95px;padding:10px 11px;border-bottom:2px solid var(--line);color:#89958f;font-size:11px}.step strong{display:block;font-size:14px;color:inherit;margin-bottom:3px}.step.active{border-color:var(--gold);color:var(--ink)}.step.done{border-color:#89aa91;color:#5d7e68}
+.chat-panel{display:flex;flex-direction:column;min-height:610px}.chat-head{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.coach-id{display:flex;align-items:center;gap:10px}.coach-avatar{width:36px;height:36px;border-radius:12px;background:var(--ink);color:white;display:grid;place-items:center;font-family:Georgia,serif;font-size:18px}.coach-id strong{font-size:13px;display:block}.coach-id small{font-size:11px;color:var(--muted)}.online{display:flex;align-items:center;gap:5px;color:#5c8068;font-size:11px}.online i{width:7px;height:7px;border-radius:50%;background:#6ab17d}.chat-log{padding:22px 20px;display:flex;flex-direction:column;gap:15px;flex:1;overflow:auto;max-height:470px}.bubble-row{display:flex;gap:9px;max-width:90%}.bubble-row.me{align-self:flex-end;flex-direction:row-reverse}.bubble{padding:12px 14px;border-radius:15px 15px 15px 4px;background:#edf3ed;color:#314e45;font-size:13px;line-height:1.75;white-space:pre-wrap}.me .bubble{background:var(--ink);color:#fff;border-radius:15px 15px 4px 15px}.bubble small{display:block;font-size:10px;color:#789087;margin-bottom:4px}.me .bubble small{color:#c8ddd0}.talk-move{margin-top:8px;display:inline-block;background:var(--gold-soft);color:#946b2d;padding:3px 7px;border-radius:5px;font-size:10px;line-height:1.3}.typing{font-size:11px;color:var(--muted);padding:0 20px 9px}.chat-compose{padding:14px 20px 18px;border-top:1px solid var(--line)}.quick-prompts{display:flex;gap:6px;overflow:auto;margin-bottom:9px}.quick-prompts button{border:1px dashed #b8cdbd;border-radius:999px;background:transparent;color:#527266;font-size:11px;white-space:nowrap;padding:7px 10px}.compose-row{display:flex;gap:8px}.compose-row textarea{flex:1;resize:none;min-height:48px;max-height:110px;border:1px solid var(--line);border-radius:12px;padding:12px 13px;background:#fff}.compose-row textarea:focus,input:focus,select:focus{outline:3px solid #d9ebe0;border-color:#9ab9a6}.compose-row .btn{align-self:stretch}
+.canvas{padding:20px;position:sticky;top:94px;align-self:start}.canvas-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:15px}.canvas h2,.teacher-section h2{font-family:Georgia,serif;font-weight:500;margin:0;font-size:22px}.canvas-head p{color:var(--muted);font-size:11px;margin:5px 0 0;line-height:1.5}.completion{font-size:12px;color:var(--gold);font-weight:800;text-align:right}.completion-bar{height:6px;border-radius:9px;background:#e6ebe4;margin-top:6px;width:85px;overflow:hidden}.completion-bar span{display:block;height:100%;background:var(--gold);border-radius:inherit}.draft-card{border:1px solid var(--line);border-radius:13px;margin:10px 0;padding:13px;background:#fff}.draft-card h3{font-size:12px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}.draft-card h3 span{font-size:10px;color:var(--muted);font-weight:400}.draft-card p{font-size:12px;line-height:1.65;color:#52665d;margin:0;min-height:18px}.draft-card.position{background:#f5f0e2;border-color:#e4d4aa}.draft-card.point{background:#f0f6f0}.draft-card.rebuttal{background:#f8ece8}.draft-empty{color:#a0aaa4!important;font-style:italic}.mini-line{margin-top:8px;padding-top:8px;border-top:1px dashed #d8e1d8;font-size:11px;color:#71847a}.mini-line b{color:var(--ink);font-weight:700}.card-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:15px}.card-actions .btn{padding:8px 10px;font-size:11px}
+.teacher-section{max-width:1100px}.teacher-section h2{margin-bottom:6px}.section-sub{color:var(--muted);font-size:12px;margin:0 0 20px;line-height:1.6}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.form-field{display:flex;flex-direction:column;gap:7px}.form-field.full{grid-column:1/-1}.form-field label{font-size:12px;font-weight:800;color:#425f55}.form-field input,.form-field textarea,.form-field select{border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink);font-size:13px}.form-field textarea{resize:vertical;min-height:92px;line-height:1.7}.rubric-box{padding:15px;background:#f6f7f1;border:1px solid var(--line);border-radius:12px}.rubric-box h3{font-size:12px;margin:0 0 10px}.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.check{display:flex;gap:7px;align-items:flex-start;font-size:12px;color:#5a6b64;line-height:1.5}.check input{accent-color:var(--ink);margin-top:2px}.model-card{background:#edf5ef;border:1px solid #cfe1d1;border-radius:14px;padding:15px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.model-card strong{display:block;font-size:14px}.model-card p{margin:5px 0 0;font-size:11px;color:#60766b;line-height:1.6}.model-badge{background:#fff;border-radius:999px;color:#4a765e;padding:5px 8px;font-size:10px;white-space:nowrap}.form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.report-list{display:grid;gap:13px}.report-row{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;align-items:center;gap:15px;padding:17px 19px}.report-row h3{font-size:14px;margin:0 0 4px}.report-row p{font-size:11px;color:var(--muted);margin:0}.report-progress{height:7px;background:#e7ece6;border-radius:8px;overflow:hidden}.report-progress span{height:100%;display:block;background:#82a68b}.report-score{font-size:20px;font-weight:800}.report-score small{display:block;font-size:10px;color:var(--muted);font-weight:400}.report-chip{font-size:10px;padding:5px 8px;border-radius:999px;background:var(--gold-soft);color:#8c662f;white-space:nowrap}.report-detail{margin-top:12px;padding:15px;border-top:1px dashed var(--line);font-size:12px;color:#5b6e65;line-height:1.7}.empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}
+.footer-note{margin-top:24px;color:#85918b;text-align:center;font-size:11px}.mobile-nav{display:none}.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,15px);opacity:0;pointer-events:none;background:var(--ink);color:#fff;padding:11px 15px;border-radius:10px;font-size:12px;z-index:20;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1000px){.grid-2{grid-template-columns:1fr}.canvas{position:static}.stats{grid-template-columns:repeat(2,1fr)}.grid-2>.chat-panel{order:-1}.grid-2>.canvas{order:0}.chat-panel{min-height:560px}}
+@media(max-width:700px){.topbar{height:auto;min-height:68px;padding:12px 16px;gap:10px}.brand strong{font-size:15px}.top-link{display:none}.mode-switch button{padding:6px 8px;font-size:11px}.layout{display:block}.sidebar{display:none}.main{padding:27px 14px 45px}.page-head{display:block}.page-head h1{font-size:32px}.head-meta{text-align:left;margin-top:13px}.stats{gap:8px}.stat{padding:13px}.stat strong{font-size:23px}.grid-3{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}.check-grid{grid-template-columns:1fr}.report-row{grid-template-columns:1fr 1fr;gap:12px}.report-row .btn{grid-column:2;grid-row:1/3;align-self:center}.report-row .report-chip{justify-self:start}.chat-log{max-height:400px;padding:17px 14px}.chat-compose,.chat-head{padding-left:14px;padding-right:14px}.bubble-row{max-width:96%}.canvas{padding:16px}.assignment{padding:15px}.steps{margin-right:-2px}.compose-row{align-items:flex-end}.compose-row .btn{padding:10px}.mode-switch{display:none}.mobile-nav{display:flex;gap:6px;overflow:auto;margin:0 0 17px}.mobile-nav button{white-space:nowrap;border:1px solid var(--line);background:var(--paper);padding:9px 12px;border-radius:999px;font-size:11px;color:var(--muted)}.mobile-nav button.active{background:var(--ink);color:#fff;border-color:var(--ink)}}
+
+/* Keep trial controls available on phones. */
+@media(max-width:700px){.topbar{flex-wrap:wrap}.mode-switch{display:flex}.top-actions{margin-left:auto}.report-detail{grid-column:1/-1}}
+.report-detail{grid-column:1/-1}
+
+.support-card{white-space:normal;margin-top:12px;padding:12px;background:#fffdf8;border:1px solid #cfdfce;border-radius:12px}.support-card p{margin:8px 0;line-height:1.8}.support-card small,.support-visual figcaption{font-size:11px;color:#6f7d77}.support-card summary{cursor:pointer}.support-visual{margin:12px 0 0}.support-visual svg{width:100%;height:auto}.bubble:has(.support-card){max-width:100%}
+
+.login-shell{min-height:100vh;display:grid;place-items:center;padding:26px 16px}.login-card{width:min(460px,100%);padding:32px}.login-card h1{font-size:28px;margin:12px 0}.login-card>p{line-height:1.7}.login-card .brand{margin-bottom:30px}.login-card form{display:grid;gap:16px;margin:24px 0}.login-card #login-error{color:#a33b27;margin:0;font-size:13px}.login-demo{padding:14px;border-radius:12px;background:#edf3ed;font-size:12px;line-height:1.8;margin-bottom:18px}.login-demo p{margin:5px 0 0;color:#6f7d77}
+#celebration{position:fixed;inset:0;z-index:50;pointer-events:none;overflow:hidden}.celebration-note{position:absolute;top:90px;left:50%;transform:translateX(-50%);padding:14px 20px;max-width:85vw;border-radius:16px;background:#173f3a;color:white;box-shadow:0 8px 30px #173f3a33;text-align:center}.celebration-piece{position:absolute;left:var(--x);font-size:28px;animation:fall 2.3s var(--delay) both ease-in;top:-50px}
+@keyframes fall{from{transform:translate(0,-40px) rotate(0);opacity:0}20%{opacity:1}to{transform:translate(var(--drift),95vh) rotate(250deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.celebration-piece{display:none}}
+
+.bubble-row.latest-coach{outline:3px dashed #9a6b19;outline-offset:5px;margin:10px 7px 14px}.latest-coach .bubble{background:#fff5d9;box-shadow:0 3px 12px #bf8c3b22}.chat-panel,.canvas{min-width:0}.bubble{overflow-wrap:anywhere}
+
+.verified-reading{margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}
+.verified-reading h4{margin:0 0 9px}.verified-reading a{display:block;color:var(--ink-2);text-decoration:underline;overflow-wrap:anywhere}.verified-reading small{display:block;margin-top:8px;line-height:1.6}.evidence-limit{background:var(--gold-soft);padding:10px;border-radius:8px}
+
+</style>
+</head>
+<body>
+<div id="essay-app"><section style="max-width:780px;margin:50px auto;padding:24px;font-family:system-ui;color:#173f3a">
+<h1>�g�@��߫ǡU�����զ檩</h1>
+<p id="boot-status" role="status">���b�}�����u�ܽd�K�K�Y���T���@����ܡA�Ч� HTML �x�s��q���A�A�H Chrome �� Edge �}�ҡF������Ѫ���w�����|���椬�ʵ{���C</p>
+<p>���ɤw�]�t�����˦��M�{���A���ݭn�t�~�U�� CSS��JavaScript�A�]���ݭn�s�����A���C</p>
+<noscript><p>�s�����S������ JavaScript�A�G�L�k�ϥι�ܥ\��C�ХΤ@���s�����}�ҤU���� HTML �ɮסC</p></noscript>
+</section></div>
+<div id="celebration"></div>
+<div id="essay-toast" role="status" aria-live="polite"></div>
+<script>window.addEventListener('error',function(e){var el=document.getElementById('boot-status');if(el)el.textContent='���J�������G'+e.message+'�C�бN���ɤU����� Chrome �� Edge �}�ҡC';});</script>
+<script>
+(function(){
+'use strict';
+
+const VERIFIED_EVIDENCE=[
+  {
+    "id": "oecd-earnings-2025",
+    "title": "�Ǿ��P���J�G�s���ͶթM�ӧO�t��",
+    "kind": "��s���i",
+    "keywords": [
+      "���J",
+      "�~",
+      "��",
+      "�N�~",
+      "�u�@",
+      "¾�~",
+      "�g��",
+      "�Ǿ�",
+      "�X��"
+    ],
+    "facts": "�g�٦X�@�[�o�i��´�]OECD�^���m2025�~�Ш|�����n�� A4 �����X�A�����Ш|�{�׻P�������J���K�����p�F�����J�u�շ|�]�~�֡B�ʧO�B�ҵ{�����ΩҾǻ��Ӥ��P�A�u�@�g���P���J�����C",
+    "publisher": "�g�٦X�@�[�o�i��´�]OECD�^",
+    "sourceTitle": "�m2025�~�Ш|�����n�� A4 ���G�Ш|�����J�u�ա]�D�W��Ķ�^",
+    "url": "https://www.oecd.org/en/publications/education-at-a-glance-2025_1c0d9c79-en/full-report/what-are-the-earnings-advantages-to-education_7a7e64e0.html",
+    "date": "2025 �~���i",
+    "checked": "2026-11-15",
+    "locator": "�I�������F�� A4.1�F��s��k",
+    "limits": "�o�O���s���ƪ����p�A�����̦����_�]�G�B�M�@����ƾڡA�ΫO�ҨC�첦�~�ͳ����~�C",
+    "question": "��X�@���|�v�T���J������A��A�������I�g�o��ǽT�C",
+    "sourceLanguage": "en",
+    "summaryLanguage": "zh-Hant",
+    "originalSourceTitle": "Education at a Glance 2025 �X Chapter A4",
+    "originalLocator": "Context�FFigure A4.1�FMethodology"
+  },
+  {
+    "id": "tu-education-2015",
+    "title": "�O����G�ľǰV�m�P����ǲ�",
+    "kind": "�H���ۭz",
+    "keywords": [
+      "����",
+      "����",
+      "��",
+      "���",
+      "��s",
+      "�M�~",
+      "���|",
+      "�^�m",
+      "�ޯ�",
+      "���",
+      "�ѨM",
+      "��O"
+    ],
+    "facts": "�O����b�ը������x��������ۭz���A�^�U�j���ľǽҵ{�б¿�{�ĥδӪ��B�������ʦ��������ѻP��@�C�o��1955�~���~��q�Ƥ��Ĭ�s�A�é�1959��1962�~�A��������z�׻P�����V�C",
+    "publisher": "�ը������x�����",
+    "sourceTitle": "�O����ۭz�]�D�W��Ķ�^",
+    "url": "https://www.nobelprize.org/prizes/medicine/2015/tu/biographical/",
+    "date": "2015 �~�ը������ۭz",
+    "checked": "2026-11-15",
+    "locator": "�ڪ��j�ǥͬ��F�ڪ��Ĥ@���u�@�P���ͧ�J",
+    "limits": "�o�O�ӤH���ǲߤά�s�g���A������פH�HŪ�ѫ᳣������Ǯa�A�礣��⦨�N�u�k�]��Ǿ��C",
+    "question": "��X�@���o�ǹL������ޯ�A�Φۤv���ܾ�z���ƨҡC",
+    "sourceLanguage": "en",
+    "summaryLanguage": "zh-Hant",
+    "originalSourceTitle": "Tu Youyou �X Biographical",
+    "originalLocator": "My university life�FMy first job and life-long commitment"
+  },
+  {
+    "id": "jobs-learning-2005",
+    "title": "�쥬���G�h�ǫᤴ�M�ǲ�",
+    "kind": "�t�����",
+    "keywords": [
+      "�h��",
+      "����",
+      "�쥬��",
+      "����",
+      "�]�p",
+      "�зN",
+      "���",
+      "�Ǿ�",
+      "�ר�",
+      "����",
+      "�۾�",
+      "���",
+      "�L��",
+      "����"
+    ],
+    "facts": "�b�v���֤j�ǥZ����2005�~���~�t�����A�쥬���ۭz�h�ǫᤴ��ť�ҵ{�A�]�A�Ѫk�ҡA�ǲߦr��P�r�Z�C�L�^�U�]�p ������]Macintosh�^�q���ɴ��B�γo�ǩҾǡC",
+    "publisher": "�v���֤j��",
+    "sourceTitle": "�쥬���t���G�A�������ۤv���R���ơ]�D�W��Ķ�^",
+    "url": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says",
+    "date": "2005-06-12",
+    "checked": "2026-11-15",
+    "locator": "�Ĥ@�ӬG�ơG��H�͸g���s�_��",
+    "limits": "�o�O���H�^�U���ӮסA���N���h�ǥ��M���\�F�S�������Ǧ�A�]�����󰱤�ǲߡC",
+    "question": "�Ϥ��u�S�����o�Ǧ�v�M�u�S���ǲߡv�A�A�P�_�o�ӨҤl�A�X������@�ػ��k�C",
+    "sourceLanguage": "en",
+    "summaryLanguage": "zh-Hant",
+    "originalSourceTitle": "��You��ve got to find what you love,�� Jobs says",
+    "originalLocator": "The first story is about connecting the dots"
+  }
+];
+function evidenceFor(topic,claim=''){
+  if(!/Ū��|�Ǿ�|�Ш||�\Ū|�ǲߪ�����/.test(topic))return [];
+  if(!claim.trim())return VERIFIED_EVIDENCE.slice(0,2);
+  return VERIFIED_EVIDENCE.map(e=>({e,score:e.keywords.filter(k=>claim.includes(k)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,2).map(x=>x.e);
+}
+
+
+const ESSAY_STORE='fsk-essay-studio-local-trial-v2';
+const defaultConfig={topic:"�U�y���u�U��ҤU�~�A����Ū�Ѱ��v�A�]���H���uŪ�ѵL�Ρv�C�ռg�@�峹�@�g�A�ͽͧA��uŪ�ѵL�Ρv���ݪk�C",prompt:'�дN�D�ت����߳��A�c��T�Ӭ����������I�A�ì��C�Ӥ����I����X�A���ƨҧ@���׾ڡC',rubrics:['�߳��M���A�^���D��','�����I���h���A��������','�׾ڨ���Ӥ��X����ͬ�','�ƨү������������I'],target:'three',model:'gemini-3.6-flash'};
+let saved;
+try{saved=JSON.parse(localStorage.getItem(ESSAY_STORE))||{};}catch{saved={};}
+const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],view:'coach',role:'student',expandedReport:null};
+const talkMoves=[
+ {title:'�����߳�',label:'Position',prompt:'�A���D�ئ��ƻ�ݪk�H�Х��Τ@�y�ܪ����߳��C'},
+ {title:'�c������I',label:'Claim',prompt:'���@�Ӳz�ѥi�H����A���߳��H'},
+ {title:'�t��X�A�ƨ�',label:'Example',prompt:'�i�H�άƻ����ƨҤ���o�Ӥ����I�H'},
+ {title:'�����j��',label:'Complete',prompt:'���ˬd�߳��B�T�Ӥ����I�ΦU�۪��ƨҡC'}
+];
+function currentTask(){
+  if(!store.draft.position.trim())return {stage:0,index:0};
+  for(let i=0;i<3;i++){const p=store.draft.points[i];if(!p.claim.trim())return {stage:1,index:i};if(!p.evidence.trim())return {stage:2,index:i};}
+  return {stage:3,index:2};
+}
+function taskQuestion(){
+  const t=currentTask(),reading=/Ū�ѵL��/.test(store.config.topic);
+  if(t.stage===0)return reading?'�����M�u���o�Ǿ��v�M�u�Ǩ쪾�ѡv�G�A�O�P�N�B���P�N�A�٬O�����P�N�uŪ�ѵL�Ρv�H�ХΤ@�y�ܪ����߳��C':'����P�N�B���P�N�γ����P�N�u'+store.config.topic+'�v�A�Τ@�y�ܪ����߳��C';
+  if(t.stage===1)return t.index===0?'�Х����X�Ĥ@�Ӥ���A�߳��������I�C':'�д��X��'+['�@','�G','�T'][t.index]+'�Ӥ���A�߳��������I�C';
+  if(t.stage===2)return '�A���X�u'+store.draft.points[t.index].claim+'�v�C�Ч�@���e�{�o�@�I���u��ƥ�A�g�X�u�֡����Ӿ��c�B���F�ƻ�B���G�εo�{�v�F�Q����ɡA�i���u�д��Ѿ\Ū��ơv�C';
+  return '�A�w�����߳��B�T�Ӥ����I�ΦU�۪��ƨҡC���ˬd�ƨҬO�_�A�X������������I�A�M���x�s�ǲ߳��i�C';
+}
+function depthQuestion(text){
+  if(currentTask().stage!==1)return '';
+  const reading=/Ū��|�Ǿ�|�Ш||�\Ū/.test(store.config.topic);
+  const qualified=/���@�w|����|�ëD|���N��|����O��|���O��|�����M|������|����|����|���M��|���G|�i��|���||���U/.test(text);
+  if(reading&&/�h��|����|�쥬��/.test(text)&&/�L��|����Ū|����Ū|�S����/.test(text)&&!qualified)return '���Ϥ��u�S�������Ǧ�v�P�u�S���~��ǲߡv�C�A�n��ê��O�Ǿ��A�٬O�Ҧ����ѾǲߡH�п�@���A������I��g�o��ǽT�C';
+  if(reading&&/�~|���J|�ȿ�|�ÿ�|�o�F|����/.test(text)&&!qualified)return '�A���b�q���J�P�_Ū�Ѫ����ȡC�аϤ��u�W�[�u�@���|�v�P�u�O�Ұ��~�v�A�A��@������]�Ҿǧޯ�B��~�ݨD�Τu�@�g��^�A��g�o�Ӥ����I�C';
+  if(!qualified&&/�@�w|���w|���M|�Ҧ��H|�H�H|�����S��|�@�L|�ߤ@|�u�n.+�N/.test(text))return '�o�y�ܬO�_�A�Ω�C�ӤH�H�п�@�ӥi����ܵ��G������]��H�B�귽�ι�ڰ��k�^�A������I�令���M���A�νd�򪺤@�y�ܡC';
+  return '';
+}
+
+const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,flowVersion:2}));}catch{}};
+const toast=msg=>{const el=$('#essay-toast');el.textContent=msg;el.className='toast show';clearTimeout(toast.t);toast.t=setTimeout(()=>el.className='toast',2600)};
+function icon(n){return ({spark:'?',chat:'?',book:'?',chart:'?',settings:'?',file:'?',arrow:'��',check:'?',plus:'��',download:'��',reset:'?'})[n]||'�E';}
+function progress(){const d=store.draft;const count=(d.position.trim()?1:0)+d.points.reduce((n,p)=>n+(p.claim.trim()?1:0)+(p.claim.trim()&&p.evidence.trim()?1:0),0);return Math.round(count/7*100);}
+function stageLabel(){return talkMoves[currentTask().stage].title;}
+function initialMessages(){return [{from:'coach',move:'Welcome',text:`�D�ءG${store.config.topic}\n\n�ڷ|�@�B�@�B���ާA�c��߳��B�����I�ΦX�A���ƨҡC`},{from:'coach',text:taskQuestion()}];}
+function ensureMessages(){if(!store.messages.length)store.messages=initialMessages();}
+function infer(text){const t=currentTask(),value=text.trim();if(t.stage===0)store.draft.position=value;else if(t.stage===1)store.draft.points[t.index].claim=value;else if(t.stage===2)store.draft.points[t.index].evidence=value;}
+function coachReply(text){infer(text);store.stage=currentTask().stage;return {move:talkMoves[store.stage].label,text:taskQuestion()};}
+
+function vagueAnswer(text){
+  const s=text.trim().replace(/[�A�C�I�H,.!?\s]/g,'');
+  return /�Q����|�Q���X|�����D|����|�S���Ҥl|�S���ƨ�|�����|��|���Ѿ\Ū|����/.test(s) || s.length<8 || /^(�����D|����|����|�S���Q�k|���n���a|Ū�Ѧ���|Ū�ѵL��|�ܦn|���n|�ܭ��n|�����D�z|��ı�o�ܦn|�]���ܦn|�]������|�ڻ{���o�ܭ��n)[�ڧr�O�a]*$/.test(s)
+    || (s.length<45 && /�ܭ��n|���n�B|����|�ܦn|�ܤ��n/.test(s) && !/�Ҧp|�]��|�p�G|��|�i�H|���|�ҥH/.test(s));
+}
+function supportMaterial(){
+  const t=currentTask(),claim=t.stage===2?store.draft.points[t.index].claim:'';
+  return {evidence:evidenceFor(store.config.topic,claim),cards:['�H���ξ��c','�ƥ�P�o�{','�A�Ϊ��d��']};
+}
+function visualScaffold(cards){
+  const labels=cards.slice(0,3);
+  return '<figure class="support-visual"><svg viewBox="0 0 480 120" role="img" aria-label="'+esc(labels.join('�B')+'�G�p�Q�ϥd')+'">'+labels.map((label,i)=>'<g transform="translate('+(i*160)+',0)"><rect x="5" y="5" width="145" height="110" rx="15" fill="'+['#e4f0e9','#f8ecd3','#f8e7e2'][i]+'"/><circle cx="77" cy="40" r="22" fill="white"/><text x="77" y="48" text-anchor="middle" font-size="23" fill="#173f3a">'+['?','?','!'][i]+'</text><text x="77" y="90" text-anchor="middle" font-size="14" fill="#173f3a">'+esc(label)+'</text></g>').join('')+'</svg><figcaption>�p�Q�ϥd�]�оǥܷN�^�G��@�i�A�p�Q��ƻ���骺�H�B�Ʃα��ҡH</figcaption></figure>';
+}
+function supportMarkup(m){
+  if(!m.support)return '';
+  const level=Math.max(1,Math.min(4,Number(m.support.level)||1));
+  // Only render reviewed catalogue records. Never display model/legacy free-form readings.
+  const ids=Array.isArray(m.support.evidenceIds)?m.support.evidenceIds:[];
+  const evidence=ids.map(id=>VERIFIED_EVIDENCE.find(e=>e.id===id)).filter(Boolean).slice(0,2);
+  const readings=evidence.length?evidence.map(e=>'<article class="verified-reading"><h4>'+esc(e.title)+'</h4><span class="tag">'+esc(e.kind)+' �P �w�ֹ�ӷ�</span><p><strong>'+(e.sourceLanguage==='en'?'����K�n�]��嬰�^��^':'����\Ū���')+'</strong></p><p lang="zh-Hant">'+esc(e.facts)+'</p><p class="evidence-limit"><strong>�ޥάɭ��G</strong>'+esc(e.limits)+'</p><p><strong>�\Ū��V�G</strong>'+esc(e.question)+'</p><a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+(e.sourceLanguage==='en'?'�d�ݭ^����G':'�d�ݭ��G')+esc(e.publisher)+' �P '+esc(e.sourceTitle)+' ��</a><small>'+esc(e.date)+'�U�ֹ����G'+esc(e.checked)+'<br>����m�G'+esc(e.locator)+'</small></article>').join(''):'<p>�ثe��Ʈw�S���w�ֹ�B���X�o�Ӥ����I�����ơC�Х��ЦѮv��U��@�g�����s�D�ά�s���F���n��������@�ƹ�C</p>';
+  return '<aside class="support-card"><strong>��Ҥp����</strong>'+(level>=2?'<p>��z�ƨҡG�u�H�������c�G�ġġF�Ʊ�����s�o�{�G�ġġF�ӷ��Φ~���G�ġġC�v</p>':'<p>�u�ݧ����ثe�o�@�y�A�Ȯɤ��μg��q�峹�C</p>')+(level>=3?'<details open><summary>Ū�@Ū�A�A�Q�@�Q</summary>'+readings+'</details>':'')+(level>=4?visualScaffold(['�H���ξ��c','�ƥ�P�o�{','�A�Ϊ��d��']):'')+'</aside>';
+}
+let coachBusy=false;
+let providerReady=false;
+store.helpLevel=Number.isInteger(saved.helpLevel)?Math.max(0,Math.min(4,saved.helpLevel)):0;
+store.helpStage=Number.isInteger(saved.helpStage)?saved.helpStage:0;
+function supportReply(){
+  store.stage=currentTask().stage;
+  if(store.helpStage!==store.stage)store.helpLevel=0;
+  store.helpStage=store.stage;
+  store.helpLevel=Math.min(4,Math.max(store.stage===2?3:1,store.helpLevel+1));
+  const evidence=supportMaterial().evidence;
+  let question=taskQuestion();
+  if(store.stage===1&&store.helpLevel===1)question=/Ū�ѵL��/.test(store.config.topic)?'����@�ө|���ϥΪ����סA�Ҧp�u�@���|�B�ѨM���D����O�ξǲߪ��������ȡA�A�g�@������A�߳����z�ѡC':'����@�Ө��v�T����H�A���X�o�Ӱ��k��L�����@������n�B�έ���C';
+  if(store.helpLevel===2)question=store.stage===0?'�Ч����o�y�G�u�ڡ]�P�N�����P�N�������P�N�^�D�ت����k�A�]���ġġC�v���g�A���ݪk�Y�i�C':'����@�ب���v�T�]���|�B��O�έ���^�A�����u�o������������U�ġİ���ġġv�C';
+  if(store.helpLevel>=3)question=evidence.length?'��Ū�U�����w�ֹ���ơA��X�P�ثe�Q�k�������@��ƩΤ@���o�{�A�Φۤv���ܰO�U�u��H�B�Ʊ��εo�{�B�ӷ��v�C':'�ثe�S�����X�o�Ӥ����I���w�ֹ�\Ū���ơC�Х����X�Ҥl�ݭn�e�{���@������v�T�A�ýЦѮv��U�M����C';
+  return {from:'coach',text:question,support:{level:store.helpLevel,evidenceIds:evidence.map(e=>e.id)}};
+}
+async function askCoach(text){
+  const answer=String(text||'').trim();
+  if(!answer||coachBusy)return;
+  coachBusy=true;
+  if(currentTask().stage===3){toast('�j���w�����A�i�H�x�s�ǲ߳��i�C');coachBusy=false;return;}
+  const previousMessages=store.messages.slice();
+  store.messages.push({from:'student',text:answer});
+  render();
+  try{
+    if(providerReady){
+      const response=await fetch('/api/essay-coach',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:answer,topic:store.config.topic,prompt:store.config.prompt,rubrics:store.config.rubrics,target:store.config.target,stage:currentTask().stage,pointIndex:currentTask().index,helpLevel:store.helpLevel,draft:store.draft,messages:previousMessages.slice(-20)}),signal:AbortSignal.timeout(55000)});
+      const result=await response.json();
+      if(!response.ok)throw Error(result.error||'Gemini �Ȯɥ���^��');
+      if(result.needsSupport){
+        const reply=supportReply();
+        reply.text=result.message;
+        reply.support.evidenceIds=Array.isArray(result.evidenceIds)?result.evidenceIds:[];
+        if(result.supportKind==='depth')reply.support.level=1;
+        else if(result.supportKind==='reading')reply.support.level=Math.max(3,reply.support.level);
+        store.messages.push(reply);
+      }else{
+        coachReply(answer);
+        store.helpLevel=0;
+        store.messages.push({from:'coach',text:currentTask().stage===1?taskQuestion():result.message});
+      }
+    }else if(depthQuestion(answer)){
+      store.messages.push({from:'coach',text:depthQuestion(answer),support:{level:1,evidenceIds:[]}});
+    }else if(vagueAnswer(answer)){
+      store.messages.push(supportReply());
+    }else{
+      store.helpLevel=0;
+      const reply=coachReply(answer);
+      store.messages.push({from:'coach',move:reply.move,text:reply.text});
+    }
+  }catch(error){
+    store.messages.push({from:'coach',text:'�o��������o Gemini �^�СA�ǲ߶��q�S���e�i�C�еy��A�e�X�A���^���C'});
+    toast(error.name==='TimeoutError'?'Gemini �^�йO�ɡA�Э��աC':error.message);
+  }finally{
+    coachBusy=false;
+    save();render();celebrateProgress();
+    const log=document.querySelector('#chat-log');
+    if(log)log.scrollTop=log.scrollHeight;
+  }
+}
+async function connectCoach(){
+  if(typeof location==='undefined'||!/^https?:$/.test(location.protocol))return;
+  try{const r=await fetch('/api/essay-status');if(r.ok){const s=await r.json();providerReady=s.ready===true;render();}}catch{}
+}
+
+
+let loginPortal=(typeof location!=='undefined'&&String(location.search||'').includes('portal=teacher'))?'teacher':'student';
+store.role=null;
+function loginScreen(){
+  const teacher=loginPortal==='teacher';
+  return `<main class="login-shell"><section class="login-card panel">
+    <div class="brand"><span class="brand-mark">�g</span><strong>�g�@��߫�</strong></div>
+    <p class="eyebrow">${teacher?'TEACHER CONSOLE':'STUDENT SPACE'}</p>
+    <h1>${teacher?'�Ѯv��x�n�J':'�ǥͺݵn�J'}</h1>
+    <p>${teacher?'�]�w�g�@�D�ػP�����ѦҡA�d�ݾǲ߳��i�C':'�@�B�@�B��z�Q�k�A�����A���峹�j���C'}</p>
+    <form id="essay-login-form"><div class="form-field"><label for="login-user">�b��</label><input id="login-user" name="username" autocomplete="username" required></div>
+    <div class="form-field"><label for="login-pass">�K�X</label><input id="login-pass" name="password" type="password" autocomplete="current-password" required></div>
+    <p id="login-error" role="alert"></p><button class="btn primary" type="submit">�n�J${teacher?'�Ѯv��x':'�ǥͺ�'}</button></form>
+    <aside class="login-demo">�����ܽd�b��G<code>${teacher?'teacher01':'student01'}</code><br>�K�X�G<code>${teacher?'Teach123!':'Learn123!'}</code><p>�u�ѥ����զ�F�|�����J�����b�����ҡC</p></aside>
+    <button class="btn ghost" data-action="login-portal" data-role="${teacher?'student':'teacher'}">�e��${teacher?'�ǥͺ�':'�Ѯv��x'}�n�J</button>
+  </section></main>`;
+}
+function render(){
+  const app=$('#essay-app');
+  if(!store.role){app.innerHTML=loginScreen();return;}
+  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brand-mark">�g</span><span><small>CHINESE �P WRITING</small><strong>�g�@��߫�</strong></span></div><div class="top-actions"><span class="tag">${store.role==='student'?'�ǥͺ�':'�Ѯv��x'}</span><button class="btn ghost" data-action="logout" ${coachBusy?'disabled':''}>�n�X</button></div></header>${store.role==='student'?studentView():teacherView()}</div>`;
+}
+function milestoneKeys(){
+  const d=store.draft,keys=[];
+  d.points.forEach((p,i)=>{if(p.claim.trim()&&p.evidence.trim())keys.push('��'+(i+1)+'�Ӥ����I�ι����ƨ�');});
+  return keys;
+}
+let rewardedMilestones=new Set();
+let celebrationTimer;
+function celebrateProgress(){
+  if(store.role!=='student')return;
+  const completed=milestoneKeys().filter(k=>!rewardedMilestones.has(k));
+  if(!completed.length)return;
+  completed.forEach(k=>rewardedMilestones.add(k));
+  const host=document.getElementById('celebration');
+  if(!host)return;
+  clearTimeout(celebrationTimer);
+  const label='����'+completed.join('�B')+'�A�~��[�o�I';
+  const reduced=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  host.innerHTML='<div class="celebration-note" role="status">'+esc(label)+'</div>'+(reduced?'':Array.from({length:22},()=>'<span aria-hidden="true" class="celebration-piece petals" style="--x:'+(Math.random()*100).toFixed(1)+'%;--delay:'+(Math.random()*.3).toFixed(2)+'s;--drift:'+((Math.random()-.5)*160).toFixed(1)+'px;font-size:'+(20+Math.random()*16).toFixed(0)+'px">'+['??','??','??'][Math.floor(Math.random()*3)]+'</span>').join(''));
+  celebrationTimer=setTimeout(()=>{host.innerHTML='';},2600);
+}
+
+function mobileNav(){const links=store.role==='teacher'?[['settings','�D�س]�w'],['reports','�ǲ߳��i']]:[['coach','��ܤ޾�'],['draft','�ڪ��[�c']];return '<nav class="mobile-nav">'+links.map(([id,label])=>'<button data-action="view" data-view="'+id+'" class="'+(store.view===id?'active':'')+'">'+label+'</button>').join('')+'</nav>';}
+function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} AI ��ܤ޾�</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} �ڪ����Ҭ[�c</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE �P 01</div><h1>��Q�k�A�g�����ҡC</h1><p>���N�A�g���סA�u���A���һ��M���C</p></div><div class="head-meta"><strong>${p}%</strong>�[�c������<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">�����m���D��</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} �T�Ӥ����I�ϦU�۪��ƨ�</span><span class="tag">${icon('check')} �Юv�w�]�w�����Ѧ�</span></div></div><div class="steps">${['�߳�','�����I','�ƨ�','����'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,3)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'? ':''}${s}</strong>${['�����ݪk','�v�@�c��','�t��X�A�Ҥl','�ˬd�j��'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">�ܽd����ƥu�O�s�b�����s�����F���J�դ�b��θ�Ʈw��A�i�ѱЮv��x�����d�ݡC</p></main></div>`;}
+function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">��</div><div><strong>���ұнm</strong><small>�v�B���� �P ��z�Q�k</small></div></div><span class="online"><i></i>${providerReady?'Gemini 3.6 �P Thinking':'���u���ܸզ�'}</span></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${esc(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose"><div class="quick-prompts"><button data-action="quick" data-text="�ڹ��D�ت��߳��O�K�K�A�]���K�K">�ڷQ���ռg�߳�</button><button data-action="quick" data-text="���ٷQ��t�@�Ө��סG�K�K">�A�[�@�Ӥ����I</button><button data-action="quick" data-text="�ڷQ��������ƨҡA�д��Ѿ\Ū���">��@������׾�</button></div><div class="compose-row"><textarea id="coach-input" rows="2" placeholder="�g�U�A���Q�k�A�нm�|�l�ݤU�@�B�K�K"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'��Ҥ��K':'�e�X'} ${icon('arrow')}</button></div></div>`;}
+function canvas(full=false){const d=store.draft;return `<div class="canvas-head"><div><h2>���Ҭ[�c</h2><p>�߳��B�����I�ΰt��ƨҡC</p></div><div class="completion">${progress()}%<div class="completion-bar"><span style="width:${progress()}%"></span></div></div></div><div class="draft-card position"><h3>���ߥ߳�</h3><p>${esc(d.position||'���g�X�A���߳��C')}</p></div>${d.points.map((p,i)=>`<div class="draft-card point"><h3>�����I ${i+1}</h3><p>${esc(p.claim||'�ݺc��')}</p><div class="mini-line"><b>�ƨҡ]�׾ڡ^�G</b>${esc(p.evidence||'�ݰt��X�A���ƨ�')}</div></div>`).join('')}<div class="card-actions">${full?'<button class="btn ghost" data-action="reset">���s�}�l</button>':''}<button class="btn gold" data-action="report">�x�s�ǲ߳��i</button></div>`;}
+function teacherView(){return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Teaching space</p><nav class="side-nav"><button data-action="view" data-view="settings" class="${store.view==='settings'?'active':''}">${icon('settings')} �D�ػP�����]�w</button><button data-action="view" data-view="reports" class="${store.view==='reports'?'active':''}">${icon('chart')} �ǥ;ǲ߳��i</button></nav><div class="side-note"><strong>�Юv��x</strong>�����զ�G�]�w�D�ػP�ؼе��c�A���紣�ݤγ��i�y�{�C</div></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">TEACHER CONSOLE �P LOCAL DEMO</div><h1>${store.view==='reports'?'�ݨ��ǥͫ�˫�ҡC':'�]�w�@�Ӧn���l�ݸ��u�C'}</h1><p>${store.view==='reports'?'�q��ܾ��{�M���Ҭ[�c�F�Ѿǥͪ��ǲ߱��p�C':'�D�ةM�����Ѧҷ|���� AI �нm���оǯߵ��C'}</p></div><div class="head-meta"><strong>${store.reports.length}</strong>���w�x�s���i<br><span>�Юv���ժ�</span></div></div>${store.view==='reports'?reportsView():settingsView()}<p class="footer-note">��x�{�ɥH�ܽd��ƹB�@�F�������i���J�դ�n�J�B��Ʈw�ίu���� AI �ҫ��A�ȡC</p></main></div>`;}
+function settingsView(){const c=store.config;return `<section class="teacher-section panel panel-pad"><h2>�D�ػP�����Ѧ�</h2><p class="section-sub">�o�ǳ]�w�|�v�T�ǥͬݨ쪺�D�ءBAI �����ݤ�V�M���i�����������ءC</p><div class="model-card"><div><strong>��ĳ�ҫ��GGPT-5 mini</strong><p>�A�X���W�v������l�ݡB���c�Ʀ^���M�ǲ߬����F�ݭn�������������R�ɡA�i��� GPT-5�C</p></div><span class="model-badge">�i����</span></div><form id="settings-form" style="margin-top:20px"><div class="form-grid"><div class="form-field full"><label for="setting-topic">ĳ�פ��D��</label><input id="setting-topic" name="topic" value="${esc(c.topic)}" required></div><div class="form-field full"><label for="setting-prompt">�g�@�n�D���I��</label><textarea id="setting-prompt" name="prompt" required>${esc(c.prompt)}</textarea></div><div class="form-field"><label for="setting-target">�ؼе��c</label><select id="setting-target" name="target"><option value="three" ${c.target==='three'?'selected':''}>�T�Ӥ����I�ϦU�۪��ƨ�</option></select></div><div class="form-field"><label for="setting-model">AI �ҫ�</label><select id="setting-model" name="model"><option value="gpt-5-mini" ${c.model==='gpt-5-mini'?'selected':''}>GPT-5 mini�]��ĳ�^</option><option value="gpt-5">GPT-5�]���`�פ��R�^</option><option value="mock">�ܽd�Ҧ��]�L API�^</option></select></div><div class="form-field full"><div class="rubric-box"><h3>�����Ѧҡ]�|��ܦb�Юv���i�^</h3><div class="check-grid">${defaultConfig.rubrics.map((r,i)=>`<label class="check"><input type="checkbox" name="rubric" value="${esc(r)}" ${(c.rubrics||[]).includes(r)?'checked':''}>${esc(r)}</label>`).join('')}</div></div></div></div><div class="form-actions"><button type="button" class="btn ghost" data-action="reset-config">�٭�ܽd�D��</button><button class="btn primary" type="submit">�x�s�]�w ${icon('check')}</button></div></form></section>`;}
+function reportsView(){if(!store.reports.length)return `<section class="panel empty">�|�����ǥͳ��i�C��������u�ǥͺݡv�����@���ܽd�A�A�^�Ӭd�ݳ��i�C</section>`;return `<div class="stats"><div class="stat"><span>�w������i</span><strong>${store.reports.length}</strong><small>���ǲ߬���</small></div><div class="stat"><span>����������</span><strong>${Math.round(store.reports.reduce((a,r)=>a+r.progress,0)/store.reports.length)}%</strong><small>�[�c�إ߱��p</small></div><div class="stat"><span>�w��߳�</span><strong>${store.reports.filter(r=>r.position).length}</strong><small>�ǥͯ�������A</small></div><div class="stat"><span>�ƨһ���</span><strong>${store.reports.filter(r=>(r.examples||[]).filter(Boolean).length===3).length}</strong><small>�T�Ӥ����I�����ƨ�</small></div></div><section class="report-list">${store.reports.map((r,i)=>`<article class="panel report-row"><div><h3>${esc(r.student||'�ܽd�ǥ�')}</h3><p>${esc(r.topic)} �P ${esc(r.time)}</p></div><div><div class="report-progress"><span style="width:${r.progress}%"></span></div><p style="margin-top:6px">${r.progress}% �[�c������</p></div><div class="report-score">${r.points}<small>�Ӥ����I�w����</small></div><span class="report-chip">${(r.examples||[]).filter(Boolean).length===3?'�ƨһ���':'���ݸɥR�ƨ�'}</span><button class="btn ghost" data-action="toggle-report" data-index="${i}">�d�ݸԱ� ${icon('arrow')}</button>${store.expandedReport===i?`<div class="report-detail"><b>�߳��G</b>${esc(r.position||'�|����g')}<br><b>�����I�G</b>${esc(r.claims.join('�F')||'�|����g')}<br><b>�t��ƨҡG</b>${esc((r.examples||[]).map((v,i)=>'�����I'+(i+1)+'�G'+(v||'�ݸɥR')).join('�F')||'�³��i���O���ƨ�')}<br><b>�оǫ�ĳ�G</b>${esc(r.suggestion)}</div>`:''}</article>`).join('')}</section><div class="form-actions"><button class="btn primary" data-action="export-reports">${icon('download')} �ץX CSV</button><button class="btn danger" data-action="clear-reports">�M���ܽd���i</button></div>`;}
+function submitReport(){const d=store.draft;const report={student:'student01�]�ܽd�^',topic:store.config.topic,time:new Intl.DateTimeFormat('zh-HK',{dateStyle:'medium',timeStyle:'short'}).format(new Date()),progress:progress(),points:d.points.filter(p=>p.claim).length,position:d.position,claims:d.points.map(p=>p.claim),examples:d.points.map(p=>p.evidence),suggestion:progress()<100?'�иɻ������I�ι���������ƨҡC':'���ˬd�T�Ӥ����I�O�_�������ơA�H�ΨƨҬO�_�A���C'};store.reports=[report,...store.reports.filter(r=>r.student!=='student01�]�ܽd�^')];save();toast('�w�x�s�ǲ߳��i�C');render();}
+function resetDraft(){rewardedMilestones.clear();store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;save();render();toast('�w���s�}�l�o���m�ߡC');}
+function exportReports(){const rows=[['�ǥ�','�D��','������','�����I��','�t��ƨ�','�߳�','�����I','���'],...store.reports.map(r=>[r.student,r.topic,r.progress+'%',r.points,(r.examples||[]).map((v,i)=>'�����I'+(i+1)+'�G'+v).join('�F'),r.position,r.claims.join('�F'),r.time])];const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='ĳ�פ�ǲ߳��i.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('�w�ץX CSV ���i�C');}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-action]');if(!b)return;
+  const a=b.dataset.action;
+  if(a==='login-portal'&&!store.role){loginPortal=b.dataset.role==='teacher'?'teacher':'student';render();return;}
+  if(!store.role)return;
+  if(a==='logout'&&!coachBusy){loginPortal=store.role;store.role=null;render();return;}
+  if(a==='view'){
+    const allowed=store.role==='teacher'?['settings','reports']:['coach','draft'];
+    if(allowed.includes(b.dataset.view)){store.view=b.dataset.view;render();}
+  }else if(a==='send'&&store.role==='student'){const input=$('#coach-input');if(input?.value.trim())askCoach(input.value.trim());}
+  else if(a==='quick'&&store.role==='student'){const input=$('#coach-input');if(input){input.value=b.dataset.text;input.focus();}}
+  else if(a==='report'&&store.role==='student')submitReport();
+  else if(a==='reset'&&store.role==='student'&&!coachBusy)resetDraft();
+  else if(store.role==='teacher'){
+    if(a==='reset-config'){store.config={...defaultConfig};save();render();toast('�w�٭�ܽd�D�ءC');}
+    else if(a==='toggle-report'){store.expandedReport=store.expandedReport===Number(b.dataset.index)?null:Number(b.dataset.index);render();}
+    else if(a==='export-reports')exportReports();
+    else if(a==='clear-reports'){store.reports=[];save();render();toast('�w�M���ܽd���i�C');}
+  }
+});
+document.addEventListener('submit',e=>{
+  if(e.target.id==='essay-login-form'){
+    e.preventDefault();const fd=new FormData(e.target);
+    const teacher=loginPortal==='teacher';
+    if(fd.get('username').trim()!==(teacher?'teacher01':'student01')||fd.get('password')!==(teacher?'Teach123!':'Learn123!')){
+      $('#login-error').textContent='�b��αK�X�����T�A�ШϥΦ��J�f���ܽd�b��C';return;
+    }
+    store.role=loginPortal;store.view=teacher?'settings':'coach';render();return;
+  }
+  if(e.target.id!=='settings-form'||store.role!=='teacher')return;
+  e.preventDefault();const fd=new FormData(e.target);
+  store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'three',model:'gemini-3.6-flash',rubrics:fd.getAll('rubric')};
+  store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;rewardedMilestones.clear();
+  store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};
+  save();toast('�D�ػP�����ѦҤw�x�s�C');render();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&e.target.id==='coach-input'){e.preventDefault();const b=document.querySelector('[data-action="send"]');b?.click();}});
+function normalizeState(){const raw=store.draft&&typeof store.draft==='object'?store.draft:{};const rawPoints=Array.isArray(raw.points)?raw.points:[];store.config={...defaultConfig,...(store.config&&typeof store.config==='object'?store.config:{})};store.draft={position:typeof raw.position==='string'?raw.position:'',points:[0,1,2].map(i=>{const p=rawPoints[i]&&typeof rawPoints[i]==='object'?rawPoints[i]:{};return {claim:typeof p.claim==='string'?p.claim:'',evidence:typeof p.evidence==='string'?p.evidence:'',reasoning:typeof p.reasoning==='string'?p.reasoning:''};}),rebuttal:{opposing:typeof raw.rebuttal?.opposing==='string'?raw.rebuttal.opposing:'',response:typeof raw.rebuttal?.response==='string'?raw.rebuttal.response:''}};store.messages=Array.isArray(store.messages)?store.messages.filter(m=>m&&typeof m.text==='string').map(m=>({from:m.from==='student'?'student':'coach',move:typeof m.move==='string'?m.move:'',text:m.text,support:m.support&&typeof m.support==='object'?m.support:null})):[];store.reports=Array.isArray(store.reports)?store.reports.filter(r=>r&&typeof r==='object').map(r=>({...r,claims:Array.isArray(r.claims)?r.claims.filter(Boolean):[]})):[];store.stage=Number.isFinite(Number(store.stage))?Math.max(0,Math.min(6,Math.floor(Number(store.stage)))):0;}
+normalizeState();
+store.config.target='three';
+store.config.rubrics=(store.config.rubrics||[]).filter(x=>!['�໡���׾ڦp���������I','��w�Q�Ϥ��[�I�æ��Ļ��'].includes(x));
+if(!store.config.rubrics.includes('�ƨү������������I'))store.config.rubrics.push('�ƨү������������I');
+if(store.config.prompt.includes('����׾ڤΧ������'))store.config.prompt=defaultConfig.prompt;
+store.stage=currentTask().stage;
+if(saved.flowVersion!==2&&store.messages.some(m=>m.from==='student'))store.messages.push({from:'coach',text:'�ǲ߬y�{�w��s���߳��B�����I�ΰt��ƨҡC'+taskQuestion()});
+
+store.messages=store.messages.map(m=>m.support&&!Array.isArray(m.support.evidenceIds)?{...m,text:'�L�����\Ū���ܤw���ΡC�Э��s�n�D�\Ū��ơA�H�d�ݪ����w�ֹ�ӷ������ơC',support:null}:m);
+rewardedMilestones=new Set(milestoneKeys());
+// Adopt the new sample only when no existing student work would be relabelled.
+if(store.config.topic==='���ǥ����_����ϥΥͦ����H�u����H'&&!store.draft.position.trim()&&!store.messages.some(m=>m.from==='student')){
+  store.config.topic=defaultConfig.topic;
+}
+if(!store.messages.some(m=>m.from==='student'))store.messages=initialMessages();
+else store.messages=store.messages.map(m=>m.move==='Welcome'?initialMessages()[0]:m);
+store.config.model='gemini-3.6-flash';
+const originalRender=render;
+render=function(){originalRender();const card=document.querySelector('.model-card strong');if(card)card.textContent='Gemini 3.6 Flash �P Thinking�]���^';const note=document.querySelector('.model-card p');if(note)note.textContent=providerReady?'Gemini �w�s���A���D�ءB�����ѦҤξǥͦ^�����ѳv�B�޾ɡC':'�|���s�� Gemini�G�ثe�i�եγv�Ŵ��ܡB�u�g�\Ū���p�Q�ϥd�C';const select=document.querySelector('#setting-model');if(select){select.innerHTML='<option value="gemini-3.6-flash">Gemini 3.6 Flash �P Thinking�]���^</option>';select.value='gemini-3.6-flash';}};
+render();
+connectCoach();
+
+})();
+</script>
+</body>
+</html>
+
