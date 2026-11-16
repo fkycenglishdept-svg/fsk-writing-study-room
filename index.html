@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>�g�@��߫ǡU�������u�զ�</title>
+<title>寫作研習室｜本機離線試行</title>
 <style>
 :root{--ink:#173f3a;--ink-2:#28645b;--cream:#f6f4ed;--paper:#fffdf8;--line:#dfe5da;--muted:#6f7d77;--gold:#bf8c3b;--gold-soft:#f8ecd3;--mint:#e4f0e9;--rose:#f8e7e2;--shadow:0 18px 44px rgba(25,59,50,.08);font-family:Inter,"Noto Sans TC","PingFang HK","Microsoft JhengHei",sans-serif;color:var(--ink);background:var(--cream)}
 *{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(circle at 80% 0,#fffdf5 0,transparent 30%),var(--cream)}button,input,textarea,select{font:inherit}button{cursor:pointer}a{color:inherit}
@@ -42,14 +42,14 @@
 </head>
 <body>
 <div id="essay-app"><section style="max-width:780px;margin:50px auto;padding:24px;font-family:system-ui;color:#173f3a">
-<h1>�g�@��߫ǡU�����զ檩</h1>
-<p id="boot-status" role="status">���b�}�����u�ܽd�K�K�Y���T���@����ܡA�Ч� HTML �x�s��q���A�A�H Chrome �� Edge �}�ҡF������Ѫ���w�����|���椬�ʵ{���C</p>
-<p>���ɤw�]�t�����˦��M�{���A���ݭn�t�~�U�� CSS��JavaScript�A�]���ݭn�s�����A���C</p>
-<noscript><p>�s�����S������ JavaScript�A�G�L�k�ϥι�ܥ\��C�ХΤ@���s�����}�ҤU���� HTML �ɮסC</p></noscript>
+<h1>寫作研習室｜本機試行版</h1>
+<p id="boot-status" role="status">正在開啟離線示範……若此訊息一直顯示，請把 HTML 儲存到電腦，再以 Chrome 或 Edge 開啟；部分聊天附件預覽不會執行互動程式。</p>
+<p>本檔已包含全部樣式和程式，不需要另外下載 CSS／JavaScript，也不需要連接伺服器。</p>
+<noscript><p>瀏覽器沒有執行 JavaScript，故無法使用對話功能。請用一般瀏覽器開啟下載的 HTML 檔案。</p></noscript>
 </section></div>
 <div id="celebration"></div>
 <div id="essay-toast" role="status" aria-live="polite"></div>
-<script>window.addEventListener('error',function(e){var el=document.getElementById('boot-status');if(el)el.textContent='���J�������G'+e.message+'�C�бN���ɤU����� Chrome �� Edge �}�ҡC';});</script>
+<script>window.addEventListener('error',function(e){var el=document.getElementById('boot-status');if(el)el.textContent='載入未完成：'+e.message+'。請將本檔下載後用 Chrome 或 Edge 開啟。';});</script>
 <script>
 (function(){
 'use strict';
@@ -57,117 +57,117 @@
 const VERIFIED_EVIDENCE=[
   {
     "id": "oecd-earnings-2025",
-    "title": "�Ǿ��P���J�G�s���ͶթM�ӧO�t��",
-    "kind": "��s���i",
+    "title": "學歷與收入：群體趨勢和個別差異",
+    "kind": "研究報告",
     "keywords": [
-      "���J",
-      "�~",
-      "��",
-      "�N�~",
-      "�u�@",
-      "¾�~",
-      "�g��",
-      "�Ǿ�",
-      "�X��"
+      "收入",
+      "薪",
+      "錢",
+      "就業",
+      "工作",
+      "職業",
+      "經濟",
+      "學歷",
+      "出路"
     ],
-    "facts": "�g�٦X�@�[�o�i��´�]OECD�^���m2025�~�Ш|�����n�� A4 �����X�A�����Ш|�{�׻P�������J���K�����p�F�����J�u�շ|�]�~�֡B�ʧO�B�ҵ{�����ΩҾǻ��Ӥ��P�A�u�@�g���P���J�����C",
-    "publisher": "�g�٦X�@�[�o�i��´�]OECD�^",
-    "sourceTitle": "�m2025�~�Ш|�����n�� A4 ���G�Ш|�����J�u�ա]�D�W��Ķ�^",
+    "facts": "經濟合作暨發展組織（OECD）的《2025年教育概覽》第 A4 章指出，較高教育程度與較高收入有密切關聯；但收入優勢會因年齡、性別、課程類型及所學領域而不同，工作經驗亦與收入有關。",
+    "publisher": "經濟合作暨發展組織（OECD）",
+    "sourceTitle": "《2025年教育概覽》第 A4 章：教育的收入優勢（題名中譯）",
     "url": "https://www.oecd.org/en/publications/education-at-a-glance-2025_1c0d9c79-en/full-report/what-are-the-earnings-advantages-to-education_7a7e64e0.html",
-    "date": "2025 �~���i",
+    "date": "2025 年報告",
     "checked": "2026-11-15",
-    "locator": "�I�������F�� A4.1�F��s��k",
-    "limits": "�o�O���s���ƪ����p�A�����̦����_�]�G�B�M�@����ƾڡA�ΫO�ҨC�첦�~�ͳ����~�C",
-    "question": "��X�@���|�v�T���J������A��A�������I�g�o��ǽT�C",
+    "locator": "背景說明；圖 A4.1；研究方法",
+    "limits": "這是跨國群體資料的關聯，不能單憑此推斷因果、套作香港數據，或保證每位畢業生都高薪。",
+    "question": "選出一項會影響收入的條件，把你的分論點寫得更準確。",
     "sourceLanguage": "en",
     "summaryLanguage": "zh-Hant",
-    "originalSourceTitle": "Education at a Glance 2025 �X Chapter A4",
-    "originalLocator": "Context�FFigure A4.1�FMethodology"
+    "originalSourceTitle": "Education at a Glance 2025 — Chapter A4",
+    "originalLocator": "Context；Figure A4.1；Methodology"
   },
   {
     "id": "tu-education-2015",
-    "title": "�O����G�ľǰV�m�P����ǲ�",
-    "kind": "�H���ۭz",
+    "title": "屠呦呦：藥學訓練與持續學習",
+    "kind": "人物自述",
     "keywords": [
-      "����",
-      "����",
-      "��",
-      "���",
-      "��s",
-      "�M�~",
-      "���|",
-      "�^�m",
-      "�ޯ�",
-      "���",
-      "�ѨM",
-      "��O"
+      "知識",
+      "應用",
+      "醫",
+      "科學",
+      "研究",
+      "專業",
+      "社會",
+      "貢獻",
+      "技能",
+      "實踐",
+      "解決",
+      "能力"
     ],
-    "facts": "�O����b�ը������x��������ۭz���A�^�U�j���ľǽҵ{�б¿�{�ĥδӪ��B�������ʦ��������ѻP��@�C�o��1955�~���~��q�Ƥ��Ĭ�s�A�é�1959��1962�~�A��������z�׻P�����V�C",
-    "publisher": "�ը������x�����",
-    "sourceTitle": "�O����ۭz�]�D�W��Ķ�^",
+    "facts": "屠呦呦在諾貝爾獎官方網站的自述中，回顧大學藥學課程教授辨認藥用植物、提取活性成分等知識與實作。她於1955年畢業後從事中藥研究，並於1959至1962年再接受中醫理論與實踐培訓。",
+    "publisher": "諾貝爾獎官方網站",
+    "sourceTitle": "屠呦呦自述（題名中譯）",
     "url": "https://www.nobelprize.org/prizes/medicine/2015/tu/biographical/",
-    "date": "2015 �~�ը������ۭz",
+    "date": "2015 年諾貝爾獎自述",
     "checked": "2026-11-15",
-    "locator": "�ڪ��j�ǥͬ��F�ڪ��Ĥ@���u�@�P���ͧ�J",
-    "limits": "�o�O�ӤH���ǲߤά�s�g���A������פH�HŪ�ѫ᳣������Ǯa�A�礣��⦨�N�u�k�]��Ǿ��C",
-    "question": "��X�@���o�ǹL������ޯ�A�Φۤv���ܾ�z���ƨҡC",
+    "locator": "我的大學生活；我的第一份工作與畢生投入",
+    "limits": "這是個人的學習及研究經歷，不能推論人人讀書後都成為科學家，亦不能把成就只歸因於學歷。",
+    "question": "找出一項她學過的具體技能，用自己的話整理成事例。",
     "sourceLanguage": "en",
     "summaryLanguage": "zh-Hant",
-    "originalSourceTitle": "Tu Youyou �X Biographical",
-    "originalLocator": "My university life�FMy first job and life-long commitment"
+    "originalSourceTitle": "Tu Youyou — Biographical",
+    "originalLocator": "My university life；My first job and life-long commitment"
   },
   {
     "id": "jobs-learning-2005",
-    "title": "�쥬���G�h�ǫᤴ�M�ǲ�",
-    "kind": "�t�����",
+    "title": "喬布斯：退學後仍然學習",
+    "kind": "演講實錄",
     "keywords": [
-      "�h��",
-      "����",
-      "�쥬��",
-      "����",
-      "�]�p",
-      "�зN",
-      "���",
-      "�Ǿ�",
-      "�ר�",
-      "����",
-      "�۾�",
-      "���",
-      "�L��",
-      "����"
+      "退學",
+      "輟學",
+      "喬布斯",
+      "興趣",
+      "設計",
+      "創意",
+      "文憑",
+      "學歷",
+      "終身",
+      "持續",
+      "自學",
+      "實用",
+      "無用",
+      "長遠"
     ],
-    "facts": "�b�v���֤j�ǥZ����2005�~���~�t�����A�쥬���ۭz�h�ǫᤴ��ť�ҵ{�A�]�A�Ѫk�ҡA�ǲߦr��P�r�Z�C�L�^�U�]�p ������]Macintosh�^�q���ɴ��B�γo�ǩҾǡC",
-    "publisher": "�v���֤j��",
-    "sourceTitle": "�쥬���t���G�A�������ۤv���R���ơ]�D�W��Ķ�^",
+    "facts": "在史丹福大學刊載的2005年畢業演講中，喬布斯自述退學後仍旁聽課程，包括書法課，學習字體與字距。他回顧設計 麥金塔（Macintosh）電腦時曾運用這些所學。",
+    "publisher": "史丹福大學",
+    "sourceTitle": "喬布斯演講：你必須找到自己熱愛的事（題名中譯）",
     "url": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says",
     "date": "2005-06-12",
     "checked": "2026-11-15",
-    "locator": "�Ĥ@�ӬG�ơG��H�͸g���s�_��",
-    "limits": "�o�O���H�^�U���ӮסA���N���h�ǥ��M���\�F�S�������Ǧ�A�]�����󰱤�ǲߡC",
-    "question": "�Ϥ��u�S�����o�Ǧ�v�M�u�S���ǲߡv�A�A�P�_�o�ӨҤl�A�X������@�ػ��k�C",
+    "locator": "第一個故事：把人生經歷連起來",
+    "limits": "這是本人回顧的個案，不代表退學必然成功；沒有完成學位，也不等於停止學習。",
+    "question": "區分「沒有取得學位」和「沒有學習」，再判斷這個例子適合支持哪一種說法。",
     "sourceLanguage": "en",
     "summaryLanguage": "zh-Hant",
-    "originalSourceTitle": "��You��ve got to find what you love,�� Jobs says",
+    "originalSourceTitle": "‘You’ve got to find what you love,’ Jobs says",
     "originalLocator": "The first story is about connecting the dots"
   }
 ];
 function evidenceFor(topic,claim=''){
-  if(!/Ū��|�Ǿ�|�Ш||�\Ū|�ǲߪ�����/.test(topic))return [];
+  if(!/讀書|學歷|教育|閱讀|學習的價值/.test(topic))return [];
   if(!claim.trim())return VERIFIED_EVIDENCE.slice(0,2);
   return VERIFIED_EVIDENCE.map(e=>({e,score:e.keywords.filter(k=>claim.includes(k)).length})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,2).map(x=>x.e);
 }
 
 
 const ESSAY_STORE='fsk-essay-studio-local-trial-v2';
-const defaultConfig={topic:"�U�y���u�U��ҤU�~�A����Ū�Ѱ��v�A�]���H���uŪ�ѵL�Ρv�C�ռg�@�峹�@�g�A�ͽͧA��uŪ�ѵL�Ρv���ݪk�C",prompt:'�дN�D�ت����߳��A�c��T�Ӭ����������I�A�ì��C�Ӥ����I����X�A���ƨҧ@���׾ڡC',rubrics:['�߳��M���A�^���D��','�����I���h���A��������','�׾ڨ���Ӥ��X����ͬ�','�ƨү������������I'],target:'three',model:'gemini-3.6-flash'};
+const defaultConfig={topic:"俗語說「萬般皆下品，惟有讀書高」，也有人說「讀書無用」。試寫作文章一篇，談談你對「讀書無用」的看法。",prompt:'請就題目表明立場，構思三個相關的分論點，並為每個分論點選取合適的事例作為論據。',rubrics:['立場清晰，回應題旨','分論點有層次，互不重複','論據具體而切合香港生活','事例能支持對應分論點'],target:'three',model:'gemini-3.6-flash'};
 let saved;
 try{saved=JSON.parse(localStorage.getItem(ESSAY_STORE))||{};}catch{saved={};}
 const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],view:'coach',role:'student',expandedReport:null};
 const talkMoves=[
- {title:'�����߳�',label:'Position',prompt:'�A���D�ئ��ƻ�ݪk�H�Х��Τ@�y�ܪ����߳��C'},
- {title:'�c������I',label:'Claim',prompt:'���@�Ӳz�ѥi�H����A���߳��H'},
- {title:'�t��X�A�ƨ�',label:'Example',prompt:'�i�H�άƻ����ƨҤ���o�Ӥ����I�H'},
- {title:'�����j��',label:'Complete',prompt:'���ˬd�߳��B�T�Ӥ����I�ΦU�۪��ƨҡC'}
+ {title:'表明立場',label:'Position',prompt:'你對題目有甚麼看法？請先用一句話表明立場。'},
+ {title:'構思分論點',label:'Claim',prompt:'哪一個理由可以支持你的立場？'},
+ {title:'配對合適事例',label:'Example',prompt:'可以用甚麼具體事例支持這個分論點？'},
+ {title:'完成大綱',label:'Complete',prompt:'請檢查立場、三個分論點及各自的事例。'}
 ];
 function currentTask(){
   if(!store.draft.position.trim())return {stage:0,index:0};
@@ -175,45 +175,45 @@ function currentTask(){
   return {stage:3,index:2};
 }
 function taskQuestion(){
-  const t=currentTask(),reading=/Ū�ѵL��/.test(store.config.topic);
-  if(t.stage===0)return reading?'�����M�u���o�Ǿ��v�M�u�Ǩ쪾�ѡv�G�A�O�P�N�B���P�N�A�٬O�����P�N�uŪ�ѵL�Ρv�H�ХΤ@�y�ܪ����߳��C':'����P�N�B���P�N�γ����P�N�u'+store.config.topic+'�v�A�Τ@�y�ܪ����߳��C';
-  if(t.stage===1)return t.index===0?'�Х����X�Ĥ@�Ӥ���A�߳��������I�C':'�д��X��'+['�@','�G','�T'][t.index]+'�Ӥ���A�߳��������I�C';
-  if(t.stage===2)return '�A���X�u'+store.draft.points[t.index].claim+'�v�C�Ч�@���e�{�o�@�I���u��ƥ�A�g�X�u�֡����Ӿ��c�B���F�ƻ�B���G�εo�{�v�F�Q����ɡA�i���u�д��Ѿ\Ū��ơv�C';
-  return '�A�w�����߳��B�T�Ӥ����I�ΦU�۪��ƨҡC���ˬd�ƨҬO�_�A�X������������I�A�M���x�s�ǲ߳��i�C';
+  const t=currentTask(),reading=/讀書無用/.test(store.config.topic);
+  if(t.stage===0)return reading?'先分清「取得學歷」和「學到知識」：你是同意、不同意，還是部分同意「讀書無用」？請用一句話表明立場。':'先選同意、不同意或部分同意「'+store.config.topic+'」，用一句話表明立場。';
+  if(t.stage===1)return t.index===0?'請先提出第一個支持你立場的分論點。':'請提出第'+['一','二','三'][t.index]+'個支持你立場的分論點。';
+  if(t.stage===2)return '你提出「'+store.draft.points[t.index].claim+'」。請找一件能呈現這一點的真實事件，寫出「誰／哪個機構、做了甚麼、結果或發現」；想不到時，可說「請提供閱讀資料」。';
+  return '你已完成立場、三個分論點及各自的事例。請檢查事例是否適合支持對應分論點，然後儲存學習報告。';
 }
 function depthQuestion(text){
   if(currentTask().stage!==1)return '';
-  const reading=/Ū��|�Ǿ�|�Ш||�\Ū/.test(store.config.topic);
-  const qualified=/���@�w|����|�ëD|���N��|����O��|���O��|�����M|������|����|����|���M��|���G|�i��|���||���U/.test(text);
-  if(reading&&/�h��|����|�쥬��/.test(text)&&/�L��|����Ū|����Ū|�S����/.test(text)&&!qualified)return '���Ϥ��u�S�������Ǧ�v�P�u�S���~��ǲߡv�C�A�n��ê��O�Ǿ��A�٬O�Ҧ����ѾǲߡH�п�@���A������I��g�o��ǽT�C';
-  if(reading&&/�~|���J|�ȿ�|�ÿ�|�o�F|����/.test(text)&&!qualified)return '�A���b�q���J�P�_Ū�Ѫ����ȡC�аϤ��u�W�[�u�@���|�v�P�u�O�Ұ��~�v�A�A��@������]�Ҿǧޯ�B��~�ݨD�Τu�@�g��^�A��g�o�Ӥ����I�C';
-  if(!qualified&&/�@�w|���w|���M|�Ҧ��H|�H�H|�����S��|�@�L|�ߤ@|�u�n.+�N/.test(text))return '�o�y�ܬO�_�A�Ω�C�ӤH�H�п�@�ӥi����ܵ��G������]��H�B�귽�ι�ڰ��k�^�A������I�令���M���A�νd�򪺤@�y�ܡC';
+  const reading=/讀書|學歷|教育|閱讀/.test(store.config.topic);
+  const qualified=/不一定|未必|並非|不代表|不能保證|不保證|不必然|不等於|部分|有時|取決於|視乎|可能|機會|有助/.test(text);
+  if(reading&&/退學|輟學|喬布斯/.test(text)&&/無用|不用讀|不必讀|沒有用/.test(text)&&!qualified)return '先區分「沒有完成學位」與「沒有繼續學習」。你要質疑的是學歷，還是所有知識學習？請選一項，把分論點改寫得更準確。';
+  if(reading&&/薪|收入|賺錢|掙錢|發達|有錢/.test(text)&&!qualified)return '你正在從收入判斷讀書的價值。請區分「增加工作機會」與「保證高薪」，再選一項條件（所學技能、行業需求或工作經驗），改寫這個分論點。';
+  if(!qualified&&/一定|必定|必然|所有人|人人|完全沒有|毫無|唯一|只要.+就/.test(text))return '這句話是否適用於每個人？請選一個可能改變結果的條件（對象、資源或實際做法），把分論點改成有清楚適用範圍的一句話。';
   return '';
 }
 
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,flowVersion:2}));}catch{}};
 const toast=msg=>{const el=$('#essay-toast');el.textContent=msg;el.className='toast show';clearTimeout(toast.t);toast.t=setTimeout(()=>el.className='toast',2600)};
-function icon(n){return ({spark:'?',chat:'?',book:'?',chart:'?',settings:'?',file:'?',arrow:'��',check:'?',plus:'��',download:'��',reset:'?'})[n]||'�E';}
+function icon(n){return ({spark:'✦',chat:'◌',book:'▤',chart:'◒',settings:'⚙',file:'▧',arrow:'→',check:'✓',plus:'＋',download:'↓',reset:'↻'})[n]||'•';}
 function progress(){const d=store.draft;const count=(d.position.trim()?1:0)+d.points.reduce((n,p)=>n+(p.claim.trim()?1:0)+(p.claim.trim()&&p.evidence.trim()?1:0),0);return Math.round(count/7*100);}
 function stageLabel(){return talkMoves[currentTask().stage].title;}
-function initialMessages(){return [{from:'coach',move:'Welcome',text:`�D�ءG${store.config.topic}\n\n�ڷ|�@�B�@�B���ާA�c��߳��B�����I�ΦX�A���ƨҡC`},{from:'coach',text:taskQuestion()}];}
+function initialMessages(){return [{from:'coach',move:'Welcome',text:`題目：${store.config.topic}\n\n我會一步一步指引你構思立場、分論點及合適的事例。`},{from:'coach',text:taskQuestion()}];}
 function ensureMessages(){if(!store.messages.length)store.messages=initialMessages();}
 function infer(text){const t=currentTask(),value=text.trim();if(t.stage===0)store.draft.position=value;else if(t.stage===1)store.draft.points[t.index].claim=value;else if(t.stage===2)store.draft.points[t.index].evidence=value;}
 function coachReply(text){infer(text);store.stage=currentTask().stage;return {move:talkMoves[store.stage].label,text:taskQuestion()};}
 
 function vagueAnswer(text){
-  const s=text.trim().replace(/[�A�C�I�H,.!?\s]/g,'');
-  return /�Q����|�Q���X|�����D|����|�S���Ҥl|�S���ƨ�|�����|��|���Ѿ\Ū|����/.test(s) || s.length<8 || /^(�����D|����|����|�S���Q�k|���n���a|Ū�Ѧ���|Ū�ѵL��|�ܦn|���n|�ܭ��n|�����D�z|��ı�o�ܦn|�]���ܦn|�]������|�ڻ{���o�ܭ��n)[�ڧr�O�a]*$/.test(s)
-    || (s.length<45 && /�ܭ��n|���n�B|����|�ܦn|�ܤ��n/.test(s) && !/�Ҧp|�]��|�p�G|��|�i�H|���|�ҥH/.test(s));
+  const s=text.trim().replace(/[，。！？,.!?\s]/g,'');
+  return /想不到|想不出|不知道|唔知|沒有例子|沒有事例|未能舉例|提供閱讀|不懂/.test(s) || s.length<8 || /^(不知道|唔知|不懂|沒有想法|有好有壞|讀書有用|讀書無用|很好|不好|很重要|都有道理|我覺得很好|因為很好|因為有用|我認為這很重要)[啊呀呢吧]*$/.test(s)
+    || (s.length<45 && /很重要|有好處|有用|很好|很不好/.test(s) && !/例如|因為|如果|當|可以|能夠|所以/.test(s));
 }
 function supportMaterial(){
   const t=currentTask(),claim=t.stage===2?store.draft.points[t.index].claim:'';
-  return {evidence:evidenceFor(store.config.topic,claim),cards:['�H���ξ��c','�ƥ�P�o�{','�A�Ϊ��d��']};
+  return {evidence:evidenceFor(store.config.topic,claim),cards:['人物或機構','事件與發現','適用的範圍']};
 }
 function visualScaffold(cards){
   const labels=cards.slice(0,3);
-  return '<figure class="support-visual"><svg viewBox="0 0 480 120" role="img" aria-label="'+esc(labels.join('�B')+'�G�p�Q�ϥd')+'">'+labels.map((label,i)=>'<g transform="translate('+(i*160)+',0)"><rect x="5" y="5" width="145" height="110" rx="15" fill="'+['#e4f0e9','#f8ecd3','#f8e7e2'][i]+'"/><circle cx="77" cy="40" r="22" fill="white"/><text x="77" y="48" text-anchor="middle" font-size="23" fill="#173f3a">'+['?','?','!'][i]+'</text><text x="77" y="90" text-anchor="middle" font-size="14" fill="#173f3a">'+esc(label)+'</text></g>').join('')+'</svg><figcaption>�p�Q�ϥd�]�оǥܷN�^�G��@�i�A�p�Q��ƻ���骺�H�B�Ʃα��ҡH</figcaption></figure>';
+  return '<figure class="support-visual"><svg viewBox="0 0 480 120" role="img" aria-label="'+esc(labels.join('、')+'：聯想圖卡')+'">'+labels.map((label,i)=>'<g transform="translate('+(i*160)+',0)"><rect x="5" y="5" width="145" height="110" rx="15" fill="'+['#e4f0e9','#f8ecd3','#f8e7e2'][i]+'"/><circle cx="77" cy="40" r="22" fill="white"/><text x="77" y="48" text-anchor="middle" font-size="23" fill="#173f3a">'+['?','↔','!'][i]+'</text><text x="77" y="90" text-anchor="middle" font-size="14" fill="#173f3a">'+esc(label)+'</text></g>').join('')+'</svg><figcaption>聯想圖卡（教學示意）：選一張，聯想到甚麼具體的人、事或情境？</figcaption></figure>';
 }
 function supportMarkup(m){
   if(!m.support)return '';
@@ -221,8 +221,8 @@ function supportMarkup(m){
   // Only render reviewed catalogue records. Never display model/legacy free-form readings.
   const ids=Array.isArray(m.support.evidenceIds)?m.support.evidenceIds:[];
   const evidence=ids.map(id=>VERIFIED_EVIDENCE.find(e=>e.id===id)).filter(Boolean).slice(0,2);
-  const readings=evidence.length?evidence.map(e=>'<article class="verified-reading"><h4>'+esc(e.title)+'</h4><span class="tag">'+esc(e.kind)+' �P �w�ֹ�ӷ�</span><p><strong>'+(e.sourceLanguage==='en'?'����K�n�]��嬰�^��^':'����\Ū���')+'</strong></p><p lang="zh-Hant">'+esc(e.facts)+'</p><p class="evidence-limit"><strong>�ޥάɭ��G</strong>'+esc(e.limits)+'</p><p><strong>�\Ū��V�G</strong>'+esc(e.question)+'</p><a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+(e.sourceLanguage==='en'?'�d�ݭ^����G':'�d�ݭ��G')+esc(e.publisher)+' �P '+esc(e.sourceTitle)+' ��</a><small>'+esc(e.date)+'�U�ֹ����G'+esc(e.checked)+'<br>����m�G'+esc(e.locator)+'</small></article>').join(''):'<p>�ثe��Ʈw�S���w�ֹ�B���X�o�Ӥ����I�����ơC�Х��ЦѮv��U��@�g�����s�D�ά�s���F���n��������@�ƹ�C</p>';
-  return '<aside class="support-card"><strong>��Ҥp����</strong>'+(level>=2?'<p>��z�ƨҡG�u�H�������c�G�ġġF�Ʊ�����s�o�{�G�ġġF�ӷ��Φ~���G�ġġC�v</p>':'<p>�u�ݧ����ثe�o�@�y�A�Ȯɤ��μg��q�峹�C</p>')+(level>=3?'<details open><summary>Ū�@Ū�A�A�Q�@�Q</summary>'+readings+'</details>':'')+(level>=4?visualScaffold(['�H���ξ��c','�ƥ�P�o�{','�A�Ϊ��d��']):'')+'</aside>';
+  const readings=evidence.length?evidence.map(e=>'<article class="verified-reading"><h4>'+esc(e.title)+'</h4><span class="tag">'+esc(e.kind)+' · 已核對來源</span><p><strong>'+(e.sourceLanguage==='en'?'中文摘要（原文為英文）':'中文閱讀資料')+'</strong></p><p lang="zh-Hant">'+esc(e.facts)+'</p><p class="evidence-limit"><strong>引用界限：</strong>'+esc(e.limits)+'</p><p><strong>閱讀方向：</strong>'+esc(e.question)+'</p><a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">'+(e.sourceLanguage==='en'?'查看英文原文：':'查看原文：')+esc(e.publisher)+' · '+esc(e.sourceTitle)+' ↗</a><small>'+esc(e.date)+'｜核對日期：'+esc(e.checked)+'<br>原文位置：'+esc(e.locator)+'</small></article>').join(''):'<p>目前資料庫沒有已核實且切合這個分論點的材料。請先請老師協助找一篇相關新聞或研究原文；不要把推測當作事實。</p>';
+  return '<aside class="support-card"><strong>思考小提示</strong>'+(level>=2?'<p>整理事例：「人物／機構：＿＿；事情／研究發現：＿＿；來源及年份：＿＿。」</p>':'<p>只需完善目前這一句，暫時不用寫整段文章。</p>')+(level>=3?'<details open><summary>讀一讀，再想一想</summary>'+readings+'</details>':'')+(level>=4?visualScaffold(['人物或機構','事件與發現','適用的範圍']):'')+'</aside>';
 }
 let coachBusy=false;
 let providerReady=false;
@@ -235,16 +235,16 @@ function supportReply(){
   store.helpLevel=Math.min(4,Math.max(store.stage===2?3:1,store.helpLevel+1));
   const evidence=supportMaterial().evidence;
   let question=taskQuestion();
-  if(store.stage===1&&store.helpLevel===1)question=/Ū�ѵL��/.test(store.config.topic)?'����@�ө|���ϥΪ����סA�Ҧp�u�@���|�B�ѨM���D����O�ξǲߪ��������ȡA�A�g�@������A�߳����z�ѡC':'����@�Ө��v�T����H�A���X�o�Ӱ��k��L�����@������n�B�έ���C';
-  if(store.helpLevel===2)question=store.stage===0?'�Ч����o�y�G�u�ڡ]�P�N�����P�N�������P�N�^�D�ت����k�A�]���ġġC�v���g�A���ݪk�Y�i�C':'����@�ب���v�T�]���|�B��O�έ���^�A�����u�o������������U�ġİ���ġġv�C';
-  if(store.helpLevel>=3)question=evidence.length?'��Ū�U�����w�ֹ���ơA��X�P�ثe�Q�k�������@��ƩΤ@���o�{�A�Φۤv���ܰO�U�u��H�B�Ʊ��εo�{�B�ӷ��v�C':'�ثe�S�����X�o�Ӥ����I���w�ֹ�\Ū���ơC�Х����X�Ҥl�ݭn�e�{���@������v�T�A�ýЦѮv��U�M����C';
+  if(store.stage===1&&store.helpLevel===1)question=/讀書無用/.test(store.config.topic)?'先選一個尚未使用的角度，例如工作機會、解決問題的能力或學習的長遠價值，再寫一項支持你立場的理由。':'先選一個受影響的對象，指出這個做法對他有哪一項具體好處或限制。';
+  if(store.helpLevel===2)question=store.stage===0?'請完成這句：「我（同意／不同意／部分同意）題目的說法，因為＿＿。」先寫你的看法即可。':'先選一種具體影響（機會、能力或限制），完成「這能／未必能幫助＿＿做到＿＿」。';
+  if(store.helpLevel>=3)question=evidence.length?'先讀下面的已核實材料，選出與目前想法相關的一件事或一項發現，用自己的話記下「對象、事情或發現、來源」。':'目前沒有切合這個分論點的已核實閱讀材料。請先指出例子需要呈現哪一項具體影響，並請老師協助尋找原文。';
   return {from:'coach',text:question,support:{level:store.helpLevel,evidenceIds:evidence.map(e=>e.id)}};
 }
 async function askCoach(text){
   const answer=String(text||'').trim();
   if(!answer||coachBusy)return;
   coachBusy=true;
-  if(currentTask().stage===3){toast('�j���w�����A�i�H�x�s�ǲ߳��i�C');coachBusy=false;return;}
+  if(currentTask().stage===3){toast('大綱已完成，可以儲存學習報告。');coachBusy=false;return;}
   const previousMessages=store.messages.slice();
   store.messages.push({from:'student',text:answer});
   render();
@@ -253,7 +253,7 @@ async function askCoach(text){
       const response=await fetch('/api/essay-coach',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({message:answer,topic:store.config.topic,prompt:store.config.prompt,rubrics:store.config.rubrics,target:store.config.target,stage:currentTask().stage,pointIndex:currentTask().index,helpLevel:store.helpLevel,draft:store.draft,messages:previousMessages.slice(-20)}),signal:AbortSignal.timeout(55000)});
       const result=await response.json();
-      if(!response.ok)throw Error(result.error||'Gemini �Ȯɥ���^��');
+      if(!response.ok)throw Error(result.error||'Gemini 暫時未能回應');
       if(result.needsSupport){
         const reply=supportReply();
         reply.text=result.message;
@@ -276,8 +276,8 @@ async function askCoach(text){
       store.messages.push({from:'coach',move:reply.move,text:reply.text});
     }
   }catch(error){
-    store.messages.push({from:'coach',text:'�o��������o Gemini �^�СA�ǲ߶��q�S���e�i�C�еy��A�e�X�A���^���C'});
-    toast(error.name==='TimeoutError'?'Gemini �^�йO�ɡA�Э��աC':error.message);
+    store.messages.push({from:'coach',text:'這次未能取得 Gemini 回覆，學習階段沒有前進。請稍後再送出你的回答。'});
+    toast(error.name==='TimeoutError'?'Gemini 回覆逾時，請重試。':error.message);
   }finally{
     coachBusy=false;
     save();render();celebrateProgress();
@@ -296,25 +296,25 @@ store.role=null;
 function loginScreen(){
   const teacher=loginPortal==='teacher';
   return `<main class="login-shell"><section class="login-card panel">
-    <div class="brand"><span class="brand-mark">�g</span><strong>�g�@��߫�</strong></div>
+    <div class="brand"><span class="brand-mark">寫</span><strong>寫作研習室</strong></div>
     <p class="eyebrow">${teacher?'TEACHER CONSOLE':'STUDENT SPACE'}</p>
-    <h1>${teacher?'�Ѯv��x�n�J':'�ǥͺݵn�J'}</h1>
-    <p>${teacher?'�]�w�g�@�D�ػP�����ѦҡA�d�ݾǲ߳��i�C':'�@�B�@�B��z�Q�k�A�����A���峹�j���C'}</p>
-    <form id="essay-login-form"><div class="form-field"><label for="login-user">�b��</label><input id="login-user" name="username" autocomplete="username" required></div>
-    <div class="form-field"><label for="login-pass">�K�X</label><input id="login-pass" name="password" type="password" autocomplete="current-password" required></div>
-    <p id="login-error" role="alert"></p><button class="btn primary" type="submit">�n�J${teacher?'�Ѯv��x':'�ǥͺ�'}</button></form>
-    <aside class="login-demo">�����ܽd�b��G<code>${teacher?'teacher01':'student01'}</code><br>�K�X�G<code>${teacher?'Teach123!':'Learn123!'}</code><p>�u�ѥ����զ�F�|�����J�����b�����ҡC</p></aside>
-    <button class="btn ghost" data-action="login-portal" data-role="${teacher?'student':'teacher'}">�e��${teacher?'�ǥͺ�':'�Ѯv��x'}�n�J</button>
+    <h1>${teacher?'老師後台登入':'學生端登入'}</h1>
+    <p>${teacher?'設定寫作題目與評分參考，查看學習報告。':'一步一步整理想法，完成你的文章大綱。'}</p>
+    <form id="essay-login-form"><div class="form-field"><label for="login-user">帳戶</label><input id="login-user" name="username" autocomplete="username" required></div>
+    <div class="form-field"><label for="login-pass">密碼</label><input id="login-pass" name="password" type="password" autocomplete="current-password" required></div>
+    <p id="login-error" role="alert"></p><button class="btn primary" type="submit">登入${teacher?'老師後台':'學生端'}</button></form>
+    <aside class="login-demo">本機示範帳戶：<code>${teacher?'teacher01':'student01'}</code><br>密碼：<code>${teacher?'Teach123!':'Learn123!'}</code><p>只供本機試行；尚未接入正式帳戶驗證。</p></aside>
+    <button class="btn ghost" data-action="login-portal" data-role="${teacher?'student':'teacher'}">前往${teacher?'學生端':'老師後台'}登入</button>
   </section></main>`;
 }
 function render(){
   const app=$('#essay-app');
   if(!store.role){app.innerHTML=loginScreen();return;}
-  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brand-mark">�g</span><span><small>CHINESE �P WRITING</small><strong>�g�@��߫�</strong></span></div><div class="top-actions"><span class="tag">${store.role==='student'?'�ǥͺ�':'�Ѯv��x'}</span><button class="btn ghost" data-action="logout" ${coachBusy?'disabled':''}>�n�X</button></div></header>${store.role==='student'?studentView():teacherView()}</div>`;
+  app.innerHTML=`<div class="app-shell"><header class="topbar"><div class="brand"><span class="brand-mark">寫</span><span><small>CHINESE · WRITING</small><strong>寫作研習室</strong></span></div><div class="top-actions"><span class="tag">${store.role==='student'?'學生端':'老師後台'}</span><button class="btn ghost" data-action="logout" ${coachBusy?'disabled':''}>登出</button></div></header>${store.role==='student'?studentView():teacherView()}</div>`;
 }
 function milestoneKeys(){
   const d=store.draft,keys=[];
-  d.points.forEach((p,i)=>{if(p.claim.trim()&&p.evidence.trim())keys.push('��'+(i+1)+'�Ӥ����I�ι����ƨ�');});
+  d.points.forEach((p,i)=>{if(p.claim.trim()&&p.evidence.trim())keys.push('第'+(i+1)+'個分論點及對應事例');});
   return keys;
 }
 let rewardedMilestones=new Set();
@@ -327,22 +327,22 @@ function celebrateProgress(){
   const host=document.getElementById('celebration');
   if(!host)return;
   clearTimeout(celebrationTimer);
-  const label='����'+completed.join('�B')+'�A�~��[�o�I';
+  const label='完成'+completed.join('、')+'，繼續加油！';
   const reduced=typeof window.matchMedia==='function'&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  host.innerHTML='<div class="celebration-note" role="status">'+esc(label)+'</div>'+(reduced?'':Array.from({length:22},()=>'<span aria-hidden="true" class="celebration-piece petals" style="--x:'+(Math.random()*100).toFixed(1)+'%;--delay:'+(Math.random()*.3).toFixed(2)+'s;--drift:'+((Math.random()-.5)*160).toFixed(1)+'px;font-size:'+(20+Math.random()*16).toFixed(0)+'px">'+['??','??','??'][Math.floor(Math.random()*3)]+'</span>').join(''));
+  host.innerHTML='<div class="celebration-note" role="status">'+esc(label)+'</div>'+(reduced?'':Array.from({length:22},()=>'<span aria-hidden="true" class="celebration-piece petals" style="--x:'+(Math.random()*100).toFixed(1)+'%;--delay:'+(Math.random()*.3).toFixed(2)+'s;--drift:'+((Math.random()-.5)*160).toFixed(1)+'px;font-size:'+(20+Math.random()*16).toFixed(0)+'px">'+['🌸','🌼','🌺'][Math.floor(Math.random()*3)]+'</span>').join(''));
   celebrationTimer=setTimeout(()=>{host.innerHTML='';},2600);
 }
 
-function mobileNav(){const links=store.role==='teacher'?[['settings','�D�س]�w'],['reports','�ǲ߳��i']]:[['coach','��ܤ޾�'],['draft','�ڪ��[�c']];return '<nav class="mobile-nav">'+links.map(([id,label])=>'<button data-action="view" data-view="'+id+'" class="'+(store.view===id?'active':'')+'">'+label+'</button>').join('')+'</nav>';}
-function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} AI ��ܤ޾�</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} �ڪ����Ҭ[�c</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE �P 01</div><h1>��Q�k�A�g�����ҡC</h1><p>���N�A�g���סA�u���A���һ��M���C</p></div><div class="head-meta"><strong>${p}%</strong>�[�c������<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">�����m���D��</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} �T�Ӥ����I�ϦU�۪��ƨ�</span><span class="tag">${icon('check')} �Юv�w�]�w�����Ѧ�</span></div></div><div class="steps">${['�߳�','�����I','�ƨ�','����'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,3)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'? ':''}${s}</strong>${['�����ݪk','�v�@�c��','�t��X�A�Ҥl','�ˬd�j��'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">�ܽd����ƥu�O�s�b�����s�����F���J�դ�b��θ�Ʈw��A�i�ѱЮv��x�����d�ݡC</p></main></div>`;}
-function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">��</div><div><strong>���ұнm</strong><small>�v�B���� �P ��z�Q�k</small></div></div><span class="online"><i></i>${providerReady?'Gemini 3.6 �P Thinking':'���u���ܸզ�'}</span></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${esc(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose"><div class="quick-prompts"><button data-action="quick" data-text="�ڹ��D�ت��߳��O�K�K�A�]���K�K">�ڷQ���ռg�߳�</button><button data-action="quick" data-text="���ٷQ��t�@�Ө��סG�K�K">�A�[�@�Ӥ����I</button><button data-action="quick" data-text="�ڷQ��������ƨҡA�д��Ѿ\Ū���">��@������׾�</button></div><div class="compose-row"><textarea id="coach-input" rows="2" placeholder="�g�U�A���Q�k�A�нm�|�l�ݤU�@�B�K�K"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'��Ҥ��K':'�e�X'} ${icon('arrow')}</button></div></div>`;}
-function canvas(full=false){const d=store.draft;return `<div class="canvas-head"><div><h2>���Ҭ[�c</h2><p>�߳��B�����I�ΰt��ƨҡC</p></div><div class="completion">${progress()}%<div class="completion-bar"><span style="width:${progress()}%"></span></div></div></div><div class="draft-card position"><h3>���ߥ߳�</h3><p>${esc(d.position||'���g�X�A���߳��C')}</p></div>${d.points.map((p,i)=>`<div class="draft-card point"><h3>�����I ${i+1}</h3><p>${esc(p.claim||'�ݺc��')}</p><div class="mini-line"><b>�ƨҡ]�׾ڡ^�G</b>${esc(p.evidence||'�ݰt��X�A���ƨ�')}</div></div>`).join('')}<div class="card-actions">${full?'<button class="btn ghost" data-action="reset">���s�}�l</button>':''}<button class="btn gold" data-action="report">�x�s�ǲ߳��i</button></div>`;}
-function teacherView(){return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Teaching space</p><nav class="side-nav"><button data-action="view" data-view="settings" class="${store.view==='settings'?'active':''}">${icon('settings')} �D�ػP�����]�w</button><button data-action="view" data-view="reports" class="${store.view==='reports'?'active':''}">${icon('chart')} �ǥ;ǲ߳��i</button></nav><div class="side-note"><strong>�Юv��x</strong>�����զ�G�]�w�D�ػP�ؼе��c�A���紣�ݤγ��i�y�{�C</div></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">TEACHER CONSOLE �P LOCAL DEMO</div><h1>${store.view==='reports'?'�ݨ��ǥͫ�˫�ҡC':'�]�w�@�Ӧn���l�ݸ��u�C'}</h1><p>${store.view==='reports'?'�q��ܾ��{�M���Ҭ[�c�F�Ѿǥͪ��ǲ߱��p�C':'�D�ةM�����Ѧҷ|���� AI �нm���оǯߵ��C'}</p></div><div class="head-meta"><strong>${store.reports.length}</strong>���w�x�s���i<br><span>�Юv���ժ�</span></div></div>${store.view==='reports'?reportsView():settingsView()}<p class="footer-note">��x�{�ɥH�ܽd��ƹB�@�F�������i���J�դ�n�J�B��Ʈw�ίu���� AI �ҫ��A�ȡC</p></main></div>`;}
-function settingsView(){const c=store.config;return `<section class="teacher-section panel panel-pad"><h2>�D�ػP�����Ѧ�</h2><p class="section-sub">�o�ǳ]�w�|�v�T�ǥͬݨ쪺�D�ءBAI �����ݤ�V�M���i�����������ءC</p><div class="model-card"><div><strong>��ĳ�ҫ��GGPT-5 mini</strong><p>�A�X���W�v������l�ݡB���c�Ʀ^���M�ǲ߬����F�ݭn�������������R�ɡA�i��� GPT-5�C</p></div><span class="model-badge">�i����</span></div><form id="settings-form" style="margin-top:20px"><div class="form-grid"><div class="form-field full"><label for="setting-topic">ĳ�פ��D��</label><input id="setting-topic" name="topic" value="${esc(c.topic)}" required></div><div class="form-field full"><label for="setting-prompt">�g�@�n�D���I��</label><textarea id="setting-prompt" name="prompt" required>${esc(c.prompt)}</textarea></div><div class="form-field"><label for="setting-target">�ؼе��c</label><select id="setting-target" name="target"><option value="three" ${c.target==='three'?'selected':''}>�T�Ӥ����I�ϦU�۪��ƨ�</option></select></div><div class="form-field"><label for="setting-model">AI �ҫ�</label><select id="setting-model" name="model"><option value="gpt-5-mini" ${c.model==='gpt-5-mini'?'selected':''}>GPT-5 mini�]��ĳ�^</option><option value="gpt-5">GPT-5�]���`�פ��R�^</option><option value="mock">�ܽd�Ҧ��]�L API�^</option></select></div><div class="form-field full"><div class="rubric-box"><h3>�����Ѧҡ]�|��ܦb�Юv���i�^</h3><div class="check-grid">${defaultConfig.rubrics.map((r,i)=>`<label class="check"><input type="checkbox" name="rubric" value="${esc(r)}" ${(c.rubrics||[]).includes(r)?'checked':''}>${esc(r)}</label>`).join('')}</div></div></div></div><div class="form-actions"><button type="button" class="btn ghost" data-action="reset-config">�٭�ܽd�D��</button><button class="btn primary" type="submit">�x�s�]�w ${icon('check')}</button></div></form></section>`;}
-function reportsView(){if(!store.reports.length)return `<section class="panel empty">�|�����ǥͳ��i�C��������u�ǥͺݡv�����@���ܽd�A�A�^�Ӭd�ݳ��i�C</section>`;return `<div class="stats"><div class="stat"><span>�w������i</span><strong>${store.reports.length}</strong><small>���ǲ߬���</small></div><div class="stat"><span>����������</span><strong>${Math.round(store.reports.reduce((a,r)=>a+r.progress,0)/store.reports.length)}%</strong><small>�[�c�إ߱��p</small></div><div class="stat"><span>�w��߳�</span><strong>${store.reports.filter(r=>r.position).length}</strong><small>�ǥͯ�������A</small></div><div class="stat"><span>�ƨһ���</span><strong>${store.reports.filter(r=>(r.examples||[]).filter(Boolean).length===3).length}</strong><small>�T�Ӥ����I�����ƨ�</small></div></div><section class="report-list">${store.reports.map((r,i)=>`<article class="panel report-row"><div><h3>${esc(r.student||'�ܽd�ǥ�')}</h3><p>${esc(r.topic)} �P ${esc(r.time)}</p></div><div><div class="report-progress"><span style="width:${r.progress}%"></span></div><p style="margin-top:6px">${r.progress}% �[�c������</p></div><div class="report-score">${r.points}<small>�Ӥ����I�w����</small></div><span class="report-chip">${(r.examples||[]).filter(Boolean).length===3?'�ƨһ���':'���ݸɥR�ƨ�'}</span><button class="btn ghost" data-action="toggle-report" data-index="${i}">�d�ݸԱ� ${icon('arrow')}</button>${store.expandedReport===i?`<div class="report-detail"><b>�߳��G</b>${esc(r.position||'�|����g')}<br><b>�����I�G</b>${esc(r.claims.join('�F')||'�|����g')}<br><b>�t��ƨҡG</b>${esc((r.examples||[]).map((v,i)=>'�����I'+(i+1)+'�G'+(v||'�ݸɥR')).join('�F')||'�³��i���O���ƨ�')}<br><b>�оǫ�ĳ�G</b>${esc(r.suggestion)}</div>`:''}</article>`).join('')}</section><div class="form-actions"><button class="btn primary" data-action="export-reports">${icon('download')} �ץX CSV</button><button class="btn danger" data-action="clear-reports">�M���ܽd���i</button></div>`;}
-function submitReport(){const d=store.draft;const report={student:'student01�]�ܽd�^',topic:store.config.topic,time:new Intl.DateTimeFormat('zh-HK',{dateStyle:'medium',timeStyle:'short'}).format(new Date()),progress:progress(),points:d.points.filter(p=>p.claim).length,position:d.position,claims:d.points.map(p=>p.claim),examples:d.points.map(p=>p.evidence),suggestion:progress()<100?'�иɻ������I�ι���������ƨҡC':'���ˬd�T�Ӥ����I�O�_�������ơA�H�ΨƨҬO�_�A���C'};store.reports=[report,...store.reports.filter(r=>r.student!=='student01�]�ܽd�^')];save();toast('�w�x�s�ǲ߳��i�C');render();}
-function resetDraft(){rewardedMilestones.clear();store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;save();render();toast('�w���s�}�l�o���m�ߡC');}
-function exportReports(){const rows=[['�ǥ�','�D��','������','�����I��','�t��ƨ�','�߳�','�����I','���'],...store.reports.map(r=>[r.student,r.topic,r.progress+'%',r.points,(r.examples||[]).map((v,i)=>'�����I'+(i+1)+'�G'+v).join('�F'),r.position,r.claims.join('�F'),r.time])];const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='ĳ�פ�ǲ߳��i.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('�w�ץX CSV ���i�C');}
+function mobileNav(){const links=store.role==='teacher'?[['settings','題目設定'],['reports','學習報告']]:[['coach','對話引導'],['draft','我的架構']];return '<nav class="mobile-nav">'+links.map(([id,label])=>'<button data-action="view" data-view="'+id+'" class="'+(store.view===id?'active':'')+'">'+label+'</button>').join('')+'</nav>';}
+function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} AI 對話引導</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} 我的論證架構</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE · 01</div><h1>把想法，寫成論證。</h1><p>不代你寫答案，只幫你把思考說清楚。</p></div><div class="head-meta"><strong>${p}%</strong>架構完成度<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">本次練習題目</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} 三個分論點＋各自的事例</span><span class="tag">${icon('check')} 教師已設定評分參考</span></div></div><div class="steps">${['立場','分論點','事例','完成'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,3)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'✓ ':''}${s}</strong>${['表明看法','逐一構思','配對合適例子','檢查大綱'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">示範版資料只保存在本機瀏覽器；接入校方帳戶及資料庫後，可由教師後台集中查看。</p></main></div>`;}
+function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><span class="online"><i></i>${providerReady?'Gemini 3.6 · Thinking':'離線提示試行'}</span></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${esc(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose"><div class="quick-prompts"><button data-action="quick" data-text="我對題目的立場是……，因為……">我想先試寫立場</button><button data-action="quick" data-text="我還想到另一個角度：……">再加一個分論點</button><button data-action="quick" data-text="我想不到相關事例，請提供閱讀資料">找一項具體論據</button></div><div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下你的想法，教練會追問下一步……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
+function canvas(full=false){const d=store.draft;return `<div class="canvas-head"><div><h2>論證架構</h2><p>立場、分論點及配對事例。</p></div><div class="completion">${progress()}%<div class="completion-bar"><span style="width:${progress()}%"></span></div></div></div><div class="draft-card position"><h3>中心立場</h3><p>${esc(d.position||'先寫出你的立場。')}</p></div>${d.points.map((p,i)=>`<div class="draft-card point"><h3>分論點 ${i+1}</h3><p>${esc(p.claim||'待構思')}</p><div class="mini-line"><b>事例（論據）：</b>${esc(p.evidence||'待配對合適的事例')}</div></div>`).join('')}<div class="card-actions">${full?'<button class="btn ghost" data-action="reset">重新開始</button>':''}<button class="btn gold" data-action="report">儲存學習報告</button></div>`;}
+function teacherView(){return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Teaching space</p><nav class="side-nav"><button data-action="view" data-view="settings" class="${store.view==='settings'?'active':''}">${icon('settings')} 題目與評分設定</button><button data-action="view" data-view="reports" class="${store.view==='reports'?'active':''}">${icon('chart')} 學生學習報告</button></nav><div class="side-note"><strong>教師後台</strong>本機試行：設定題目與目標結構，體驗提問及報告流程。</div></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">TEACHER CONSOLE · LOCAL DEMO</div><h1>${store.view==='reports'?'看見學生怎樣思考。':'設定一個好的追問路線。'}</h1><p>${store.view==='reports'?'從對話歷程和論證架構了解學生的學習情況。':'題目和評分參考會成為 AI 教練的教學脈絡。'}</p></div><div class="head-meta"><strong>${store.reports.length}</strong>份已儲存報告<br><span>教師測試版</span></div></div>${store.view==='reports'?reportsView():settingsView()}<p class="footer-note">後台現時以示範資料運作；正式版可接入校方登入、資料庫及真正的 AI 模型服務。</p></main></div>`;}
+function settingsView(){const c=store.config;return `<section class="teacher-section panel panel-pad"><h2>題目與評分參考</h2><p class="section-sub">這些設定會影響學生看到的題目、AI 的提問方向和報告中的評估項目。</p><div class="model-card"><div><strong>建議模型：GPT-5 mini</strong><p>適合高頻率的中文追問、結構化回應和學習紀錄；需要更複雜的長文評析時，可改用 GPT-5。</p></div><span class="model-badge">可替換</span></div><form id="settings-form" style="margin-top:20px"><div class="form-grid"><div class="form-field full"><label for="setting-topic">議論文題目</label><input id="setting-topic" name="topic" value="${esc(c.topic)}" required></div><div class="form-field full"><label for="setting-prompt">寫作要求／背景</label><textarea id="setting-prompt" name="prompt" required>${esc(c.prompt)}</textarea></div><div class="form-field"><label for="setting-target">目標結構</label><select id="setting-target" name="target"><option value="three" ${c.target==='three'?'selected':''}>三個分論點＋各自的事例</option></select></div><div class="form-field"><label for="setting-model">AI 模型</label><select id="setting-model" name="model"><option value="gpt-5-mini" ${c.model==='gpt-5-mini'?'selected':''}>GPT-5 mini（建議）</option><option value="gpt-5">GPT-5（較深度分析）</option><option value="mock">示範模式（無 API）</option></select></div><div class="form-field full"><div class="rubric-box"><h3>評分參考（會顯示在教師報告）</h3><div class="check-grid">${defaultConfig.rubrics.map((r,i)=>`<label class="check"><input type="checkbox" name="rubric" value="${esc(r)}" ${(c.rubrics||[]).includes(r)?'checked':''}>${esc(r)}</label>`).join('')}</div></div></div></div><div class="form-actions"><button type="button" class="btn ghost" data-action="reset-config">還原示範題目</button><button class="btn primary" type="submit">儲存設定 ${icon('check')}</button></div></form></section>`;}
+function reportsView(){if(!store.reports.length)return `<section class="panel empty">尚未有學生報告。先切換到「學生端」完成一次示範，再回來查看報告。</section>`;return `<div class="stats"><div class="stat"><span>已提交報告</span><strong>${store.reports.length}</strong><small>份學習紀錄</small></div><div class="stat"><span>平均完成度</span><strong>${Math.round(store.reports.reduce((a,r)=>a+r.progress,0)/store.reports.length)}%</strong><small>架構建立情況</small></div><div class="stat"><span>已填立場</span><strong>${store.reports.filter(r=>r.position).length}</strong><small>學生能表明取態</small></div><div class="stat"><span>事例齊備</span><strong>${store.reports.filter(r=>(r.examples||[]).filter(Boolean).length===3).length}</strong><small>三個分論點均有事例</small></div></div><section class="report-list">${store.reports.map((r,i)=>`<article class="panel report-row"><div><h3>${esc(r.student||'示範學生')}</h3><p>${esc(r.topic)} · ${esc(r.time)}</p></div><div><div class="report-progress"><span style="width:${r.progress}%"></span></div><p style="margin-top:6px">${r.progress}% 架構完成度</p></div><div class="report-score">${r.points}<small>個分論點已捕捉</small></div><span class="report-chip">${(r.examples||[]).filter(Boolean).length===3?'事例齊備':'仍需補充事例'}</span><button class="btn ghost" data-action="toggle-report" data-index="${i}">查看詳情 ${icon('arrow')}</button>${store.expandedReport===i?`<div class="report-detail"><b>立場：</b>${esc(r.position||'尚未填寫')}<br><b>分論點：</b>${esc(r.claims.join('；')||'尚未填寫')}<br><b>配對事例：</b>${esc((r.examples||[]).map((v,i)=>'分論點'+(i+1)+'：'+(v||'待補充')).join('；')||'舊報告未記錄事例')}<br><b>教學建議：</b>${esc(r.suggestion)}</div>`:''}</article>`).join('')}</section><div class="form-actions"><button class="btn primary" data-action="export-reports">${icon('download')} 匯出 CSV</button><button class="btn danger" data-action="clear-reports">清除示範報告</button></div>`;}
+function submitReport(){const d=store.draft;const report={student:'student01（示範）',topic:store.config.topic,time:new Intl.DateTimeFormat('zh-HK',{dateStyle:'medium',timeStyle:'short'}).format(new Date()),progress:progress(),points:d.points.filter(p=>p.claim).length,position:d.position,claims:d.points.map(p=>p.claim),examples:d.points.map(p=>p.evidence),suggestion:progress()<100?'請補齊分論點及對應的具體事例。':'請檢查三個分論點是否互不重複，以及事例是否適切。'};store.reports=[report,...store.reports.filter(r=>r.student!=='student01（示範）')];save();toast('已儲存學習報告。');render();}
+function resetDraft(){rewardedMilestones.clear();store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;save();render();toast('已重新開始這次練習。');}
+function exportReports(){const rows=[['學生','題目','完成度','分論點數','配對事例','立場','分論點','日期'],...store.reports.map(r=>[r.student,r.topic,r.progress+'%',r.points,(r.examples||[]).map((v,i)=>'分論點'+(i+1)+'：'+v).join('；'),r.position,r.claims.join('；'),r.time])];const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='議論文學習報告.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('已匯出 CSV 報告。');}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-action]');if(!b)return;
   const a=b.dataset.action;
@@ -357,10 +357,10 @@ document.addEventListener('click',e=>{
   else if(a==='report'&&store.role==='student')submitReport();
   else if(a==='reset'&&store.role==='student'&&!coachBusy)resetDraft();
   else if(store.role==='teacher'){
-    if(a==='reset-config'){store.config={...defaultConfig};save();render();toast('�w�٭�ܽd�D�ءC');}
+    if(a==='reset-config'){store.config={...defaultConfig};save();render();toast('已還原示範題目。');}
     else if(a==='toggle-report'){store.expandedReport=store.expandedReport===Number(b.dataset.index)?null:Number(b.dataset.index);render();}
     else if(a==='export-reports')exportReports();
-    else if(a==='clear-reports'){store.reports=[];save();render();toast('�w�M���ܽd���i�C');}
+    else if(a==='clear-reports'){store.reports=[];save();render();toast('已清除示範報告。');}
   }
 });
 document.addEventListener('submit',e=>{
@@ -368,7 +368,7 @@ document.addEventListener('submit',e=>{
     e.preventDefault();const fd=new FormData(e.target);
     const teacher=loginPortal==='teacher';
     if(fd.get('username').trim()!==(teacher?'teacher01':'student01')||fd.get('password')!==(teacher?'Teach123!':'Learn123!')){
-      $('#login-error').textContent='�b��αK�X�����T�A�ШϥΦ��J�f���ܽd�b��C';return;
+      $('#login-error').textContent='帳戶或密碼不正確，請使用此入口的示範帳戶。';return;
     }
     store.role=loginPortal;store.view=teacher?'settings':'coach';render();return;
   }
@@ -377,29 +377,29 @@ document.addEventListener('submit',e=>{
   store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'three',model:'gemini-3.6-flash',rubrics:fd.getAll('rubric')};
   store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;rewardedMilestones.clear();
   store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};
-  save();toast('�D�ػP�����ѦҤw�x�s�C');render();
+  save();toast('題目與評分參考已儲存。');render();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&e.target.id==='coach-input'){e.preventDefault();const b=document.querySelector('[data-action="send"]');b?.click();}});
 function normalizeState(){const raw=store.draft&&typeof store.draft==='object'?store.draft:{};const rawPoints=Array.isArray(raw.points)?raw.points:[];store.config={...defaultConfig,...(store.config&&typeof store.config==='object'?store.config:{})};store.draft={position:typeof raw.position==='string'?raw.position:'',points:[0,1,2].map(i=>{const p=rawPoints[i]&&typeof rawPoints[i]==='object'?rawPoints[i]:{};return {claim:typeof p.claim==='string'?p.claim:'',evidence:typeof p.evidence==='string'?p.evidence:'',reasoning:typeof p.reasoning==='string'?p.reasoning:''};}),rebuttal:{opposing:typeof raw.rebuttal?.opposing==='string'?raw.rebuttal.opposing:'',response:typeof raw.rebuttal?.response==='string'?raw.rebuttal.response:''}};store.messages=Array.isArray(store.messages)?store.messages.filter(m=>m&&typeof m.text==='string').map(m=>({from:m.from==='student'?'student':'coach',move:typeof m.move==='string'?m.move:'',text:m.text,support:m.support&&typeof m.support==='object'?m.support:null})):[];store.reports=Array.isArray(store.reports)?store.reports.filter(r=>r&&typeof r==='object').map(r=>({...r,claims:Array.isArray(r.claims)?r.claims.filter(Boolean):[]})):[];store.stage=Number.isFinite(Number(store.stage))?Math.max(0,Math.min(6,Math.floor(Number(store.stage)))):0;}
 normalizeState();
 store.config.target='three';
-store.config.rubrics=(store.config.rubrics||[]).filter(x=>!['�໡���׾ڦp���������I','��w�Q�Ϥ��[�I�æ��Ļ��'].includes(x));
-if(!store.config.rubrics.includes('�ƨү������������I'))store.config.rubrics.push('�ƨү������������I');
-if(store.config.prompt.includes('����׾ڤΧ������'))store.config.prompt=defaultConfig.prompt;
+store.config.rubrics=(store.config.rubrics||[]).filter(x=>!['能說明論據如何支持分論點','能預想反方觀點並有效駁論'].includes(x));
+if(!store.config.rubrics.includes('事例能支持對應分論點'))store.config.rubrics.push('事例能支持對應分論點');
+if(store.config.prompt.includes('具體論據及完整論證'))store.config.prompt=defaultConfig.prompt;
 store.stage=currentTask().stage;
-if(saved.flowVersion!==2&&store.messages.some(m=>m.from==='student'))store.messages.push({from:'coach',text:'�ǲ߬y�{�w��s���߳��B�����I�ΰt��ƨҡC'+taskQuestion()});
+if(saved.flowVersion!==2&&store.messages.some(m=>m.from==='student'))store.messages.push({from:'coach',text:'學習流程已更新為立場、分論點及配對事例。'+taskQuestion()});
 
-store.messages=store.messages.map(m=>m.support&&!Array.isArray(m.support.evidenceIds)?{...m,text:'�L�����\Ū���ܤw���ΡC�Э��s�n�D�\Ū��ơA�H�d�ݪ����w�ֹ�ӷ������ơC',support:null}:m);
+store.messages=store.messages.map(m=>m.support&&!Array.isArray(m.support.evidenceIds)?{...m,text:'過往的閱讀提示已停用。請重新要求閱讀資料，以查看附有已核對來源的材料。',support:null}:m);
 rewardedMilestones=new Set(milestoneKeys());
 // Adopt the new sample only when no existing student work would be relabelled.
-if(store.config.topic==='���ǥ����_����ϥΥͦ����H�u����H'&&!store.draft.position.trim()&&!store.messages.some(m=>m.from==='student')){
+if(store.config.topic==='中學生應否限制使用生成式人工智能？'&&!store.draft.position.trim()&&!store.messages.some(m=>m.from==='student')){
   store.config.topic=defaultConfig.topic;
 }
 if(!store.messages.some(m=>m.from==='student'))store.messages=initialMessages();
 else store.messages=store.messages.map(m=>m.move==='Welcome'?initialMessages()[0]:m);
 store.config.model='gemini-3.6-flash';
 const originalRender=render;
-render=function(){originalRender();const card=document.querySelector('.model-card strong');if(card)card.textContent='Gemini 3.6 Flash �P Thinking�]���^';const note=document.querySelector('.model-card p');if(note)note.textContent=providerReady?'Gemini �w�s���A���D�ءB�����ѦҤξǥͦ^�����ѳv�B�޾ɡC':'�|���s�� Gemini�G�ثe�i�եγv�Ŵ��ܡB�u�g�\Ū���p�Q�ϥd�C';const select=document.querySelector('#setting-model');if(select){select.innerHTML='<option value="gemini-3.6-flash">Gemini 3.6 Flash �P Thinking�]���^</option>';select.value='gemini-3.6-flash';}};
+render=function(){originalRender();const card=document.querySelector('.model-card strong');if(card)card.textContent='Gemini 3.6 Flash · Thinking（高）';const note=document.querySelector('.model-card p');if(note)note.textContent=providerReady?'Gemini 已連接，按題目、評分參考及學生回答提供逐步引導。':'尚未連接 Gemini：目前可試用逐級提示、短篇閱讀及聯想圖卡。';const select=document.querySelector('#setting-model');if(select){select.innerHTML='<option value="gemini-3.6-flash">Gemini 3.6 Flash · Thinking（高）</option>';select.value='gemini-3.6-flash';}};
 render();
 connectCoach();
 
@@ -407,4 +407,3 @@ connectCoach();
 </script>
 </body>
 </html>
-
