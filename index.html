@@ -214,7 +214,7 @@ function evidenceFor(topic,claim='',response='',historicalOnly=false){
 
 
 const ESSAY_STORE='fsk-essay-studio-local-trial-v2';
-const defaultConfig={topic:"俗語說「萬般皆下品，惟有讀書高」，也有人說「讀書無用」。試寫作文章一篇，談談你對「讀書無用」的看法。",prompt:'請表明立場，構思兩個相關分論點並各配一件真實事例，再提出一個反方觀點及回應，完成一個駁論。',rubrics:['立場清晰，回應題旨','兩個分論點有層次，互不重複','事例真實並切合分論點','駁論能回應反方觀點'],target:'two-plus-rebuttal',model:'gemini-flash-latest'};
+const defaultConfig={topic:"俗語說「萬般皆下品，惟有讀書高」，也有人說「讀書無用」。試寫作文章一篇，談談你對「讀書無用」的看法。",prompt:'請表明立場，構思兩個相關分論點並各配一件真實事例，再提出一個反方觀點及回應，完成一個駁論。',rubrics:['立場清晰，回應題旨','兩個分論點有層次，互不重複','事例真實並切合分論點','駁論能回應反方觀點'],target:'two-plus-rebuttal',model:'gemini-3.5-flash-lite'};
 let saved;
 try{saved=JSON.parse(localStorage.getItem(ESSAY_STORE))||{};}catch{saved={};}
 const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],view:'coach',role:'student',expandedReport:null};
@@ -521,7 +521,7 @@ document.addEventListener('submit',e=>{
   }
   if(e.target.id!=='settings-form'||store.role!=='teacher')return;
   e.preventDefault();const fd=new FormData(e.target);
-  store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'two-plus-rebuttal',model:'gemini-3.6-flash',rubrics:fd.getAll('rubric')};
+  store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'two-plus-rebuttal',model:'gemini-3.5-flash-lite',rubrics:fd.getAll('rubric')};
   store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;rewardedMilestones.clear();
   store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};
   save();toast('題目與評分參考已儲存。');render();
@@ -544,18 +544,18 @@ if(store.config.topic==='中學生應否限制使用生成式人工智能？'&&!
 }
 if(!store.messages.some(m=>m.from==='student'))store.messages=initialMessages();
 else store.messages=store.messages.map(m=>m.move==='Welcome'?initialMessages()[0]:m);
-store.config.model='gemini-flash-latest';
+store.config.model='gemini-3.5-flash-lite';
 const originalRender=render;
 render=function(){
   originalRender();
   const card=document.querySelector('.model-card strong');
-  if(card)card.textContent='Gemini 即時 AI';
+  if(card)card.textContent='Gemini 3.5 Flash-Lite';
   const note=document.querySelector('.model-card p');
-  if(note)note.textContent='網站已連接 Cloudflare Worker 的 Gemini 即時對話；目前模型版本由 Worker 設定。真實事件或最新資料會透過搜尋核對來源。';
+  if(note)note.textContent='網站已連接 Cloudflare Worker，使用 Gemini 3.5 Flash-Lite 即時回答。真實事件或最新資料會透過搜尋核對來源。';
   const badge=document.querySelector('.model-badge');
   if(badge)badge.textContent='Gemini API';
   const select=document.querySelector('#setting-model');
-  if(select){select.innerHTML='<option value="gemini-flash-latest">Gemini 即時 AI（Worker 設定）</option>';select.value='gemini-flash-latest';}
+  if(select){select.innerHTML='<option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>';select.value='gemini-3.5-flash-lite';}
 };
 render();
 })();
