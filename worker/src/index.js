@@ -13,7 +13,7 @@ function corsHeaders(origin) {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, X-Teacher-Code",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
@@ -59,6 +59,53 @@ function hasChineseHistoricalRequest(text) {
   return /中國|西方|古代|歷史|事件|真實|論據|事例|例子|最新|最近|今天|今年/.test(text);
 }
 
+export class ClassroomStore {
+  constructor(ctx, env) { this.ctx = ctx; this.env = env; }
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (request.method === "POST" && url.pathname === "/save") {
+      let record;
+      try { record = await request.json(); } catch { return new Response("bad request", { status: 400 }); }
+      const key = typeof record.sessionId === "string" && /^[a-zA-Z0-9_-]{16,80}$/.test(record.sessionId) ? record.sessionId : "";
+      if (!key) return new Response("invalid session id", { status: 400 });
+      const now = Date.now();
+      const previous = await this.ctx.storage.get("session:" + key);
+      const messages = Array.isArray(record.messages) ? record.messages.slice(-80).filter(m => m && typeof m.text === "string").map(m => ({ from: m.from === "student" ? "student" : "coach", text: m.text.slice(0, 1800) })) : [];
+      const safe = {
+        sessionId: key, studentLabel: String(record.studentLabel || "學生").trim().slice(0, 80),
+        topic: String(record.topic || "").slice(0, 500),
+        stage: Math.max(0, Math.min(4, Number(record.stage) || 0)),
+        stageLabel: String(record.stageLabel || "").slice(0, 80),
+        progress: Math.max(0, Math.min(100, Number(record.progress) || 0)),
+        draft: record.draft && typeof record.draft === "object" ? record.draft : {},
+        messages, createdAt: previous?.createdAt || now, updatedAt: now,
+        expiresAt: now + 30 * 24 * 60 * 60 * 1000
+      };
+      if (JSON.stringify(safe).length > 90_000) return new Response("record too large", { status: 413 });
+      await this.ctx.storage.put("session:" + key, safe);
+      await this.prune(now);
+      return Response.json({ ok: true });
+    }
+    if (request.method === "GET" && url.pathname === "/list") {
+      const now = Date.now(), records = await this.ctx.storage.list({ prefix: "session:", limit: 250 }), sessions = [];
+      for (const [key, value] of records) {
+        if (value?.expiresAt > now) sessions.push(value);
+        else await this.ctx.storage.delete(key);
+      }
+      sessions.sort((a, b) => b.updatedAt - a.updatedAt);
+      return Response.json({ sessions: sessions.slice(0, 150) });
+    }
+    return new Response("not found", { status: 404 });
+  }
+  async prune(now) {
+    const records = await this.ctx.storage.list({ prefix: "session:", limit: 250 });
+    const sorted = [...records.entries()].sort((a, b) => (b[1]?.updatedAt || 0) - (a[1]?.updatedAt || 0));
+    for (let i = 0; i < sorted.length; i++) {
+      if (sorted[i][1]?.expiresAt <= now || i >= 150) await this.ctx.storage.delete(sorted[i][0]);
+    }
+  }
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -69,6 +116,37 @@ export default {
     if (request.method === "OPTIONS") {
       if (!allowed) return new Response(null, { status: 403 });
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
+    }
+
+    if (url.pathname === "/api/classroom/session" && request.method === "POST") {
+      if (!allowed) return json({ error: "不允許這個網站呼叫。" }, 403, corsOrigin);
+      if (!env.CLASSROOM_STORE) return json({ error: "課堂記錄服務尚未設定。" }, 503, corsOrigin);
+      const length = Number(request.headers.get("Content-Length") || 0);
+      if (length > 100_000) return json({ error: "對話紀錄太大。" }, 413, corsOrigin);
+      let record;
+      try { record = await request.json(); } catch { return json({ error: "記錄格式不正確。" }, 400, corsOrigin); }
+      const id = typeof record.sessionId === "string" && /^[a-zA-Z0-9_-]{16,80}$/.test(record.sessionId) ? record.sessionId : "";
+      if (!id) return json({ error: "對話識別碼不正確。" }, 400, corsOrigin);
+      try {
+        const stub = env.CLASSROOM_STORE.get(env.CLASSROOM_STORE.idFromName("classroom"));
+        const stored = await stub.fetch("https://classroom-store/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(record) });
+        if (!stored.ok) return json({ error: "無法保存課堂紀錄。" }, 502, corsOrigin);
+        return json({ saved: true }, 200, corsOrigin);
+      } catch { return json({ error: "暫時無法保存課堂紀錄。" }, 502, corsOrigin); }
+    }
+
+    if (url.pathname === "/api/classroom/sessions" && request.method === "GET") {
+      if (!allowed) return json({ error: "不允許這個網站呼叫。" }, 403, corsOrigin);
+      if (!env.TEACHER_ACCESS_CODE) return json({ error: "老師查看密碼尚未在 Cloudflare Worker 設定。" }, 503, corsOrigin);
+      const supplied = request.headers.get("X-Teacher-Code") || "";
+      if (supplied.length < 12 || supplied !== env.TEACHER_ACCESS_CODE) return json({ error: "老師查看密碼不正確（HTTP 401）。" }, 401, corsOrigin);
+      if (!env.CLASSROOM_STORE) return json({ error: "課堂記錄服務尚未設定。" }, 503, corsOrigin);
+      try {
+        const stub = env.CLASSROOM_STORE.get(env.CLASSROOM_STORE.idFromName("classroom"));
+        const stored = await stub.fetch("https://classroom-store/list");
+        if (!stored.ok) return json({ error: "無法載入課堂紀錄。" }, 502, corsOrigin);
+        return json(await stored.json(), 200, corsOrigin);
+      } catch { return json({ error: "暫時無法載入課堂紀錄。" }, 502, corsOrigin); }
     }
 
     if (url.pathname === "/api/essay-status" && request.method === "GET") {

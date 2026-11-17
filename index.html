@@ -218,7 +218,7 @@ const ESSAY_STORE='fsk-essay-studio-local-trial-v2';
 const defaultConfig={topic:"俗語說「萬般皆下品，惟有讀書高」，也有人說「讀書無用」。試寫作文章一篇，談談你對「讀書無用」的看法。",prompt:'請表明立場，構思兩個相關分論點並各配一件真實事例，再提出一個反方觀點及回應，完成一個駁論。',rubrics:['立場清晰，回應題旨','兩個分論點有層次，互不重複','事例真實並切合分論點','駁論能回應反方觀點'],target:'two-plus-rebuttal',model:'gemini-3.5-flash-lite'};
 let saved;
 try{saved=JSON.parse(localStorage.getItem(ESSAY_STORE))||{};}catch{saved={};}
-const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],view:'coach',role:'student',expandedReport:null};
+const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],studentLabel:saved.studentLabel||'',sessionId:saved.sessionId||'',view:'coach',role:'student',expandedReport:null};
 const talkMoves=[
  {title:'表明立場',label:'Position',prompt:'請先用一句話表明立場。'},
  {title:'構思分論點',label:'Claim',prompt:'請先提出第一個支持你立場的分論點。'},
@@ -253,7 +253,7 @@ function depthQuestion(text){
 }
 
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,flowVersion:4}));}catch{}};
+const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,studentLabel:store.studentLabel,sessionId:store.sessionId,flowVersion:4}));}catch{}};
 const toast=msg=>{const el=$('#essay-toast');el.textContent=msg;el.className='toast show';clearTimeout(toast.t);toast.t=setTimeout(()=>el.className='toast',2600)};
 function icon(n){return ({spark:'✦',chat:'◌',book:'▤',chart:'◒',settings:'⚙',file:'▧',arrow:'→',check:'✓',plus:'＋',download:'↓',reset:'↻'})[n]||'•';}
 function progress(){const d=store.draft,points=d.points.slice(0,2);const count=(d.position.trim()?1:0)+points.reduce((n,p)=>n+(p.claim.trim()?1:0)+(p.claim.trim()&&p.evidence.trim()?1:0),0)+(d.rebuttal.opposing.trim()?1:0)+(d.rebuttal.response.trim()?1:0);return Math.round(count/7*100);}
@@ -392,6 +392,7 @@ function supportReply(){
   if(store.helpLevel>=3)question=evidence.length?'先讀下面的已核實材料，選出與目前想法相關的一件事或一項發現，用自己的話記下「對象、事情或發現、來源」。':'目前沒有切合這個分論點的已核實閱讀材料。請先指出例子需要呈現哪一項具體影響，並請老師協助尋找原文。';
   return {from:'coach',text:question,support:{level:store.helpLevel,evidenceIds:evidence.map(e=>e.id)}};
 }
+function newClassroomSessionId(){return (typeof crypto!=='undefined'&&crypto.randomUUID)?crypto.randomUUID():'session-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);}
 function geminiEndpoint(path){
   const configured=String(window.GEMINI_API_ENDPOINT||'').trim().replace(/\/+$/,'');
   if(!configured)return '';
@@ -406,6 +407,7 @@ async function askCoach(text){
   store.helpLevel=0;
   save();
   render();
+  let gotCoachReply=false;
   try{
     const endpoint=geminiEndpoint('essay-coach');
     if(!endpoint)throw new Error('AI 服務網址尚未設定。請在 GitHub「Settings → Secrets and variables → Actions → Variables」加入 GEMINI_API_ENDPOINT，填入 Cloudflare Worker 網址。');
@@ -426,11 +428,13 @@ async function askCoach(text){
     if(data.advanceDraft===true)infer(answer);
     store.stage=currentTask().stage;
     store.messages.push({from:'coach',move:talkMoves[store.stage].label,text:data.message.trim()});
+    gotCoachReply=true;
   }catch(error){
     store.messages.push({from:'coach',text:'這次未能取得 Gemini 回覆，學習階段沒有前進。'+(error&&error.message?'\n\n'+error.message:'請檢查 Worker 網址及服務設定後重試。')});
   }finally{
     coachBusy=false;
     save();
+    if(gotCoachReply)await persistClassroomSession();
     render();
     celebrateProgress();
     const log=document.querySelector('#chat-log');
@@ -440,6 +444,7 @@ async function askCoach(text){
 
 let loginPortal=(typeof location!=='undefined'&&String(location.search||'').includes('portal=teacher'))?'teacher':'student';
 store.role=null;
+async function persistClassroomSession(){try{const endpoint=geminiEndpoint('classroom/session');if(!endpoint||!store.studentLabel||!store.sessionId)return;await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:store.sessionId,studentLabel:store.studentLabel,topic:store.config.topic,stage:currentTask().stage,stageLabel:stageLabel(),progress:progress(),draft:store.draft,messages:store.messages})});}catch{}}
 function loginScreen(){
   const teacher=loginPortal==='teacher';
   return `<main class="login-shell"><section class="login-card panel">
@@ -447,7 +452,7 @@ function loginScreen(){
     <p class="eyebrow">${teacher?'TEACHER CONSOLE':'STUDENT SPACE'}</p>
     <h1>${teacher?'老師登入':'學生登入'}</h1>
     <p>${teacher?'設定寫作題目與評分參考，查看學習報告。':'一步一步整理想法，完成你的文章大綱。'}</p>
-    <form id="essay-login-form"><div class="form-field"><label for="login-user">帳戶</label><input id="login-user" name="username" autocomplete="username" required></div>
+    <form id="essay-login-form">${teacher?'':`<div class="form-field"><label for="student-label">學生識別名稱（建議用座號或代號）</label><input id="student-label" name="studentLabel" maxlength="80" autocomplete="nickname" required></div>`}<div class="form-field"><label for="login-user">帳戶</label><input id="login-user" name="username" autocomplete="username" required></div>
     <div class="form-field"><label for="login-pass">密碼</label><input id="login-pass" name="password" type="password" autocomplete="current-password" required></div>
     <p id="login-error" role="alert"></p><button class="btn primary" type="submit">登入${teacher?'老師':'學生'}</button></form>
     <aside class="login-demo">本機示範帳戶：<code>${teacher?'teacher01':'student01'}</code><br>密碼：<code>${teacher?'Teach123!':'Learn123!'}</code></aside>
@@ -482,7 +487,7 @@ function celebrateProgress(){
 }
 
 function mobileNav(){const links=store.role==='teacher'?[['settings','題目設定'],['reports','學習報告']]:[['coach','對話引導'],['draft','我的架構']];return '<nav class="mobile-nav">'+links.map(([id,label])=>'<button data-action="view" data-view="'+id+'" class="'+(store.view===id?'active':'')+'">'+label+'</button>').join('')+'</nav>';}
-function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} AI 對話引導</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} 我的論證架構</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE · 01</div><h1>把想法，寫成論證。</h1><p>不代你寫答案，只幫你把思考說清楚。</p></div><div class="head-meta"><strong>${p}%</strong>架構完成度<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">本次練習題目</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} 兩個分論點＋一個駁論</span><span class="tag">${icon('check')} 教師已設定評分參考</span></div></div><div class="steps">${['立場','分論點','事例','駁論','完成'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,4)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'✓ ':''}${s}</strong>${['表明看法','構思兩項理由','配對真實事件','回應反方觀點','檢查大綱'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">示範版資料只保存在本機瀏覽器；接入校方帳戶及資料庫後，可由教師後台集中查看。</p></main></div>`;}
+function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} AI 對話引導</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} 我的論證架構</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE · 01</div><h1>把想法，寫成論證。</h1><p>不代你寫答案，只幫你把思考說清楚。</p></div><div class="head-meta"><strong>${p}%</strong>架構完成度<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">本次練習題目</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} 兩個分論點＋一個駁論</span><span class="tag">${icon('check')} 教師已設定評分參考</span></div></div><div class="steps">${['立場','分論點','事例','駁論','完成'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,4)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'✓ ':''}${s}</strong>${['表明看法','構思兩項理由','配對真實事件','回應反方觀點','檢查大綱'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">對話會同步至共享伺服器，老師可在「學生學習報告」查看；請使用座號或代號，避免輸入敏感個人資料。</p></main></div>`;}
 function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>Gemini 3.5 Flash-Lite · 即時 AI</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose"><div class="quick-prompts"><button data-action="quick" data-text="我對題目的立場是……，因為……">我想先試寫立場</button><button data-action="quick" data-text="我還想到另一個角度：……">再加一個分論點</button><button data-action="quick" data-text="我想不到相關事例，請提供閱讀資料">找一項具體論據</button></div><div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下你的想法，教練會追問下一步……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
 function openDraftEditor(field){
  const dialog=$('#draft-edit-dialog');if(!dialog)return;
@@ -510,16 +515,33 @@ function draftEditDialog(){return `<dialog class="edit-dialog" id="draft-edit-di
 function canvas(full=false){const d=store.draft;return `<div class="canvas-head"><div><h2>論證架構</h2><p>立場、兩個分論點、各自事例及一個駁論。</p></div><div class="completion">${progress()}%<div class="completion-bar"><span style="width:${progress()}%"></span></div></div></div><div class="draft-card position"><h3>中心立場</h3><p>${esc(d.position||'先寫出你的立場。')}</p></div>${d.points.slice(0,2).map((p,i)=>`<div class="draft-card point"><h3>分論點 ${i+1}<span class="draft-inline-actions"><button class="btn ghost mini-edit" data-action="edit-field" data-field="point-${i}-claim">編輯分論點</button><button class="btn ghost mini-edit" data-action="edit-field" data-field="point-${i}-evidence">編輯事例</button></span></h3><p>${esc(p.claim||'待構思')}</p><div class="mini-line"><b>事例（論據）：</b>${esc(p.evidence||'待配對真實事件')}</div></div>`).join('')}<div class="draft-card rebuttal"><h3>駁論<span class="draft-inline-actions"><button class="btn ghost mini-edit" data-action="edit-field" data-field="rebuttal-opposing">編輯反方觀點</button><button class="btn ghost mini-edit" data-action="edit-field" data-field="rebuttal-response">編輯回應</button></span></h3><p><b>反方觀點：</b>${esc(d.rebuttal.opposing||'待提出反方觀點')}</p><div class="mini-line"><b>駁論回應：</b>${esc(d.rebuttal.response||'待回應反方觀點')}</div></div><div class="card-actions">${full?'<button class="btn ghost" data-action="reset">重新開始對話</button>':''}<button class="btn gold" data-action="report">儲存學習報告</button></div>${draftEditDialog()}`;}
 function teacherView(){return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Teaching space</p><nav class="side-nav"><button data-action="view" data-view="settings" class="${store.view==='settings'?'active':''}">${icon('settings')} 題目與評分設定</button><button data-action="view" data-view="reports" class="${store.view==='reports'?'active':''}">${icon('chart')} 學生學習報告</button></nav><div class="side-note"><strong>教師後台</strong>本機試行：設定題目與目標結構，體驗提問及報告流程。</div></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">TEACHER CONSOLE · LOCAL DEMO</div><h1>${store.view==='reports'?'看見學生怎樣思考。':'設定一個好的追問路線。'}</h1><p>${store.view==='reports'?'從對話歷程和論證架構了解學生的學習情況。':'題目和評分參考會傳給 Gemini，作為寫作教練的提問脈絡。'}</p></div><div class="head-meta"><strong>${store.reports.length}</strong>份已儲存報告<br><span>教師測試版</span></div></div>${store.view==='reports'?reportsView():settingsView()}<p class="footer-note">後台現時以示範資料運作；對話由 Gemini 即時生成；草稿及報告仍儲存在本機瀏覽器。</p></main></div>`;}
 function settingsView(){const c=store.config;return `<section class="teacher-section panel panel-pad"><h2>題目與評分參考</h2><p class="section-sub">這些設定會影響學生看到的題目、本機教練的提問方向和報告中的評估項目。</p><div class="model-card"><div><strong>建議模型：GPT-5 mini</strong><p>適合高頻率的中文追問、結構化回應和學習紀錄；需要更複雜的長文評析時，可改用 GPT-5。</p></div><span class="model-badge">可替換</span></div><form id="settings-form" style="margin-top:20px"><div class="form-grid"><div class="form-field full"><label for="setting-topic">議論文題目</label><input id="setting-topic" name="topic" value="${esc(c.topic)}" required></div><div class="form-field full"><label for="setting-prompt">寫作要求／背景</label><textarea id="setting-prompt" name="prompt" required>${esc(c.prompt)}</textarea></div><div class="form-field"><label for="setting-target">目標結構</label><select id="setting-target" name="target"><option value="two-plus-rebuttal" selected>兩個分論點＋一個駁論</option></select></div><div class="form-field"><label for="setting-model">AI 模型</label><select id="setting-model" name="model"><option value="gpt-5-mini" ${c.model==='gpt-5-mini'?'selected':''}>GPT-5 mini（建議）</option><option value="gpt-5">GPT-5（較深度分析）</option><option value="mock">示範模式（無 API）</option></select></div><div class="form-field full"><div class="rubric-box"><h3>評分參考（會顯示在教師報告）</h3><div class="check-grid">${defaultConfig.rubrics.map((r,i)=>`<label class="check"><input type="checkbox" name="rubric" value="${esc(r)}" ${(c.rubrics||[]).includes(r)?'checked':''}>${esc(r)}</label>`).join('')}</div></div></div></div><div class="form-actions"><button type="button" class="btn ghost" data-action="reset-config">還原示範題目</button><button class="btn primary" type="submit">儲存設定 ${icon('check')}</button></div></form></section>`;}
-function reportsView(){if(!store.reports.length)return `<section class="panel empty">尚未有學生報告。先切換到「學生端」完成一次示範，再回來查看報告。</section>`;return `<div class="stats"><div class="stat"><span>已提交報告</span><strong>${store.reports.length}</strong><small>份學習紀錄</small></div><div class="stat"><span>平均完成度</span><strong>${Math.round(store.reports.reduce((a,r)=>a+r.progress,0)/store.reports.length)}%</strong><small>架構建立情況</small></div><div class="stat"><span>已填立場</span><strong>${store.reports.filter(r=>r.position).length}</strong><small>學生能表明取態</small></div><div class="stat"><span>事例齊備</span><strong>${store.reports.filter(r=>(r.examples||[]).filter(Boolean).length===2).length}</strong><small>兩個分論點均有事例</small></div></div><section class="report-list">${store.reports.map((r,i)=>`<article class="panel report-row"><div><h3>${esc(r.student||'示範學生')}</h3><p>${esc(r.topic)} · ${esc(r.time)}</p></div><div><div class="report-progress"><span style="width:${r.progress}%"></span></div><p style="margin-top:6px">${r.progress}% 架構完成度</p></div><div class="report-score">${r.points}<small>個分論點已捕捉</small></div><span class="report-chip">${(r.examples||[]).filter(Boolean).length===2?'事例齊備':'仍需補充事例'}</span><button class="btn ghost" data-action="toggle-report" data-index="${i}">查看詳情 ${icon('arrow')}</button>${store.expandedReport===i?`<div class="report-detail"><b>立場：</b>${esc(r.position||'尚未填寫')}<br><b>分論點：</b>${esc(r.claims.join('；')||'尚未填寫')}<br><b>配對事例：</b>${esc((r.examples||[]).map((v,i)=>'分論點'+(i+1)+'：'+(v||'待補充')).join('；')||'舊報告未記錄事例')}<br><b>教學建議：</b>${esc(r.suggestion)}</div>`:''}</article>`).join('')}</section><div class="form-actions"><button class="btn primary" data-action="export-reports">${icon('download')} 匯出 CSV</button><button class="btn danger" data-action="clear-reports">清除示範報告</button></div>`;}
+let liveRefreshTimer=null;
+async function refreshLiveSessions(){
+ const status=$('#live-status'),host=$('#live-sessions');if(!host)return;
+ let code='';try{code=sessionStorage.getItem('teacherAccessCode')||'';}catch{}
+ const field=$('#teacher-access-code');if(field&&code)field.value=code;
+ if(!code){if(status)status.textContent='請輸入老師查看密碼以載入學生對話。';return;}
+ const endpoint=geminiEndpoint('classroom/sessions');if(!endpoint){if(status)status.textContent='即時服務網址尚未設定。';return;}
+ if(status)status.textContent='正在更新學生對話……';
+ try{
+  const response=await fetch(endpoint,{headers:{'X-Teacher-Code':code,'Accept':'application/json'},cache:'no-store'}),data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'載入失敗（HTTP '+response.status+'）。');
+  const sessions=Array.isArray(data.sessions)?data.sessions:[];
+  if(status)status.textContent='最後更新：'+new Intl.DateTimeFormat('zh-HK',{dateStyle:'medium',timeStyle:'short'}).format(new Date())+' · '+sessions.length+' 個對話';
+  host.innerHTML=sessions.length?sessions.map(session=>'<article class="panel panel-pad"><div class="canvas-head"><div><h3>'+esc(session.studentLabel||'學生')+'</h3><p>'+esc(session.topic||'未設定題目')+' · '+esc(session.stageLabel||'學習中')+' · 完成度 '+(Number(session.progress)||0)+'%</p></div><span class="report-chip">更新於 '+esc(new Intl.DateTimeFormat('zh-HK',{dateStyle:'short',timeStyle:'short'}).format(new Date(session.updatedAt||Date.now())))+'</span></div><div class="report-progress"><span style="width:'+Math.max(0,Math.min(100,Number(session.progress)||0))+'%"></span></div><details open><summary style="cursor:pointer;margin-top:12px;font-size:12px;font-weight:700">查看對話（'+(Array.isArray(session.messages)?session.messages.length:0)+' 則）</summary><div class="report-detail">'+(Array.isArray(session.messages)?session.messages:[]).map(m=>'<p><b>'+(m.from==='student'?'學生':'AI教練')+'：</b>'+esc(m.text||'')+'</p>').join('')+'</div></details><div class="report-detail"><b>目前大綱：</b>'+esc(JSON.stringify(session.draft||{}))+'</div></article>').join(''):'<div class="panel empty">目前沒有學生對話。學生與 AI 完成一輪對話後，紀錄會出現在這裡。</div>';
+ }catch(error){if(status)status.textContent=error.message||'暫時無法載入學生對話。';if(error.message&&/401|密碼/i.test(error.message))host.innerHTML='<div class="panel empty">查看密碼不正確，請重新輸入。</div>';}
+}
+function reportsView(){return `<section class="teacher-section panel panel-pad live-classroom"><div class="canvas-head"><div><h2>即時課堂對話</h2><p class="section-sub">學生每次收到 AI 回覆後，對話便會同步至此頁；頁面每 10 秒更新一次。記錄保留 30 日。</p></div><button class="btn primary" data-action="refresh-live">重新整理 ↻</button></div><form id="teacher-code-form" class="form-grid"><div class="form-field"><label for="teacher-access-code">老師查看密碼</label><input id="teacher-access-code" name="teacherCode" type="password" autocomplete="current-password" placeholder="輸入 Cloudflare Worker 的 TEACHER_ACCESS_CODE" required></div><div class="form-actions" style="align-items:end"><button class="btn" type="submit">連線查看</button></div></form><p id="live-status" class="section-sub" role="status">請輸入老師查看密碼以載入學生對話。</p><div id="live-sessions" class="report-list"><div class="panel empty">尚未載入對話。</div></div></section>${!store.reports.length?`<section class="panel empty" style="margin-top:18px">尚未有已提交的學習報告；學生即時對話會顯示在上方。</section>`:`<div class="stats"><div class="stat"><span>已提交報告</span><strong>${store.reports.length}</strong><small>份學習紀錄</small></div><div class="stat"><span>平均完成度</span><strong>${Math.round(store.reports.reduce((a,r)=>a+r.progress,0)/store.reports.length)}%</strong><small>架構建立情況</small></div><div class="stat"><span>已填立場</span><strong>${store.reports.filter(r=>r.position).length}</strong><small>學生能表明取態</small></div><div class="stat"><span>事例齊備</span><strong>${store.reports.filter(r=>(r.examples||[]).filter(Boolean).length===2).length}</strong><small>兩個分論點均有事例</small></div></div><section class="report-list">${store.reports.map((r,i)=>`<article class="panel report-row"><div><h3>${esc(r.student||'示範學生')}</h3><p>${esc(r.topic)} · ${esc(r.time)}</p></div><div><div class="report-progress"><span style="width:${r.progress}%"></span></div><p style="margin-top:6px">${r.progress}% 架構完成度</p></div><div class="report-score">${r.points}<small>個分論點已捕捉</small></div><span class="report-chip">${(r.examples||[]).filter(Boolean).length===2?'事例齊備':'仍需補充事例'}</span><button class="btn ghost" data-action="toggle-report" data-index="${i}">查看詳情 ${icon('arrow')}</button>${store.expandedReport===i?`<div class="report-detail"><b>立場：</b>${esc(r.position||'尚未填寫')}<br><b>分論點：</b>${esc(r.claims.join('；')||'尚未填寫')}<br><b>配對事例：</b>${esc((r.examples||[]).map((v,i)=>'分論點'+(i+1)+'：'+(v||'待補充')).join('；')||'舊報告未記錄事例')}<br><b>教學建議：</b>${esc(r.suggestion)}</div>`:''}</article>`).join('')}</section><div class="form-actions"><button class="btn primary" data-action="export-reports">${icon('download')} 匯出 CSV</button><button class="btn danger" data-action="clear-reports">清除示範報告</button></div>`}`;}
 function submitReport(){const d=store.draft;const report={student:'student01（示範）',topic:store.config.topic,time:new Intl.DateTimeFormat('zh-HK',{dateStyle:'medium',timeStyle:'short'}).format(new Date()),progress:progress(),points:d.points.filter(p=>p.claim).length,position:d.position,claims:d.points.map(p=>p.claim),examples:d.points.map(p=>p.evidence),suggestion:progress()<100?'請補齊分論點及對應的具體事例。':'請檢查兩個分論點是否互不重複，駁論是否回應反方，以及事例是否適切。'};store.reports=[report,...store.reports.filter(r=>r.student!=='student01（示範）')];save();toast('已儲存學習報告。');render();}
-function resetDraft(){rewardedMilestones.clear();store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;save();render();toast('已重新開始對話。');}
+function resetDraft(){rewardedMilestones.clear();store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=[];store.sessionId=newClassroomSessionId();store.stage=0;store.helpLevel=0;store.helpStage=0;save();render();toast('已重新開始對話。');}
 function exportReports(){const rows=[['學生','題目','完成度','分論點數','配對事例','立場','分論點','日期'],...store.reports.map(r=>[r.student,r.topic,r.progress+'%',r.points,(r.examples||[]).map((v,i)=>'分論點'+(i+1)+'：'+v).join('；'),r.position,r.claims.join('；'),r.time])];const csv='\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='議論文學習報告.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);toast('已匯出 CSV 報告。');}
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-action]');if(!b)return;
   const a=b.dataset.action;
   if(a==='login-portal'&&!store.role){loginPortal=b.dataset.role==='teacher'?'teacher':'student';render();return;}
   if(!store.role)return;
-  if(a==='logout'&&!coachBusy){loginPortal=store.role;store.role=null;render();return;}
+  if(a==='logout'&&!coachBusy){if(store.role==='teacher'){try{sessionStorage.removeItem('teacherAccessCode');}catch{}clearInterval(liveRefreshTimer);liveRefreshTimer=null;}loginPortal=store.role;store.role=null;render();return;}
+  if(a==='refresh-live'&&store.role==='teacher'){refreshLiveSessions();return;}
   if(a==='edit-field'&&store.role==='student'){openDraftEditor(b.dataset.field);return;}
   if(a==='cancel-edit'){const dialog=$('#draft-edit-dialog');if(dialog?.open)dialog.close();return;}
   if(a==='view'){
@@ -541,12 +563,14 @@ document.addEventListener('submit',e=>{
     e.preventDefault();const field=$('#draft-edit-key').value,value=$('#draft-edit-value').value.trim();
     if(value)saveDraftEdit(field,value);return;
   }
+  if(e.target.id==='teacher-code-form'&&store.role==='teacher'){e.preventDefault();const code=String(new FormData(e.target).get('teacherCode')||'').trim();if(code.length<12){$('#live-status').textContent='密碼長度至少需要 12 個字元。';return;}try{sessionStorage.setItem('teacherAccessCode',code);}catch{}refreshLiveSessions();return;}
   if(e.target.id==='essay-login-form'){
     e.preventDefault();const fd=new FormData(e.target);
     const teacher=loginPortal==='teacher';
     if(fd.get('username').trim()!==(teacher?'teacher01':'student01')||fd.get('password')!==(teacher?'Teach123!':'Learn123!')){
       $('#login-error').textContent='帳戶或密碼不正確，請使用此入口的示範帳戶。';return;
     }
+    if(!teacher){const label=String(fd.get('studentLabel')||'').trim();if(!label){$('#login-error').textContent='請填寫學生識別名稱。';return;}if(store.studentLabel&&store.studentLabel!==label){store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=initialMessages();store.stage=0;}store.studentLabel=label;store.sessionId=newClassroomSessionId();save();}
     store.role=loginPortal;store.view=teacher?'settings':'coach';render();return;
   }
   if(e.target.id!=='settings-form'||store.role!=='teacher')return;
@@ -586,6 +610,8 @@ render=function(){
   if(badge)badge.textContent='Gemini API';
   const select=document.querySelector('#setting-model');
   if(select){select.innerHTML='<option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>';select.value='gemini-3.5-flash-lite';}
+  if(liveRefreshTimer){clearInterval(liveRefreshTimer);liveRefreshTimer=null;}
+  if(store.role==='teacher'&&store.view==='reports'){refreshLiveSessions();liveRefreshTimer=setInterval(()=>{if(document.visibilityState!=='hidden')refreshLiveSessions();},10000);}
 };
 render();
 })();
