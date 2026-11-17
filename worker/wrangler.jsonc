@@ -5,6 +5,7 @@
   "compatibility_date": "2026-11-16",
   "workers_dev": true,
   "observability": { "enabled": true },
+  "ai": { "binding": "AI" },
   "durable_objects": { "bindings": [{ "name": "CLASSROOM_STORE", "class_name": "ClassroomStore" }] },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ClassroomStore"] }]
 }
