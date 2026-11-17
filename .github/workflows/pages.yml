@@ -1,4 +1,4 @@
-name: Deploy Writing Study Room to GitHub Pages
+name: Deploy Static Writing Study Room to GitHub Pages
 
 on:
   push:
@@ -26,12 +26,6 @@ jobs:
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-
-      - name: Generate Gemini endpoint config
-        env:
-          GEMINI_API_ENDPOINT: ${{ vars.GEMINI_API_ENDPOINT }}
-        run: |
-          node -e 'const fs = require("node:fs"); const endpoint = process.env.GEMINI_API_ENDPOINT || ""; fs.writeFileSync("gemini-config.js", "window.GEMINI_API_ENDPOINT = " + JSON.stringify(endpoint) + ";"); console.log(endpoint ? "Gemini endpoint configured." : "GEMINI_API_ENDPOINT is not set.");'
 
       - name: Upload site artifact
         uses: actions/upload-pages-artifact@v3
