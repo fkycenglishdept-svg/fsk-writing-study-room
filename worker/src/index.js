@@ -13,7 +13,7 @@ function corsHeaders(origin) {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Teacher-Code",
+    "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin"
   };
@@ -137,9 +137,6 @@ export default {
 
     if (url.pathname === "/api/classroom/sessions" && request.method === "GET") {
       if (!allowed) return json({ error: "不允許這個網站呼叫。" }, 403, corsOrigin);
-      if (!env.TEACHER_ACCESS_CODE) return json({ error: "老師查看密碼尚未在 Cloudflare Worker 設定。" }, 503, corsOrigin);
-      const supplied = request.headers.get("X-Teacher-Code") || "";
-      if (supplied.length < 12 || supplied !== env.TEACHER_ACCESS_CODE) return json({ error: "老師查看密碼不正確（HTTP 401）。" }, 401, corsOrigin);
       if (!env.CLASSROOM_STORE) return json({ error: "課堂記錄服務尚未設定。" }, 503, corsOrigin);
       try {
         const stub = env.CLASSROOM_STORE.get(env.CLASSROOM_STORE.idFromName("classroom"));
