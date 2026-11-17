@@ -2,6 +2,57 @@ const MODEL = "gemini-3.5-flash-lite";
 const ORIGIN = "https://fkycenglishdept-svg.github.io";
 const API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models/";
 
+let cachedVertexToken = { value: "", expiresAt: 0 };
+function hasVertexSettings(env) {
+  return Boolean(env.VERTEX_AI_PROJECT_ID || env.VERTEX_AI_SERVICE_ACCOUNT_EMAIL || env.VERTEX_AI_PRIVATE_KEY);
+}
+function hasVertexCredentials(env) {
+  return Boolean(env.VERTEX_AI_PROJECT_ID && env.VERTEX_AI_SERVICE_ACCOUNT_EMAIL && env.VERTEX_AI_PRIVATE_KEY);
+}
+function base64Url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+function pemBytes(pem) {
+  const encoded = String(pem || "").replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g, "");
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes.buffer;
+}
+async function getVertexAccessToken(env) {
+  if (cachedVertexToken.value && cachedVertexToken.expiresAt > Date.now() + 60_000) return cachedVertexToken.value;
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64Url(new TextEncoder().encode(JSON.stringify({ alg: "RS256", typ: "JWT" })));
+  const claims = base64Url(new TextEncoder().encode(JSON.stringify({
+    iss: env.VERTEX_AI_SERVICE_ACCOUNT_EMAIL,
+    scope: "https://www.googleapis.com/auth/cloud-platform",
+    aud: "https://oauth2.googleapis.com/token",
+    iat: now,
+    exp: now + 3600
+  })));
+  const unsigned = header + "." + claims;
+  const privateKey = String(env.VERTEX_AI_PRIVATE_KEY).replace(/\\n/g, "\n");
+  const key = await crypto.subtle.importKey("pkcs8", pemBytes(privateKey), {
+    name: "RSASSA-PKCS1-v1_5", hash: "SHA-256"
+  }, false, ["sign"]);
+  const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsigned));
+  const assertion = unsigned + "." + base64Url(new Uint8Array(signature));
+  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + encodeURIComponent(assertion),
+    signal: AbortSignal.timeout(15_000)
+  });
+  const tokenData = await tokenResponse.json().catch(() => ({}));
+  if (!tokenResponse.ok || typeof tokenData.access_token !== "string") {
+    throw new Error("Google Cloud 驗證失敗，請檢查 Vertex AI 服務帳戶金鑰及權限。");
+  }
+  cachedVertexToken = { value: tokenData.access_token, expiresAt: Date.now() + Number(tokenData.expires_in || 3600) * 1000 };
+  return cachedVertexToken.value;
+}
+
 const SYSTEM_INSTRUCTION = `你是「寫作研習室」的繁體中文 AI 學習教練，也能直接回答學生提出的一般問題。先回答學生真正問的內容，再視乎需要給一個簡短、可行的下一步；不要把每個問題都硬轉成下一題，也不要只回覆模板。用清楚、友善、適合中學生的香港繁體中文；若學生用其他語言，可配合回答。
 
 寫作任務脈絡：題目、寫作要求、評分準則、目前階段、立場、兩個分論點及各自事例、一個駁論都會在使用者訊息中提供。學生目前希望完成兩個互不重複的分論點，各配合適事例，並寫一個駁論。只在相關時使用這個脈絡，回答其他問題時不要離題。不要替學生直接完成整篇文章；可以解釋概念、提供思路、指出草稿問題及示範短句。
@@ -134,14 +185,18 @@ export default {
 
     if (url.pathname === "/api/essay-status" && request.method === "GET") {
       if (!allowed) return json({ ready: false }, 403, corsOrigin);
-      return json({ ready: Boolean(env.GEMINI_API_KEY), model: MODEL }, 200, corsOrigin);
+      return json({ ready: hasVertexSettings(env) ? hasVertexCredentials(env) : Boolean(env.GEMINI_API_KEY), model: MODEL, provider: hasVertexSettings(env) ? "vertex-ai" : "gemini-api" }, 200, corsOrigin);
     }
 
     if (url.pathname !== "/api/essay-coach" || request.method !== "POST") {
       return json({ error: "找不到這個服務。" }, 404, corsOrigin);
     }
     if (!allowed) return json({ error: "不允許這個網站呼叫。" }, 403, corsOrigin);
-    if (!env.GEMINI_API_KEY) return json({ error: "Gemini 尚未完成伺服器設定。" }, 503, corsOrigin);
+    const vertexRequested = hasVertexSettings(env);
+    if (vertexRequested && !hasVertexCredentials(env)) {
+      return json({ error: "Vertex AI 設定未完成，請檢查專案 ID、服務帳戶電郵及私密金鑰。" }, 503, corsOrigin);
+    }
+    if (!vertexRequested && !env.GEMINI_API_KEY) return json({ error: "Gemini 尚未完成伺服器設定。" }, 503, corsOrigin);
 
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     if (!rateAllowed(ip)) return json({ error: "送出太頻密，請稍等一分鐘再試。" }, 429, corsOrigin);
@@ -182,22 +237,41 @@ export default {
     if (needsSearch) body.tools = [{ google_search: {} }];
 
     try {
-      const response = await fetch(API_ROOT + MODEL + ":generateContent?key=" + encodeURIComponent(env.GEMINI_API_KEY), {
+      let apiUrl, headers, accessToken = "";
+      if (vertexRequested) {
+        const location = String(env.VERTEX_AI_LOCATION || "global");
+        if (!["global", "asia-south1", "us", "eu"].includes(location)) {
+          return json({ error: "VERTEX_AI_LOCATION 必須是 global、asia-south1、us 或 eu。" }, 503, corsOrigin);
+        }
+        accessToken = await getVertexAccessToken(env);
+        const host = location === "global" ? "aiplatform.googleapis.com" : location + "-aiplatform.googleapis.com";
+        apiUrl = "https://" + host + "/v1/projects/" + encodeURIComponent(env.VERTEX_AI_PROJECT_ID) +
+          "/locations/" + location + "/publishers/google/models/" + MODEL + ":generateContent";
+        headers = { "Content-Type": "application/json", "Authorization": "Bearer " + accessToken };
+      } else {
+        apiUrl = API_ROOT + MODEL + ":generateContent?key=" + encodeURIComponent(env.GEMINI_API_KEY);
+        headers = { "Content-Type": "application/json" };
+      }
+      const response = await fetch(apiUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(45_000)
       });
       const result = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const providerMessage = String(result.error?.message || `HTTP ${response.status}`)
-          .replaceAll(env.GEMINI_API_KEY, "[已隱藏]")
-          .replace(/\\s+/g, " ")
+        const providerMessage = String(result.error?.message || "HTTP " + response.status)
+          .replaceAll(accessToken || env.GEMINI_API_KEY || "__NO_SECRET__", "[已隱藏]")
+          .replace(/\s+/g, " ")
           .slice(0, 260);
-        let error = `Gemini API 請求失敗（HTTP ${response.status}）`;
-        if (response.status === 401 || response.status === 403) error = `Gemini API Key 或權限有問題（HTTP ${response.status}）`;
-        else if (response.status === 404) error = "Gemini 模型或 API 路徑不存在（HTTP 404）";
-        else if (response.status === 429) error = "Gemini 額度或速率限制（HTTP 429）";
+        let error = vertexRequested
+          ? "Vertex AI 請求失敗（HTTP " + response.status + "）"
+          : "Gemini API 請求失敗（HTTP " + response.status + "）";
+        if (response.status === 401 || response.status === 403) {
+          error = vertexRequested ? "Vertex AI 服務帳戶或 IAM 權限有問題（HTTP " + response.status + "）"
+            : "Gemini API Key 或權限有問題（HTTP " + response.status + "）";
+        } else if (response.status === 404) error = "Gemini 模型或 API 路徑不存在（HTTP 404）";
+        else if (response.status === 429) error = vertexRequested ? "Vertex AI 額度或速率限制（HTTP 429）" : "Gemini 額度或速率限制（HTTP 429）";
         return json({ error: `${error}：${providerMessage}` }, response.status === 429 ? 429 : 502, corsOrigin);
       }
 
@@ -229,7 +303,12 @@ export default {
       }, 200, corsOrigin);
     } catch (error) {
       const timeout = error?.name === "TimeoutError";
-      return json({ error: timeout ? "Gemini 回覆逾時，請重試。" : "暫時無法連接 Gemini，請稍後再試。" }, 502, corsOrigin);
+      const message = String(error?.message || "");
+      const safeError = timeout ? "AI 回覆逾時，請重試。"
+        : vertexRequested
+          ? (message.startsWith("Google Cloud 驗證失敗") ? message : "Vertex AI 連線或驗證失敗，請檢查服務帳戶設定及權限。")
+          : "暫時無法連接 Gemini，請稍後再試。";
+      return json({ error: safeError }, 502, corsOrigin);
     }
   }
 };
