@@ -619,7 +619,7 @@ function isShallowClaim(text){
 }
 function claimGuidanceReply(answer){
  const s=String(answer||''),q=normalizedQuery(s),position=store.draft.position||'';
- const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持/.test(position);
+ const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持|部分/.test(position);
  const disagrees=/不同意|不贊成|不支持|反對/.test(position);
  const explanations=agrees
  ?'你選擇「我同意讀書無用」，可把「讀書」界定為只追求分數、文憑或脫離實際的課堂學習。思考方向：\n• 文憑不等於能力：取得學歷未必代表具備實作經驗，也不能保證找到合適工作。\n• 考試導向的限制：若只操練考試而缺少實踐，學生可能難以把知識用於工作或生活。\n• 課程與需要脫節：若所學內容和職場、生活需要不相符，投入的時間與費用未必有相稱回報。\n這些分論點支持的是「某些讀書方式或只追文憑未必有用」，不必推論所有學習都沒有價值。'
@@ -924,7 +924,7 @@ function relatedHistoricalEvidence(claim){
 }
 function suggestedAnswerChoices(){
  const t=currentTask(),position=store.draft.position||'';
- const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持/.test(position);
+ const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持|部分/.test(position);
  const disagrees=/不同意|不贊成|不支持|反對/.test(position);
  if(t.stage===0)return ['我同意讀書無用','我不同意讀書無用','我部分同意讀書無用'];
  if(t.stage===1&&store.helpLevel>0){
