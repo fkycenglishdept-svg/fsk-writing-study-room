@@ -635,7 +635,7 @@ function currentTask(){
 }
 function taskQuestion(){
  const t=currentTask();
- if(t.stage===0)return '你同意、不同意，還是部分同意「讀書無用」？請用一句話表明立場。';
+ if(t.stage===0)return '先分清「取得學歷」和「學到知識」：你同意、不同意，還是部分同意「讀書無用」？請用一句話表明立場。';
  if(t.stage===1)return t.index===0?'請先提出第一個支持你立場的分論點。':'請提出第二個支持你立場的分論點。';
  if(t.stage===2)return '你提出「'+store.draft.points[t.index].claim+'」。請找一件能支持這個分論點的真實歷史事件；想不到時，說「請提供相關事件例子」。';
  if(t.stage===3&&t.index===0)return '先公平地寫出一個反方可能提出的理由（例如「有人認為……」）。下一步再寫你如何回應它。';
@@ -662,7 +662,7 @@ const toast=msg=>{const el=$('#essay-toast');el.textContent=msg;el.className='to
 function icon(n){return ({spark:'✦',chat:'◌',book:'▤',chart:'◒',settings:'⚙',file:'▧',arrow:'→',check:'✓',plus:'＋',download:'↓',reset:'↻'})[n]||'•';}
 function progress(){const d=store.draft,points=d.points.slice(0,2);const count=(d.position.trim()?1:0)+points.reduce((n,p)=>n+(p.claim.trim()?1:0)+(p.claim.trim()&&p.evidence.trim()?1:0),0)+(d.rebuttal.opposing.trim()?1:0)+(d.rebuttal.response.trim()?1:0);return Math.round(count/7*100);}
 function stageLabel(){return talkMoves[currentTask().stage].title;}
-function initialMessages(){return [{from:'coach',move:'Welcome',text:'你同意、不同意，還是部分同意「讀書無用」？請用一句話表明立場。'}];}
+function initialMessages(){return [{from:'coach',move:'Welcome',text:`題目：${store.config.topic}\n\n我會一步一步指引你構思立場、分論點及合適的事例。`},{from:'coach',text:taskQuestion()}];}
 function ensureMessages(){if(!store.messages.length)store.messages=initialMessages();}
 function infer(text){const t=currentTask(),value=text.trim();if(t.stage===0)store.draft.position=value;else if(t.stage===1){store.draft.points[t.index].claim=value;store.draft.points[t.index].angleId='';}else if(t.stage===2)store.draft.points[t.index].evidence=value;else if(t.stage===3&&t.index===0){const m=value.match(/^(?:有人認為|反方認為|有人會說|有人或會認為)?[：:，,\s]*(.+?)(?:；|。|，)?(?:然而|但是|不過|可是|但)[，,]?(.*)$/);if(m){store.draft.rebuttal.opposing=m[1].trim();store.draft.rebuttal.response=m[2].trim();}else store.draft.rebuttal.opposing=value;}else if(t.stage===3)store.draft.rebuttal.response=value;}
 function mentionedHistoricalEvidence(text){
@@ -690,7 +690,7 @@ function isShallowClaim(text){
 }
 function claimGuidanceReply(answer){
  const dirs=directionsForPosition();
- if(store.helpLevel<2)return '按你選擇的立場，這五個方向都可以用來發展分論點。先選一個角度，說明情況、對象和原因；我會再協助配對事例：\n\n'+dirs.map((d,i)=>(i+1)+'）'+d.title+'：'+d.thinking).join('\n\n')+'\n\n如果仍無法落筆，再按「再需要幫助」，我才提供可直接採用或改寫的完整答案。';
+ if(store.helpLevel<2)return '你的分論點已找到一個起點。請再想一想：這個方向能否說得更具體，指出對象、情況和原因？以下五個思考方向可以幫你再深入一步：\n\n'+dirs.map((d,i)=>(i+1)+'）'+d.title+'：'+d.thinking).join('\n\n')+'\n\n不用急着下結論；先選一個方向，用自己的話補充細節。若仍無法落筆，再按「再需要幫助」，我才提供可直接採用或改寫的完整答案。';
  return '以下五項是扣緊你所選立場的完整分論點。選一項後，系統會直接進入事例配對；每項已配有至少兩件有來源的歷史事例。';
 }
 
@@ -1124,7 +1124,7 @@ function selectEvidenceChoice(title){
  const log=document.querySelector('#chat-log');if(log)log.scrollTop=log.scrollHeight;
 }
 
-function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>本機情境對答 · 靜態資料</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose">${suggestedAnswerPanel()}<div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
+function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>chat bot</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose">${suggestedAnswerPanel()}<div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
 function openDraftEditor(field){
  const dialog=$('#draft-edit-dialog');if(!dialog)return;
  const title=$('#draft-edit-title'),value=$('#draft-edit-value'),key=$('#draft-edit-key'),note=$('#draft-edit-note');
