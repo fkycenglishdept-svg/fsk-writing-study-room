@@ -547,7 +547,7 @@ const ESSAY_STORE='fsk-essay-studio-local-trial-v2';
 const defaultConfig={topic:"俗語說「萬般皆下品，惟有讀書高」，也有人說「讀書無用」。試寫作文章一篇，談談你對「讀書無用」的看法。",prompt:'請表明立場，構思兩個相關分論點並各配一件真實事例，再提出一個反方觀點及回應，完成一個駁論。',rubrics:['立場清晰，回應題旨','兩個分論點有層次，互不重複','事例真實並切合分論點','駁論能回應反方觀點'],target:'two-plus-rebuttal',model:'static-dialogue-v1'};
 let saved;
 try{saved=JSON.parse(localStorage.getItem(ESSAY_STORE))||{};}catch{saved={};}
-const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],studentLabel:saved.studentLabel||'',view:'coach',role:'student',expandedReport:null};
+const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,helpLevel:saved.helpLevel||0,helpStage:saved.helpStage||'',reports:saved.reports||[],studentLabel:saved.studentLabel||'',view:'coach',role:'student',expandedReport:null};
 const talkMoves=[
  {title:'表明立場',label:'Position',prompt:'請先用一句話表明立場。'},
  {title:'構思分論點',label:'Claim',prompt:'請先提出第一個支持你立場的分論點。'},
@@ -618,19 +618,21 @@ function isShallowClaim(text){
  return /^(不知道|唔知|想不到|想不出|沒有想法|不懂)/.test(s)||/＿＿|____|待填/.test(s)||compact.length<10||!focus||!mechanism;
 }
 function claimGuidanceReply(answer){
- const s=String(answer||''),q=normalizedQuery(s),position=store.draft.position||'';
+ const position=store.draft.position||'';
  const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持|部分/.test(position);
  const disagrees=/不同意|不贊成|不支持|反對/.test(position);
- const explanations=agrees
- ?'你選擇「我同意讀書無用」，可把「讀書」界定為只追求分數、文憑或脫離實際的課堂學習。思考方向：\n• 文憑不等於能力：取得學歷未必代表具備實作經驗，也不能保證找到合適工作。\n• 考試導向的限制：若只操練考試而缺少實踐，學生可能難以把知識用於工作或生活。\n• 課程與需要脫節：若所學內容和職場、生活需要不相符，投入的時間與費用未必有相稱回報。\n這些分論點支持的是「某些讀書方式或只追文憑未必有用」，不必推論所有學習都沒有價值。'
- :disagrees
- ?'你選擇「我不同意讀書無用」，可思考學習如何帶來具體能力：\n• 基礎能力：讀寫和數理知識幫助處理日常資訊與工作要求。\n• 專業知識：有些職業需要系統訓練或資格，學習提供入行基礎。\n• 適應變化：持續學習讓人更新技能，面對科技和工作轉變。'
- :'你選擇「我部分同意讀書無用」，可先分清「學歷／考試」和「真正學到的知識與技能」：\n• 文憑不保證成功：只追求學歷未必換來工作或高薪。\n• 有用與否看內容：貼近生活和職業需要的學習較容易實踐；脫離需要的課程回報可能有限。\n• 學習形式有差異：課堂、職業訓練和實作各有用途，不宜一概而論。';
- if(/＿＿|____|待填/.test(s))return '請把空格補成具體情境或結果，再說明原因。\n\n'+explanations+'\n\n'+taskQuestion();
- const focus=[[/工作|職業|就業|文憑|學歷/,'文憑是否代表實際能力，或能否保證工作'],[/考試|分數|操練|課堂/,'只重考試而缺少實踐會帶來甚麼限制'],[/課程|費用|成本|回報|脫節/,'所學是否符合生活或職場需要，投入是否值得'],[/解難|問題|創意/,'學習方式是否讓人練習處理真實問題'],[/資訊|資料|判斷|證據/,'讀書是否幫助判斷資料，還是只記答案'],[/適應|變化|科技|技能/,'所學能否用於面對新的工作或生活要求']].find(([p])=>p.test(q));
- return '分論點要支持你的立場。\n\n'+explanations+'\n\n'+(focus?'你提到的方向可以再問：「'+focus[1]+'？」':'先選一個最能支持你立場的方向，再說清楚原因和適用情況。')+'\n\n下方有可直接採用或改寫的完整例句。';
+ if(store.helpLevel<2){
+  if(agrees)return '先把題目中的「讀書無用」想成一個可辯論的主張：哪些讀書方式、內容或成果真的「沒有用」？可以從三個問題想：\n\n• 課堂是否只要求背誦和應付考試，卻沒有讓學生把所學用在生活或工作？\n• 學歷或分數是否能代表實際做事能力？若不能，題目中的「讀書」究竟提供了甚麼用處？\n• 花很多時間和金錢取得的知識或資格，是否符合學生想做的工作和生活需要？\n\n先選一個問題，用自己的話寫成分論點。若仍需要幫助，再按「再需要幫助」查看完整例句。';
+  if(disagrees)return '先想「讀書」帶來的實際用途，而不是只說讀書重要：\n\n• 讀寫或數理知識怎樣用在日常生活？\n• 哪些工作需要系統學習或專業訓練？\n• 當工作方式改變時，學習怎樣幫助人更新技能？\n\n先選一個方向，說明對象和具體用途。若仍需要幫助，再按「再需要幫助」查看完整例句。';
+  return '「讀書無用」可以分成幾個不同主張：只追學歷無用、只為考試而讀無用，或所學與實際需要脫節。想想你部分同意的是哪一種，以及在甚麼情況下仍然有用。若仍需要幫助，再按「再需要幫助」查看完整例句。';
+ }
+ if(agrees)return '以下是可直接採用或改寫的分論點，請選一個最切合你想批評的「讀書」方式：\n\n• 如果學校只要求背誦和操練考試，卻很少讓學生實踐所學，那麼這種讀書未必能幫助學生處理真實生活和工作問題。\n• 學歷和考試分數不能直接代表實際工作能力；如果課程只追求文憑而缺少實作，讀書的成果便未必符合職場需要。\n• 如果課程內容與學生將來的工作或生活需要脫節，投入大量時間和金錢所學到的知識便未必能派上用場。';
+ if(disagrees)return '以下是可直接採用或改寫的分論點：\n\n• 讀書能培養讀寫和數理能力，因為這些能力有助處理日常資訊和工作要求。\n• 學習能提供部分專業工作的知識基礎，因為醫療、工程等工作需要系統訓練。\n• 持續學習有助面對科技和工作轉變，因為人可以更新技能並學習新的工具。';
+ return '以下是可直接採用或改寫的分論點：\n\n• 只取得文憑不能保證找到工作，因為僱主也會看實際能力和經驗。\n• 貼近生活或職業需要的學習仍然有用，因為學到的知識和技能可以在真實情境中實踐。\n• 讀書是否有用要看學習內容和方式，因為只背考試答案與掌握可應用的能力並不相同。';
 }
-function isClaimHelpRequest(text){return /(不知道|唔知|想不到|想不出|沒有想法|如何構思|怎樣構思|給我提示|提示一下|有甚麼角度|有什麼角度|哪個角度|不同角度|幾個角度|幾種角度|多些角度|多幾個角度)/.test(String(text||''));}
+
+function isClaimHelpRequest(text){return /(需要幫助|再需要幫助|仍需要幫助|更多幫助|不知道|唔知|想不到|想不出|沒有想法|如何構思|怎樣構思|給我提示|提示一下|有甚麼角度|有什麼角度|哪個角度|不同角度|幾個角度|幾種角度|多些角度|多幾個角度)/.test(String(text||''));}
+
 function angleFeedback(text){
  const q=normalizedQuery(text);
  const focus=[[/工作|就業|職業|出路|收入/,'職涯選擇'],[/解難|解決問題|創意|創新/,'解難能力'],[/資訊|資料|判斷|證據|讀寫/,'資訊判斷'],[/適應|變化|科技|終身|技能/,'適應變化'],[/興趣|長處|自我認識/,'自我認識'],[/社會流動|公平|平等|機會/,'教育機會'],[/健康|生活/,'生活素養'],[/公民|社區|公共/,'社會參與']].find(([p])=>p.test(q));
@@ -850,22 +852,26 @@ function acceptedDraftReply(task,text){
 function localFallback(task){
  const prompt=taskQuestion();
  if(task.stage===4)return '這則訊息未能配對到本機資料庫中的寫作問題。你可以問我如何檢查論點、事例或駁論，也可以編輯左側大綱。\n\n引導問題：'+prompt;
- store.helpLevel=1;
- return '這則回答似乎偏離了目前的寫作步驟；我先不會把它放進論證架構。讓我們回到目前問題。\n\n引導問題：'+prompt+'\n\n下方提供可直接採用或改寫的回答；也可以繼續自由輸入。';
+ store.helpLevel=1;store.helpStage=task.stage+':'+task.index;
+ return '這則回答似乎偏離了目前的寫作步驟；我先不會把它放進論證架構。讓我們回到目前問題。\n\n引導問題：'+prompt+'\n\n下方提供思考提示；若仍需要幫助，再按「再需要幫助」查看完整回答。';
 }
 function askCoach(text){
  const answer=String(text||'').trim();
  if(!answer||coachBusy)return;
+ const task=currentTask(),helpKey=task.stage+':'+task.index;
+ const previousHelpLevel=store.helpStage===helpKey?(Number(store.helpLevel)||0):0;
  coachBusy=true;store.messages.push({from:'student',text:answer});store.helpLevel=0;save();render();
- const task=currentTask();
  let reply='';
  if(task.stage===0&&isDraftAnswerCandidate(task,answer))reply=acceptedDraftReply(task,answer);
  else if(task.stage===1&&isClaimHelpRequest(answer)){
-   store.helpLevel=1;reply=claimGuidanceReply(answer);
+   store.helpLevel=Math.min(previousHelpLevel+1,2);store.helpStage=helpKey;
+   reply=claimGuidanceReply(answer);
  }else if(task.stage===1&&isShallowClaim(answer)&&(/(讀書|學習|教育|知識|技能|工作|解難|能力|資訊|判斷|適應|興趣|社會|健康|公民|有用|無用|重要|角度|分論點|好處)/.test(answer)||String(answer).trim().length<12)&&!/^(你好|您好|好|好的|收到|謝謝|多謝|唔該|hi|hello|ok|okay)$/i.test(String(answer).trim())){
-   store.helpLevel=1;reply=claimGuidanceReply(answer);
- }else if(task.stage===2&&(isEvidenceHelpRequest(answer)||(isEvidenceAnswerAttempt(answer)&&(evidenceNeedsReading(answer,store.draft.points[task.index].claim)||!isDraftAnswerCandidate(task,answer))))){
-   store.helpLevel=1;reply=historicalEvidenceAnswer(answer);
+   store.helpLevel=1;store.helpStage=helpKey;reply=claimGuidanceReply(answer);
+ }else if(task.stage===2&&isEvidenceHelpRequest(answer)){
+   store.helpLevel=1;store.helpStage=helpKey;reply=historicalEvidenceAnswer(answer);
+ }else if(task.stage===2&&isEvidenceAnswerAttempt(answer)&&(evidenceNeedsReading(answer,store.draft.points[task.index].claim)||!isDraftAnswerCandidate(task,answer))){
+   store.helpLevel=1;store.helpStage=helpKey;reply=historicalEvidenceAnswer(answer);
  }else if(isDraftAnswerCandidate(task,answer))reply=acceptedDraftReply(task,answer);
  else reply=localScenarioReply(answer,task)||answerStudentQuestion(answer)||localFallback(task);
  store.stage=currentTask().stage;
@@ -873,6 +879,7 @@ function askCoach(text){
  coachBusy=false;save();render();celebrateProgress();
  const log=document.querySelector('#chat-log');if(log)log.scrollTop=log.scrollHeight;
 }
+
 let loginPortal=(typeof location!=='undefined'&&String(location.search||'').includes('portal=teacher'))?'teacher':'student';
 store.role=null;
 function loginScreen(){
@@ -927,14 +934,14 @@ function suggestedAnswerChoices(){
  const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持|部分/.test(position);
  const disagrees=/不同意|不贊成|不支持|反對/.test(position);
  if(t.stage===0)return ['我同意讀書無用','我不同意讀書無用','我部分同意讀書無用'];
- if(t.stage===1&&store.helpLevel>0){
+ if(t.stage===1&&store.helpLevel>=2){
   if(agrees)return [
-   '只追求文憑未必能培養實際工作能力，因為缺少實作經驗的人仍可能不懂把知識用在工作上。',
-   '如果學習只集中操練考試，學生便少了練習解決真實問題的機會，因此這種讀書方式未必有用。',
-   '當課程內容與職場需要脫節，所花的時間和費用未必有相稱回報，因為學到的知識難以實際應用。'
+   '如果學校只要求背誦和操練考試，卻很少讓學生實踐所學，那麼這種讀書未必能幫助學生處理真實生活和工作問題。',
+   '學歷和考試分數不能直接代表實際工作能力；如果課程只追求文憑而缺少實作，讀書的成果便未必符合職場需要。',
+   '如果課程內容與學生將來的工作或生活需要脫節，投入大量時間和金錢所學到的知識便未必能派上用場。'
   ];
   if(disagrees)return [
-   '讀書能培養讀寫和數理能力，因為這些能力有助理解日常資訊和處理工作要求。',
+   '讀書能培養讀寫和數理能力，因為這些能力有助處理日常資訊和工作要求。',
    '學習能提供部分專業工作的知識基礎，因為醫療、工程等工作需要系統訓練。',
    '持續學習有助面對科技和工作轉變，因為人可以更新技能並學習新的工具。'
   ];
@@ -944,10 +951,7 @@ function suggestedAnswerChoices(){
    '讀書是否有用要看學習內容和方式，因為只背考試答案與掌握可應用的能力並不相同。'
   ];
  }
- if(t.stage===2&&store.helpLevel>0){
-   const records=relatedHistoricalEvidence(store.draft.points[t.index]?.claim||'');
-   return records.map(e=>'我想用「'+e.title+'」作為事例。');
- }
+ if(t.stage===2&&store.helpLevel>0)return relatedHistoricalEvidence(store.draft.points[t.index]?.claim||'').map(e=>e.title);
  if(t.stage===3&&store.helpLevel>0){
   if(t.index===0)return agrees
    ?['有人認為學歷能帶來較多工作選擇和較高收入。','有人認為學校教育能提供基礎知識，令人成為更有能力的工作者。']
@@ -959,11 +963,34 @@ function suggestedAnswerChoices(){
  return [];
 }
 function suggestedAnswerPanel(){
- const t=currentTask(),choices=suggestedAnswerChoices();if(!choices.length)return '';
- const label=t.stage===0?'可選一項立場，也可以自由輸入：':t.stage===2?'選擇一件事例即可記作論據，來源可稍後核對：':'以下是可直接採用或改寫的回答：';
- const submits=t.stage>0&&store.helpLevel>0;
- return '<div class="suggested-answers"><span>'+label+'</span><div class="suggested-answer-list">'+choices.map(x=>'<button type="button" data-action="quick" data-submit="'+(submits?'true':'false')+'" data-text="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>';
+ const t=currentTask(),choices=suggestedAnswerChoices();
+ const hasHelpButton=t.stage===1||t.stage===2;
+ if(!choices.length&&!hasHelpButton)return '';
+ const label=t.stage===0?'可選一項立場，也可以自由輸入：':t.stage===2&&choices.length?'點選事例即可記作論據，並進入下一個寫作步驟：':t.stage===1&&store.helpLevel>=2?'可直接採用或改寫完整分論點：':'需要提示時，可點選「需要幫助」：';
+ let buttons='';
+ if(choices.length)buttons=choices.map(x=>{
+  if(t.stage===2)return '<button type="button" data-action="evidence-select" data-text="'+esc(x)+'">用「'+esc(x)+'」作為論據</button>';
+  const submits=t.stage>0&&store.helpLevel>0;
+  return '<button type="button" data-action="quick" data-submit="'+(submits?'true':'false')+'" data-text="'+esc(x)+'">'+esc(x)+'</button>';
+ }).join('');
+ if(hasHelpButton&&store.helpLevel<2)buttons+='<button type="button" class="help-choice" data-action="quick" data-submit="true" data-text="需要幫助">'+(t.stage===1&&store.helpLevel>0?'再需要幫助':'需要幫助')+'</button>';
+ return '<div class="suggested-answers"><span>'+label+'</span><div class="suggested-answer-list">'+buttons+'</div></div>';
 }
+function selectEvidenceChoice(title){
+ const t=currentTask();if(t.stage!==2)return;
+ const record=relatedHistoricalEvidence(store.draft.points[t.index]?.claim||'').find(e=>normalizedQuery(e.title)===normalizedQuery(title));
+ if(!record){store.messages.push({from:'coach',move:'Example',text:'這件事例未能配對到目前的分論點，請重新選擇一項切合的事例。'});render();return;}
+ const index=t.index;
+ store.messages.push({from:'student',text:'我選用「'+record.title+'」作為論據。'});
+ store.draft.points[index].evidence=record.title+'（'+record.kind+'）';
+ store.helpLevel=0;store.helpStage='';
+ store.stage=currentTask().stage;
+ const next=index===0?'已把「'+record.title+'」直接記作分論點一的論據。現在進入第二個分論點：請提出一個與第一點不同、同樣支持你立場的理由。': '已把「'+record.title+'」直接記作分論點二的論據。下一步請構思反方觀點。';
+ store.messages.push({from:'coach',move:talkMoves[store.stage].label,text:next+'\n\n'+taskQuestion()});
+ save();render();celebrateProgress();
+ const log=document.querySelector('#chat-log');if(log)log.scrollTop=log.scrollHeight;
+}
+
 function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>本機情境對答 · 靜態資料</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose">${suggestedAnswerPanel()}<div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
 function openDraftEditor(field){
  const dialog=$('#draft-edit-dialog');if(!dialog)return;
@@ -1007,7 +1034,7 @@ document.addEventListener('click',e=>{
     const allowed=store.role==='teacher'?['settings','reports']:['coach','draft'];
     if(allowed.includes(b.dataset.view)){store.view=b.dataset.view;render();}
   }else if(a==='send'&&store.role==='student'){const input=$('#coach-input');if(input?.value.trim())askCoach(input.value.trim());}
-  else if(a==='quick'&&store.role==='student'){const input=$('#coach-input'),text=b.dataset.text||'';if(b.dataset.submit==='true'){askCoach(text);}else if(input){input.value=text;input.focus();}}
+  else if(a==='quick'&&store.role==='student'){const input=$('#coach-input'),text=b.dataset.text||'';if(b.dataset.submit==='true'){askCoach(text);}else if(input){input.value=text;input.focus();}}\n  else if(a==='evidence-select'&&store.role==='student'){selectEvidenceChoice(b.dataset.text||'');}
   else if(a==='report'&&store.role==='student')submitReport();
   else if(a==='reset'&&store.role==='student'&&!coachBusy){if(window.confirm('重新開始會清除本次對話、立場、分論點、事例和駁論；已儲存的報告及題目設定會保留。確定重新開始？'))resetDraft();}
   else if(store.role==='teacher'){
