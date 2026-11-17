@@ -137,34 +137,6 @@ export default {
       return new Response(null, { status: 204, headers: corsHeaders(origin) });
     }
 
-    if (url.pathname === "/api/classroom/session" && request.method === "POST") {
-      if (!allowed) return json({ error: "不允許這個網站呼叫。" }, 403, corsOrigin);
-      if (!env.CLASSROOM_STORE) return json({ error: "課堂記錄服務尚未設定。" }, 503, corsOrigin);
-      const length = Number(request.headers.get("Content-Length") || 0);
-      if (length > 100_000) return json({ error: "對話紀錄太大。" }, 413, corsOrigin);
-      let record;
-      try { record = await request.json(); } catch { return json({ error: "記錄格式不正確。" }, 400, corsOrigin); }
-      const id = typeof record.sessionId === "string" && /^[a-zA-Z0-9_-]{16,80}$/.test(record.sessionId) ? record.sessionId : "";
-      if (!id) return json({ error: "對話識別碼不正確。" }, 400, corsOrigin);
-      try {
-        const stub = env.CLASSROOM_STORE.get(env.CLASSROOM_STORE.idFromName("classroom"));
-        const stored = await stub.fetch("https://classroom-store/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(record) });
-        if (!stored.ok) return json({ error: "無法保存課堂紀錄。" }, 502, corsOrigin);
-        return json({ saved: true }, 200, corsOrigin);
-      } catch { return json({ error: "暫時無法保存課堂紀錄。" }, 502, corsOrigin); }
-    }
-
-    if (url.pathname === "/api/classroom/sessions" && request.method === "GET") {
-      if (!allowed) return json({ error: "不允許這個網站呼叫。" }, 403, corsOrigin);
-      if (!env.CLASSROOM_STORE) return json({ error: "課堂記錄服務尚未設定。" }, 503, corsOrigin);
-      try {
-        const stub = env.CLASSROOM_STORE.get(env.CLASSROOM_STORE.idFromName("classroom"));
-        const stored = await stub.fetch("https://classroom-store/list");
-        if (!stored.ok) return json({ error: "無法載入課堂紀錄。" }, 502, corsOrigin);
-        return json(await stored.json(), 200, corsOrigin);
-      } catch { return json({ error: "暫時無法載入課堂紀錄。" }, 502, corsOrigin); }
-    }
-
     if (url.pathname === "/api/essay-status" && request.method === "GET") {
       if (!allowed) return json({ ready: false }, 403, corsOrigin);
       return json({ ready: Boolean(env.AI), model: MODEL }, 200, corsOrigin);
