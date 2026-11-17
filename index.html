@@ -619,9 +619,10 @@ function isShallowClaim(text){
 }
 function claimGuidanceReply(answer){
  const s=String(answer||''),q=normalizedQuery(s);
- if(/＿＿|____|待填/.test(s))return '把空格補成具體的人、能力或情境，再用自己的語句說明原因。你會如何填上這兩處？\n\n'+taskQuestion();
+ const explanations='思考方向說明：\n工作技能：想想學習能否幫助人掌握某些職業需要的知識或技能；不代表保證有工作或高薪。\n解難能力：想想學習能否幫人分析問題、比較方法，再處理實際困難。\n資訊判斷：想想讀寫、數據或理解證據，如何幫人分辨資料是否可信。\n適應變化：想想環境或工作改變時，哪些知識和技能需要更新。\n自我認識：想想接觸不同學科或活動，如何幫人發現興趣或長處。';
+ if(/＿＿|____|待填/.test(s))return '把空格補成具體的人、能力或情境，再用自己的語句說明原因。你會如何填上這兩處？\n\n'+explanations+'\n\n'+taskQuestion();
  const focus=[[/工作|職業|就業/,'哪一類工作需要甚麼知識或技能'],[/解難|問題|創意/,'學習如何幫助你分析和處理一個具體問題'],[/資訊|資料|判斷|證據/,'讀書如何幫助你比較資料或判斷證據'],[/適應|變化|科技|更新技能/,'甚麼改變令你需要更新技能'],[/興趣|長處|自我認識/,'你如何從學習或活動中發現自己的興趣或長處'],[/社會|公平|機會/,'教育機會如何影響不同背景的人'],[/健康|生活/,'哪種生活情境需要相關知識'],[/公民|社區|公共/,'哪個公共議題需要理解和參與']].find(([p])=>p.test(q));
- return '這個分論點目前還比較籠統。'+(focus?'你選了這個方向，請想一想：'+focus[1]+'？':'先想：學習幫助誰？培養甚麼能力？這種能力在甚麼情況下有用？')+'下方角度只是思考提示，請把它發展成自己的理由。\n\n'+taskQuestion();
+ return '這個分論點目前還比較籠統。'+(focus?'你選了這個方向，請想一想：'+focus[1]+'？':'先想：學習幫助誰？培養甚麼能力？這種能力在甚麼情況下有用？')+'\n\n'+explanations+'\n\n請選一個方向，再用自己的話發展理由，不要只抄方向名稱。\n\n'+taskQuestion();
 }
 function isClaimHelpRequest(text){return /(不知道|唔知|想不到|想不出|沒有想法|如何構思|怎樣構思|給我提示|提示一下|有甚麼角度|有什麼角度|哪個角度|不同角度|幾個角度|幾種角度|多些角度|多幾個角度)/.test(String(text||''));}
 function angleFeedback(text){
@@ -779,7 +780,7 @@ function localScenarioReply(text,task){
 
 function vagueAnswer(text){
  const s=text.trim().replace(/[，。！？,.!?\s]/g,'');
- if(/^(我)?(同意|不同意|部分同意|贊成|反對|支持|不支持|同意一部分)[啊呀呢吧]*$/.test(s))return false;
+ if(/^(我)?(同意|不同意|部分同意)讀書無用$/.test(s)||/^(我)?(同意|不同意|部分同意|贊成|反對|支持|不支持|同意一部分)[啊呀呢吧]*$/.test(s))return false;
  return /想不到|想不出|不知道|唔知|沒有例子|沒有事例|未能舉例|提供閱讀|不懂/.test(s)||s.length<8||/^(沒有想法|有好有壞|讀書有用|讀書無用|很好|不好|很重要|都有道理|我覺得很好|因為很好|因為有用|我認為這很重要)[啊呀呢吧]*$/.test(s)||(s.length<45&&/很重要|有好處|有用|很好|很不好/.test(s)&&!/例如|因為|如果|當|可以|能夠|所以/.test(s));
 }
 function isDraftAnswerCandidate(task,text){
@@ -788,7 +789,7 @@ function isDraftAnswerCandidate(task,text){
  if(/^(好|好的|嗯+|哦+|喔+|是|係|對|明白|知道了|收到|謝謝|唔該|ok|okay|yes|no|thanks)$/i.test(compact)||vagueAnswer(value))return false;
  if(task.stage===0)return compact.length>=3&&/(同意|不同意|部分認同|贊成|反對|支持|不支持|認為|立場|讀書有用|讀書無用)/.test(value);
  if(task.stage===1)return compact.length>=8&&/(因為|可以|能夠|有助|令|使|讓|學到|培養|提高|增加|改善|促進|提供|有利|重要|價值|機會|能力)/.test(value)&&!isShallowClaim(value);
- if(task.stage===2)return compact.length>=6&&/(\d{3,4}|事件|戰役|戰爭|改革|制度|革命|運動|協定|法案|發明|成立|建立|頒布|推行|提出|發現|創立|朝|年|世紀|王|帝|文藝復興|工業革命|科舉|啟蒙)/.test(value);
+ if(task.stage===2)return compact.length>=6&&/(\d{3,4}|事件|事例|例子|戰役|戰爭|改革|制度|革命|運動|協定|法案|發明|成立|建立|頒布|推行|提出|發現|創立|朝|年|世紀|王|帝|文藝復興|工業革命|科舉|啟蒙)/.test(value);
  if(task.stage===3&&task.index===0)return compact.length>=8&&/(有人|反方|認為|會說|因為|理由|可能|雖然|但是|不過|可是|然而|但)/.test(value);
  if(task.stage===3&&task.index===1)return compact.length>=8&&/(因為|但是|不過|可是|然而|但|雖然|即使|仍然|不能|未必|不一定|只要|所以|因此|回應|問題)/.test(value);
  return false;
@@ -920,14 +921,15 @@ function suggestedAnswerChoices(){
  if(t.stage===1&&store.helpLevel>0)return ['工作技能：學習能幫助＿＿，因為＿＿。','解難能力：學習能幫助＿＿，因為＿＿。','資訊判斷：讀書能幫助＿＿，因為＿＿。','適應變化：持續學習能幫助＿＿，因為＿＿。','自我認識：學習能幫助＿＿，因為＿＿。'];
  if(t.stage===2&&store.helpLevel>0){
    const records=relatedHistoricalEvidence(store.draft.points[t.index]?.claim||'');
-   return records.map(e=>'請提供「'+e.title+'」相關的事件閱讀資料。');
+   return records.map(e=>'我想用「'+e.title+'」作為事例。');
  }
  return [];
 }
 function suggestedAnswerPanel(){
- const choices=suggestedAnswerChoices();if(!choices.length)return '';
- const label=currentTask().stage===0?'可選一項立場，也可以自由輸入：':'先自由思考；需要提示時，可選一個方向：';
- return '<div class="suggested-answers"><span>'+label+'</span><div class="suggested-answer-list">'+choices.map(x=>'<button type="button" data-action="quick" data-text="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>';
+ const t=currentTask(),choices=suggestedAnswerChoices();if(!choices.length)return '';
+ const label=t.stage===0?'可選一項立場，也可以自由輸入：':t.stage===2?'選擇一件你認為切合的事例，繼續下一步：':'先自由思考；需要提示時，可選一個方向：';
+ const submits=t.stage===2&&store.helpLevel>0;
+ return '<div class="suggested-answers"><span>'+label+'</span><div class="suggested-answer-list">'+choices.map(x=>'<button type="button" data-action="quick" data-submit="'+(submits?'true':'false')+'" data-text="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>';
 }
 function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>本機情境對答 · 靜態資料</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose">${suggestedAnswerPanel()}<div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
 function openDraftEditor(field){
