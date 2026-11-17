@@ -253,7 +253,11 @@ function depthQuestion(text){
 }
 
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,studentLabel:store.studentLabel,sessionId:store.sessionId,flowVersion:4}));}catch{}};
+function studentProgressKey(account){return ESSAY_STORE+':student:'+account;}
+function saveStudentProgress(account){if(!account)return;try{localStorage.setItem(studentProgressKey(account),JSON.stringify({draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,sessionId:store.sessionId,flowVersion:4}));}catch{}}
+function readStudentProgress(account){try{return JSON.parse(localStorage.getItem(studentProgressKey(account))||'null');}catch{return null;}}
+function emptyStudentDraft(){return {position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};}
+const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,studentLabel:store.studentLabel,sessionId:store.sessionId,flowVersion:4}));if(store.role==='student')saveStudentProgress(store.studentLabel);}catch{}};
 const toast=msg=>{const el=$('#essay-toast');el.textContent=msg;el.className='toast show';clearTimeout(toast.t);toast.t=setTimeout(()=>el.className='toast',2600)};
 function icon(n){return ({spark:'✦',chat:'◌',book:'▤',chart:'◒',settings:'⚙',file:'▧',arrow:'→',check:'✓',plus:'＋',download:'↓',reset:'↻'})[n]||'•';}
 function progress(){const d=store.draft,points=d.points.slice(0,2);const count=(d.position.trim()?1:0)+points.reduce((n,p)=>n+(p.claim.trim()?1:0)+(p.claim.trim()&&p.evidence.trim()?1:0),0)+(d.rebuttal.opposing.trim()?1:0)+(d.rebuttal.response.trim()?1:0);return Math.round(count/7*100);}
@@ -452,10 +456,10 @@ function loginScreen(){
     <p class="eyebrow">${teacher?'TEACHER CONSOLE':'STUDENT SPACE'}</p>
     <h1>${teacher?'老師登入':'學生登入'}</h1>
     <p>${teacher?'設定寫作題目與評分參考，查看學習報告。':'一步一步整理想法，完成你的文章大綱。'}</p>
-    <form id="essay-login-form">${teacher?'':`<div class="form-field"><label for="student-label">學生識別名稱（建議用座號或代號）</label><input id="student-label" name="studentLabel" maxlength="80" autocomplete="nickname" required></div>`}<div class="form-field"><label for="login-user">帳戶</label><input id="login-user" name="username" autocomplete="username" required></div>
+    <form id="essay-login-form"><div class="form-field"><label for="login-user">帳戶</label><input id="login-user" name="username" autocomplete="username" placeholder="${teacher?'':'student01 至 student15'}" required></div>
     <div class="form-field"><label for="login-pass">密碼</label><input id="login-pass" name="password" type="password" autocomplete="current-password" required></div>
     <p id="login-error" role="alert"></p><button class="btn primary" type="submit">登入${teacher?'老師':'學生'}</button></form>
-    <aside class="login-demo">本機示範帳戶：<code>${teacher?'teacher01':'student01'}</code><br>密碼：<code>${teacher?'Teach123!':'Learn123!'}</code></aside>
+    <aside class="login-demo">${teacher?'老師示範帳戶：<code>teacher01</code><br>密碼：<code>Teach123!</code>':'學生帳戶：<code>student01 至 student15</code><br>共用密碼：<code>Learn123!</code>'}</aside>
     <button class="btn ghost" data-action="login-portal" data-role="${teacher?'student':'teacher'}">前往${teacher?'學生':'老師'}登入</button>
   </section></main>`;
 }
@@ -563,18 +567,26 @@ document.addEventListener('submit',e=>{
   }
   if(e.target.id==='essay-login-form'){
     e.preventDefault();const fd=new FormData(e.target);
-    const teacher=loginPortal==='teacher';
-    if(fd.get('username').trim()!==(teacher?'teacher01':'student01')||fd.get('password')!==(teacher?'Teach123!':'Learn123!')){
-      $('#login-error').textContent='帳戶或密碼不正確，請使用此入口的示範帳戶。';return;
+    const teacher=loginPortal==='teacher',username=String(fd.get('username')||'').trim(),password=String(fd.get('password')||'');
+    const valid=teacher?(username==='teacher01'&&password==='Teach123!'):(/^student(?:0[1-9]|1[0-5])$/.test(username)&&password==='Learn123!');
+    if(!valid){$('#login-error').textContent=teacher?'帳戶或密碼不正確，請使用老師示範帳戶。':'帳戶須為 student01 至 student15，密碼為 Learn123!。';return;}
+    if(!teacher){
+      const previous=store.studentLabel;
+      if(previous&&previous!==username)saveStudentProgress(previous);
+      if(previous!==username){
+        const savedProgress=readStudentProgress(username);
+        store.draft=savedProgress?.draft||emptyStudentDraft();
+        store.messages=savedProgress?.messages||initialMessages();
+        store.stage=savedProgress?.stage||0;store.helpLevel=savedProgress?.helpLevel||0;store.helpStage=savedProgress?.helpStage||0;
+        store.sessionId=savedProgress?.sessionId||newClassroomSessionId();
+      }else if(!store.sessionId)store.sessionId=newClassroomSessionId();
+      store.studentLabel=username;save();
     }
-    if(!teacher){const label=String(fd.get('studentLabel')||'').trim();if(!label){$('#login-error').textContent='請填寫學生識別名稱。';return;}const changedStudent=store.studentLabel!==label;if(store.studentLabel&&changedStudent){store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=initialMessages();store.stage=0;}store.studentLabel=label;store.sessionId=changedStudent||!store.sessionId?newClassroomSessionId():store.sessionId;save();}
     store.role=loginPortal;store.view=teacher?'settings':'coach';render();return;
   }
   if(e.target.id!=='settings-form'||store.role!=='teacher')return;
   e.preventDefault();const fd=new FormData(e.target);
   store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'two-plus-rebuttal',model:'gemini-3.5-flash-lite',rubrics:fd.getAll('rubric')};
-  store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;rewardedMilestones.clear();
-  store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};
   save();toast('題目與評分參考已儲存。');render();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&e.target.id==='coach-input'){e.preventDefault();const b=document.querySelector('[data-action="send"]');b?.click();}});
