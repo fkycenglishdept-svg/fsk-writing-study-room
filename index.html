@@ -618,11 +618,17 @@ function isShallowClaim(text){
  return /^(不知道|唔知|想不到|想不出|沒有想法|不懂)/.test(s)||/＿＿|____|待填/.test(s)||compact.length<10||!focus||!mechanism;
 }
 function claimGuidanceReply(answer){
- const s=String(answer||''),q=normalizedQuery(s);
- const explanations='思考方向說明：\n工作技能：想想學習能否幫助人掌握某些職業需要的知識或技能；不代表保證有工作或高薪。\n解難能力：想想學習能否幫人分析問題、比較方法，再處理實際困難。\n資訊判斷：想想讀寫、數據或理解證據，如何幫人分辨資料是否可信。\n適應變化：想想環境或工作改變時，哪些知識和技能需要更新。\n自我認識：想想接觸不同學科或活動，如何幫人發現興趣或長處。';
- if(/＿＿|____|待填/.test(s))return '把空格補成具體的人、能力或情境，再用自己的語句說明原因。你會如何填上這兩處？\n\n'+explanations+'\n\n'+taskQuestion();
- const focus=[[/工作|職業|就業/,'哪一類工作需要甚麼知識或技能'],[/解難|問題|創意/,'學習如何幫助你分析和處理一個具體問題'],[/資訊|資料|判斷|證據/,'讀書如何幫助你比較資料或判斷證據'],[/適應|變化|科技|更新技能/,'甚麼改變令你需要更新技能'],[/興趣|長處|自我認識/,'你如何從學習或活動中發現自己的興趣或長處'],[/社會|公平|機會/,'教育機會如何影響不同背景的人'],[/健康|生活/,'哪種生活情境需要相關知識'],[/公民|社區|公共/,'哪個公共議題需要理解和參與']].find(([p])=>p.test(q));
- return '這個分論點目前還比較籠統。'+(focus?'你選了這個方向，請想一想：'+focus[1]+'？':'先想：學習幫助誰？培養甚麼能力？這種能力在甚麼情況下有用？')+'\n\n'+explanations+'\n\n請選一個方向，再用自己的話發展理由，不要只抄方向名稱。\n\n'+taskQuestion();
+ const s=String(answer||''),q=normalizedQuery(s),position=store.draft.position||'';
+ const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持/.test(position);
+ const disagrees=/不同意|不贊成|不支持|反對/.test(position);
+ const explanations=agrees
+ ?'你選擇「我同意讀書無用」，可把「讀書」界定為只追求分數、文憑或脫離實際的課堂學習。思考方向：\n• 文憑不等於能力：取得學歷未必代表具備實作經驗，也不能保證找到合適工作。\n• 考試導向的限制：若只操練考試而缺少實踐，學生可能難以把知識用於工作或生活。\n• 課程與需要脫節：若所學內容和職場、生活需要不相符，投入的時間與費用未必有相稱回報。\n這些分論點支持的是「某些讀書方式或只追文憑未必有用」，不必推論所有學習都沒有價值。'
+ :disagrees
+ ?'你選擇「我不同意讀書無用」，可思考學習如何帶來具體能力：\n• 基礎能力：讀寫和數理知識幫助處理日常資訊與工作要求。\n• 專業知識：有些職業需要系統訓練或資格，學習提供入行基礎。\n• 適應變化：持續學習讓人更新技能，面對科技和工作轉變。'
+ :'你選擇「我部分同意讀書無用」，可先分清「學歷／考試」和「真正學到的知識與技能」：\n• 文憑不保證成功：只追求學歷未必換來工作或高薪。\n• 有用與否看內容：貼近生活和職業需要的學習較容易實踐；脫離需要的課程回報可能有限。\n• 學習形式有差異：課堂、職業訓練和實作各有用途，不宜一概而論。';
+ if(/＿＿|____|待填/.test(s))return '請把空格補成具體情境或結果，再說明原因。\n\n'+explanations+'\n\n'+taskQuestion();
+ const focus=[[/工作|職業|就業|文憑|學歷/,'文憑是否代表實際能力，或能否保證工作'],[/考試|分數|操練|課堂/,'只重考試而缺少實踐會帶來甚麼限制'],[/課程|費用|成本|回報|脫節/,'所學是否符合生活或職場需要，投入是否值得'],[/解難|問題|創意/,'學習方式是否讓人練習處理真實問題'],[/資訊|資料|判斷|證據/,'讀書是否幫助判斷資料，還是只記答案'],[/適應|變化|科技|技能/,'所學能否用於面對新的工作或生活要求']].find(([p])=>p.test(q));
+ return '分論點要支持你的立場。\n\n'+explanations+'\n\n'+(focus?'你提到的方向可以再問：「'+focus[1]+'？」':'先選一個最能支持你立場的方向，再說清楚原因和適用情況。')+'\n\n下方有可直接採用或改寫的完整例句。';
 }
 function isClaimHelpRequest(text){return /(不知道|唔知|想不到|想不出|沒有想法|如何構思|怎樣構思|給我提示|提示一下|有甚麼角度|有什麼角度|哪個角度|不同角度|幾個角度|幾種角度|多些角度|多幾個角度)/.test(String(text||''));}
 function angleFeedback(text){
@@ -673,7 +679,7 @@ function historicalEvidenceAnswer(text){
  const t=currentTask(),claim=t.stage===2?store.draft.points[t.index].claim:store.draft.points.map(p=>p.claim).filter(Boolean).join(' ');
  const records=relatedHistoricalEvidence(claim);
  if(!records.length)return '我暫時未找到能直接配對這個分論點的已核實歷史事件。請把分論點中的關鍵詞寫得更具體，或告訴我你想討論哪種能力；我不會猜造事例。';
- return '先不要急着把事例放進大綱。以下是按你的分論點找到的閱讀資料，請先讀一則，再想想它和你的理由有甚麼關係；你來判斷它是否切題：\n\n'+records.map((e,i)=>(i+1)+'）'+e.title+'（'+e.kind+'）\n'+e.facts+'\n思考提示：'+e.question+'\n使用限制：'+e.limits+'\n來源：'+e.publisher+'，《'+e.sourceTitle+'》\n'+e.url).join('\n\n');
+ return '以下是按你的分論點找到的相關事例。你可點選一項，直接把事件記作論據並進入下一步；不必先讀完資料。資料內容、思考提示和來源供你選擇閱讀及之後核對：\n\n'+records.map((e,i)=>(i+1)+'）'+e.title+'（'+e.kind+'）\n'+e.facts+'\n思考提示：'+e.question+'\n使用限制：'+e.limits+'\n來源：'+e.publisher+'，《'+e.sourceTitle+'》\n'+e.url).join('\n\n');
 }
 function researchEvidenceAnswer(text){
  const t=currentTask(),claim=t.stage===2?store.draft.points[t.index].claim:store.draft.points.map(p=>p.claim).filter(Boolean).join(' ');
@@ -844,7 +850,8 @@ function acceptedDraftReply(task,text){
 function localFallback(task){
  const prompt=taskQuestion();
  if(task.stage===4)return '這則訊息未能配對到本機資料庫中的寫作問題。你可以問我如何檢查論點、事例或駁論，也可以編輯左側大綱。\n\n引導問題：'+prompt;
- return '這則回答似乎偏離了目前的寫作步驟，或本機資料中沒有可直接回答的內容；我先不會把它放進論證架構。\n\n讓我們回到這一步：'+prompt+'\n\n你可以改用下方建議回答，或繼續自由輸入。';
+ store.helpLevel=1;
+ return '這則回答似乎偏離了目前的寫作步驟；我先不會把它放進論證架構。讓我們回到目前問題。\n\n引導問題：'+prompt+'\n\n下方提供可直接採用或改寫的回答；也可以繼續自由輸入。';
 }
 function askCoach(text){
  const answer=String(text||'').trim();
@@ -916,19 +923,45 @@ function relatedHistoricalEvidence(claim){
  return evidenceFor(store.config.topic,claim,'',true).filter(e=>historyKinds.includes(e.kind));
 }
 function suggestedAnswerChoices(){
- const t=currentTask();
+ const t=currentTask(),position=store.draft.position||'';
+ const agrees=/同意|贊成|支持/.test(position)&&!/不同意|不贊成|不支持/.test(position);
+ const disagrees=/不同意|不贊成|不支持|反對/.test(position);
  if(t.stage===0)return ['我同意讀書無用','我不同意讀書無用','我部分同意讀書無用'];
- if(t.stage===1&&store.helpLevel>0)return ['工作技能：學習能幫助＿＿，因為＿＿。','解難能力：學習能幫助＿＿，因為＿＿。','資訊判斷：讀書能幫助＿＿，因為＿＿。','適應變化：持續學習能幫助＿＿，因為＿＿。','自我認識：學習能幫助＿＿，因為＿＿。'];
+ if(t.stage===1&&store.helpLevel>0){
+  if(agrees)return [
+   '只追求文憑未必能培養實際工作能力，因為缺少實作經驗的人仍可能不懂把知識用在工作上。',
+   '如果學習只集中操練考試，學生便少了練習解決真實問題的機會，因此這種讀書方式未必有用。',
+   '當課程內容與職場需要脫節，所花的時間和費用未必有相稱回報，因為學到的知識難以實際應用。'
+  ];
+  if(disagrees)return [
+   '讀書能培養讀寫和數理能力，因為這些能力有助理解日常資訊和處理工作要求。',
+   '學習能提供部分專業工作的知識基礎，因為醫療、工程等工作需要系統訓練。',
+   '持續學習有助面對科技和工作轉變，因為人可以更新技能並學習新的工具。'
+  ];
+  return [
+   '只取得文憑不能保證找到工作，因為僱主也會看實際能力和經驗。',
+   '貼近生活或職業需要的學習仍然有用，因為學到的知識和技能可以在真實情境中實踐。',
+   '讀書是否有用要看學習內容和方式，因為只背考試答案與掌握可應用的能力並不相同。'
+  ];
+ }
  if(t.stage===2&&store.helpLevel>0){
    const records=relatedHistoricalEvidence(store.draft.points[t.index]?.claim||'');
    return records.map(e=>'我想用「'+e.title+'」作為事例。');
+ }
+ if(t.stage===3&&store.helpLevel>0){
+  if(t.index===0)return agrees
+   ?['有人認為學歷能帶來較多工作選擇和較高收入。','有人認為學校教育能提供基礎知識，令人成為更有能力的工作者。']
+   :['有人認為讀書只會增加考試壓力，未必能保證找到工作。','有人認為不少知識可以從工作經驗或自學取得，不一定要靠學校。'];
+  return agrees
+   ?['學歷或許能增加部分工作機會，但不代表只靠文憑便有實際能力；實作訓練和工作經驗同樣重要。','學校能教基礎知識，但若課程只重考試而缺少應用，便未必能解決真實問題。']
+   :['讀書不保證工作或高薪，但能提供基礎能力和部分職業所需訓練；因此應改善課程，而非說所有讀書都無用。','自學和工作經驗也有價值，但讀書能有系統地建立知識，兩者可以互相補足。'];
  }
  return [];
 }
 function suggestedAnswerPanel(){
  const t=currentTask(),choices=suggestedAnswerChoices();if(!choices.length)return '';
- const label=t.stage===0?'可選一項立場，也可以自由輸入：':t.stage===2?'選擇一件你認為切合的事例，繼續下一步：':'先自由思考；需要提示時，可選一個方向：';
- const submits=t.stage===2&&store.helpLevel>0;
+ const label=t.stage===0?'可選一項立場，也可以自由輸入：':t.stage===2?'選擇一件事例即可記作論據，來源可稍後核對：':'以下是可直接採用或改寫的回答：';
+ const submits=t.stage>0&&store.helpLevel>0;
  return '<div class="suggested-answers"><span>'+label+'</span><div class="suggested-answer-list">'+choices.map(x=>'<button type="button" data-action="quick" data-submit="'+(submits?'true':'false')+'" data-text="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>';
 }
 function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>本機情境對答 · 靜態資料</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose">${suggestedAnswerPanel()}<div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
