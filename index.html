@@ -364,6 +364,17 @@ function vagueAnswer(text){
  if(/^(我)?(同意|不同意|部分同意|贊成|反對|支持|不支持|同意一部分)[啊呀呢吧]*$/.test(s))return false;
  return /想不到|想不出|不知道|唔知|沒有例子|沒有事例|未能舉例|提供閱讀|不懂/.test(s)||s.length<8||/^(沒有想法|有好有壞|讀書有用|讀書無用|很好|不好|很重要|都有道理|我覺得很好|因為很好|因為有用|我認為這很重要)[啊呀呢吧]*$/.test(s)||(s.length<45&&/很重要|有好處|有用|很好|很不好/.test(s)&&!/例如|因為|如果|當|可以|能夠|所以/.test(s));
 }
+function isDraftAnswerCandidate(task,text){
+ const value=String(text||'').trim(),compact=value.replace(/\s/g,'').replace(/[，。！？、；：,.!?]/g,'');
+ if(!compact||/[？?]|嗎|請問|可否|能否|可以嗎|是否|怎樣|如何|為甚麼|為什麼|點解|解釋|介紹|提供|有甚麼|有什麼|幫我|想知道/.test(value))return false;
+ if(/^(好|好的|嗯+|哦+|喔+|是|係|對|明白|知道了|收到|謝謝|唔該|ok|okay|yes|no|thanks)$/i.test(compact)||vagueAnswer(value))return false;
+ if(task.stage===0)return compact.length>=3&&/(同意|不同意|部分認同|贊成|反對|支持|不支持|認為|立場|讀書有用|讀書無用)/.test(value);
+ if(task.stage===1)return compact.length>=8&&/(因為|可以|能夠|有助|令|使|讓|學到|培養|提高|增加|改善|促進|提供|有利|重要|價值|機會|能力)/.test(value);
+ if(task.stage===2)return compact.length>=6&&/(\\d{3,4}|事件|戰役|戰爭|改革|制度|革命|運動|協定|法案|發明|成立|建立|頒布|推行|提出|發現|創立|朝|年|世紀|王|帝|文藝復興|工業革命|科舉|啟蒙)/.test(value);
+ if(task.stage===3&&task.index===0)return compact.length>=8&&/(有人|反方|認為|會說|因為|理由|可能|雖然|但是|不過|可是|然而|但)/.test(value);
+ if(task.stage===3&&task.index===1)return compact.length>=8&&/(因為|但是|不過|可是|然而|但|雖然|即使|仍然|不能|未必|不一定|只要|所以|因此|回應|問題)/.test(value);
+ return false;
+}
 function supportMaterial(){
   const t=currentTask(),claim=t.stage===2?store.draft.points[t.index].claim:'';
   return {evidence:evidenceFor(store.config.topic,claim,''),cards:['人物或機構','事件與發現','適用的範圍']};
@@ -427,7 +438,7 @@ async function askCoach(text){
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||('AI 服務回應失敗（HTTP '+response.status+'）。'));
     if(typeof data.message!=='string'||!data.message.trim())throw new Error('AI 沒有傳回文字答案，請重試。');
-    if(data.advanceDraft===true)infer(answer);
+    if(data.advanceDraft===true&&isDraftAnswerCandidate(task,answer))infer(answer);
     store.stage=currentTask().stage;
     store.messages.push({from:'coach',move:talkMoves[store.stage].label,text:data.message.trim()});
   }catch(error){
