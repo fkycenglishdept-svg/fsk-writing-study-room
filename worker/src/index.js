@@ -1,11 +1,12 @@
-const MODEL = "@cf/qwen/qwen3.8-27b";
+const MODEL = "gemini-3.5-flash-lite";
 const ORIGIN = "https://fkycenglishdept-svg.github.io";
+const API_ROOT = "https://generativelanguage.googleapis.com/v1beta/models/";
 
 const SYSTEM_INSTRUCTION = `你是「寫作研習室」的繁體中文 AI 學習教練，也能直接回答學生提出的一般問題。先回答學生真正問的內容，再視乎需要給一個簡短、可行的下一步；不要把每個問題都硬轉成下一題，也不要只回覆模板。用清楚、友善、適合中學生的香港繁體中文；若學生用其他語言，可配合回答。
 
 寫作任務脈絡：題目、寫作要求、評分準則、目前階段、立場、兩個分論點及各自事例、一個駁論都會在使用者訊息中提供。學生目前希望完成兩個互不重複的分論點，各配合適事例，並寫一個駁論。只在相關時使用這個脈絡，回答其他問題時不要離題。不要替學生直接完成整篇文章；可以解釋概念、提供思路、指出草稿問題及示範短句。
 
-事實與論據規則：學生若要求真實事例、歷史事件或論據，先查閱隨訊息提供的維基百科搜尋摘要和頁面連結。只能提出摘要支持的事件、人物、年代和結果；說明事件如何支持學生目前的分論點，並附上來源連結。搜尋不到來源時，不要猜測、杜撰或把虛構故事當真事，須清楚說目前未能核實。維基百科摘要是查找線索，不代表所有內容均為一手史料；如有爭議，提醒學生進一步查看條目所列來源。一般知識問題要誠實處理，不確定時直說。不要聲稱已修改或儲存學生資料。`;
+事實與論據規則：學生若要真實事例、歷史事件、論據或最新事實，必須使用提供的 Google Search 搜尋工具核對。只提出搜尋結果支持的事件、人物、年代和結果；簡短說明該事件如何支持學生目前的分論點，並保留來源的不確定或爭議。搜尋不到可靠來源時，清楚說目前未能核實，請勿猜測、杜撰或把虛構故事當真事。事件可來自中國古代、中國現代、西方古代或西方現代。不要為學生提供看似真實但無來源的例子。其他一般知識問題亦要誠實處理，不確定時直說。不要聲稱已修改或儲存學生資料。`;
 
 const buckets = new Map();
 function corsHeaders(origin) {
@@ -57,26 +58,6 @@ function cleanHistory(value) {
 function hasChineseHistoricalRequest(text) {
   return /中國|西方|古代|歷史|事件|真實|論據|事例|例子|最新|最近|今天|今年/.test(text);
 }
-async function searchHistoricalSources(query) {
-  try {
-    const url = new URL("https://zh.wikipedia.org/w/api.php");
-    url.search = new URLSearchParams({
-      action: "query", list: "search", srsearch: query.slice(0, 220),
-      srlimit: "4", format: "json", utf8: "1"
-    }).toString();
-    const response = await fetch(url, {
-      headers: { "Accept": "application/json", "Api-User-Agent": "fsk-writing-study-room/1.0 (school writing coach)" },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!response.ok) return [];
-    const data = await response.json();
-    return (data.query?.search || []).slice(0, 4).map(item => ({
-      title: String(item.title || "").slice(0, 140),
-      snippet: String(item.snippet || "").replace(/<[^>]*>/g, "").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").slice(0, 700),
-      uri: "https://zh.wikipedia.org/wiki/" + encodeURIComponent(String(item.title || "").replace(/ /g, "_"))
-    })).filter(item => item.title && item.snippet);
-  } catch { return []; }
-}
 
 export class ClassroomStore {
   constructor(ctx, env) { this.ctx = ctx; this.env = env; }
@@ -125,6 +106,7 @@ export class ClassroomStore {
   }
 }
 
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get("Origin") || "";
@@ -139,14 +121,14 @@ export default {
 
     if (url.pathname === "/api/essay-status" && request.method === "GET") {
       if (!allowed) return json({ ready: false }, 403, corsOrigin);
-      return json({ ready: Boolean(env.AI), model: MODEL }, 200, corsOrigin);
+      return json({ ready: Boolean(env.GEMINI_API_KEY), model: MODEL }, 200, corsOrigin);
     }
 
     if (url.pathname !== "/api/essay-coach" || request.method !== "POST") {
       return json({ error: "找不到這個服務。" }, 404, corsOrigin);
     }
     if (!allowed) return json({ error: "不允許這個網站呼叫。" }, 403, corsOrigin);
-    if (!env.AI) return json({ error: "Cloudflare Workers AI binding 尚未設定。" }, 503, corsOrigin);
+    if (!env.GEMINI_API_KEY) return json({ error: "Gemini 尚未完成伺服器設定。" }, 503, corsOrigin);
 
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     if (!rateAllowed(ip)) return json({ error: "送出太頻密，請稍等一分鐘再試。" }, 429, corsOrigin);
@@ -180,35 +162,48 @@ export default {
     const needsSearch = eventRequest(message) || hasChineseHistoricalRequest(message);
     const asksForHelp = /[？?]|請問|可否|能否|怎樣|如何|為甚麼|為什麼|點解|解釋|介紹|提供|有甚麼|有什麼/.test(message);
     const advanceDraft = !asksForHelp;
+    const body = {
+      systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+      contents,
+      generationConfig: { maxOutputTokens: 850 }
+    };
+    if (needsSearch) body.tools = [{ google_search: {} }];
 
     try {
-      let sources = [];
-      if (needsSearch) {
-        const point = context.draft?.points?.[context.pointIndex]?.claim || "";
-        const query = [context.topic, point, message].filter(Boolean).join(" ").slice(0, 220);
-        sources = await searchHistoricalSources(query);
-        const sourceNote = sources.length
-          ? "【維基百科搜尋摘要，僅供核對線索】\n" + JSON.stringify(sources)
-          : "【搜尋未找到可用來源】不要提供未核實的具體歷史事件；明確告知學生目前未能核實。";
-        contents.push({ role: "user", parts: [{ text: sourceNote }] });
+      const response = await fetch(API_ROOT + MODEL + ":generateContent?key=" + encodeURIComponent(env.GEMINI_API_KEY), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(45_000)
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const providerMessage = String(result.error?.message || `HTTP ${response.status}`)
+          .replaceAll(env.GEMINI_API_KEY, "[已隱藏]")
+          .replace(/\\s+/g, " ")
+          .slice(0, 260);
+        let error = `Gemini API 請求失敗（HTTP ${response.status}）`;
+        if (response.status === 401 || response.status === 403) error = `Gemini API Key 或權限有問題（HTTP ${response.status}）`;
+        else if (response.status === 404) error = "Gemini 模型或 API 路徑不存在（HTTP 404）";
+        else if (response.status === 429) error = "Gemini 額度或速率限制（HTTP 429）";
+        return json({ error: `${error}：${providerMessage}` }, response.status === 429 ? 429 : 502, corsOrigin);
       }
-      const messages = [
-        { role: "system", content: SYSTEM_INSTRUCTION },
-        ...contents.map(turn => ({
-          role: turn.role === "model" ? "assistant" : "user",
-          content: turn.parts.map(part => part.text || "").join("\n")
-        }))
-      ];
-      const result = await env.AI.run(MODEL, { messages, max_tokens: 850, temperature: 0.35 });
-      let answer = String(result?.response || result?.choices?.[0]?.message?.content || "").trim();
-      if (!answer) return json({ error: "Cloudflare AI 沒有傳回文字答案，請重試。" }, 502, corsOrigin);
 
+      const candidate = result.candidates?.[0];
+      let answer = (candidate?.content?.parts || []).map(part => part.text || "").join("").trim();
+      if (!answer) return json({ error: "Gemini 沒有傳回文字答案，請重試。" }, 502, corsOrigin);
+
+      const chunks = candidate?.groundingMetadata?.groundingChunks || [];
+      const sources = chunks
+        .map(chunk => chunk.web)
+        .filter(web => web && typeof web.uri === "string" && /^https:\/\//i.test(web.uri))
+        .slice(0, 5);
       if (needsSearch && sources.length) {
         answer += "\n\n參考來源：\n" + sources.map((source, index) =>
-          (index + 1) + ". " + source.title + " — " + source.uri
+          (index + 1) + ". " + String(source.title || "網頁來源").slice(0, 140) + " — " + source.uri
         ).join("\n");
       } else if (needsSearch && hasChineseHistoricalRequest(message)) {
-        answer = "我這次未能找到可供核實的資料來源，因此不會把未核對的事件當作真實論據。你可以提供更具體的分論點或事件名稱，再讓我查找。";
+        answer = "我這次未能從搜尋結果取得可核實來源，因此不會把未核對的事件當作真實例子。你可以改用較具體的分論點或事件方向再問一次。";
       }
 
       return json({
@@ -221,11 +216,8 @@ export default {
         advanceDraft
       }, 200, corsOrigin);
     } catch (error) {
-      const detail = String(error?.message || "");
-      const limited = Number(error?.status || error?.statusCode) === 429 || /quota|rate.?limit|daily.*limit/i.test(detail);
-      return json({ error: limited
-        ? "Cloudflare AI 今日額度或速率受限（HTTP 429），請稍後再試。"
-        : "暫時無法連接 Cloudflare AI，請稍後再試。" }, limited ? 429 : 502, corsOrigin);
+      const timeout = error?.name === "TimeoutError";
+      return json({ error: timeout ? "Gemini 回覆逾時，請重試。" : "暫時無法連接 Gemini，請稍後再試。" }, 502, corsOrigin);
     }
   }
 };
