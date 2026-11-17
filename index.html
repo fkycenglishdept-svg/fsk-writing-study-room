@@ -445,13 +445,13 @@ function loginScreen(){
   return `<main class="login-shell"><section class="login-card panel">
     <div class="brand"><span class="brand-mark">寫</span><strong>寫作研習室</strong></div>
     <p class="eyebrow">${teacher?'TEACHER CONSOLE':'STUDENT SPACE'}</p>
-    <h1>${teacher?'老師後台登入':'學生端登入'}</h1>
+    <h1>${teacher?'老師登入':'學生登入'}</h1>
     <p>${teacher?'設定寫作題目與評分參考，查看學習報告。':'一步一步整理想法，完成你的文章大綱。'}</p>
     <form id="essay-login-form"><div class="form-field"><label for="login-user">帳戶</label><input id="login-user" name="username" autocomplete="username" required></div>
     <div class="form-field"><label for="login-pass">密碼</label><input id="login-pass" name="password" type="password" autocomplete="current-password" required></div>
-    <p id="login-error" role="alert"></p><button class="btn primary" type="submit">登入${teacher?'老師後台':'學生端'}</button></form>
-    <aside class="login-demo">本機示範帳戶：<code>${teacher?'teacher01':'student01'}</code><br>密碼：<code>${teacher?'Teach123!':'Learn123!'}</code><p>只供本機試行；尚未接入正式帳戶驗證。</p></aside>
-    <button class="btn ghost" data-action="login-portal" data-role="${teacher?'student':'teacher'}">前往${teacher?'學生端':'老師後台'}登入</button>
+    <p id="login-error" role="alert"></p><button class="btn primary" type="submit">登入${teacher?'老師':'學生'}</button></form>
+    <aside class="login-demo">本機示範帳戶：<code>${teacher?'teacher01':'student01'}</code><br>密碼：<code>${teacher?'Teach123!':'Learn123!'}</code></aside>
+    <button class="btn ghost" data-action="login-portal" data-role="${teacher?'student':'teacher'}">前往${teacher?'學生':'老師'}登入</button>
   </section></main>`;
 }
 function coachText(value){return esc(value).replace(/(https:\/\/[^\s<>"]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');}
