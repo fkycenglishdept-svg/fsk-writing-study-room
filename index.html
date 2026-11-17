@@ -821,8 +821,8 @@ function acceptedDraftReply(task,text){
 }
 function localFallback(task){
  const prompt=taskQuestion();
- if(task.stage===4)return '這則訊息未能配對到本機資料庫中的寫作問題。你可以問我如何檢查論點、事例或駁論，也可以編輯左側大綱。\\n\\n引導問題：'+prompt;
- return '這則回答似乎偏離了目前的寫作步驟，或本機資料中沒有可直接回答的內容；我先不會把它放進論證架構。\\n\\n讓我們回到這一步：'+prompt+'\\n\\n你可以改用下方建議回答，或繼續自由輸入。';
+ if(task.stage===4)return '這則訊息未能配對到本機資料庫中的寫作問題。你可以問我如何檢查論點、事例或駁論，也可以編輯左側大綱。\n\n引導問題：'+prompt;
+ return '這則回答似乎偏離了目前的寫作步驟，或本機資料中沒有可直接回答的內容；我先不會把它放進論證架構。\n\n讓我們回到這一步：'+prompt+'\n\n你可以改用下方建議回答，或繼續自由輸入。';
 }
 function askCoach(text){
  const answer=String(text||'').trim();
