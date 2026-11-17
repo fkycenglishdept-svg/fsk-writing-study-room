@@ -594,21 +594,40 @@ function stageLabel(){return talkMoves[currentTask().stage].title;}
 function initialMessages(){return [{from:'coach',move:'Welcome',text:`題目：${store.config.topic}\n\n我會一步一步指引你構思立場、分論點及合適的事例。`},{from:'coach',text:taskQuestion()}];}
 function ensureMessages(){if(!store.messages.length)store.messages=initialMessages();}
 function infer(text){const t=currentTask(),value=text.trim();if(t.stage===0)store.draft.position=value;else if(t.stage===1)store.draft.points[t.index].claim=value;else if(t.stage===2)store.draft.points[t.index].evidence=value;else if(t.stage===3&&t.index===0){const m=value.match(/^(?:有人認為|反方認為|有人會說|有人或會認為)?[：:，,\s]*(.+?)(?:；|。|，)?(?:然而|但是|不過|可是|但)[，,]?(.*)$/);if(m){store.draft.rebuttal.opposing=m[1].trim();store.draft.rebuttal.response=m[2].trim();}else store.draft.rebuttal.opposing=value;}else if(t.stage===3)store.draft.rebuttal.response=value;}
+function mentionedHistoricalEvidence(text){
+ const q=normalizedQuery(text),kinds=['中國古代事件','中國現代事件','西方古代事件','西方現代事件'];
+ const generic=/中國|西方|古代|現代|教育|學習|讀書|知識|能力|社會|科技|工作|研究|歷史|健康|發展|機會|時間|判斷|資料|事件|事例/;
+ return VERIFIED_EVIDENCE.find(e=>kinds.includes(e.kind)&&(q.includes(normalizedQuery(e.title))||e.keywords.some(k=>k.length>=2&&!generic.test(k)&&q.includes(normalizedQuery(k)))));
+}
+function isEvidenceHelpRequest(text){return /(不知道|唔知|想不到|想不出|沒有例子|沒有事例|未能舉例|不懂|閱讀資料|(?:請|可否|能否|給我|給些|提供|想要|想看).*(事例|事件|史例|史實|論據|例子)|找不到.*(事例|事件|論據))/.test(String(text||''));}
+function isEvidenceAnswerAttempt(text){
+ const s=String(text||'').trim();
+ if(/^(好|好的|嗯+|哦+|喔+|收到|明白|謝謝|多謝|唔該|ok|okay|thanks|thank you|你好|您好|hi|hello)[！!。．\s]*$/i.test(s))return false;
+ if(/[？?]|嗎|請問|如何|怎樣|解釋|說明|甚麼|什麼|點解|為什麼|為甚麼|我想知道/.test(s))return false;
+ return true;
+}
+function evidenceNeedsReading(text,claim){
+ if(/無關|不切題|不相關|不合適|不支持|不吻合/.test(String(text||'')))return true;
+ const mentioned=mentionedHistoricalEvidence(text);if(!mentioned)return true;
+ return !relatedHistoricalEvidence(claim).some(e=>e.id===mentioned.id);
+}
+function isShallowClaim(text){
+ const s=String(text||'').trim(),q=normalizedQuery(s),compact=s.replace(/\s/g,'').replace(/[，。！？、；：,.!?]/g,'');
+ const focus=/(工作|就業|職業|出路|收入|解難|解決問題|問題解決|創意|資訊|資料|判斷|證據|適應|變化|技能|知識|興趣|長處|自我認識|社會流動|公平|健康|公民|社區|分析)/.test(q);
+ const mechanism=/(因為|透過|令|使|讓|能|有助|培養|學會|提高|改善|增加|幫助|運用|分析|判斷)/.test(q);
+ return /^(不知道|唔知|想不到|想不出|沒有想法|不懂)/.test(s)||/＿＿|____|待填/.test(s)||compact.length<10||!focus||!mechanism;
+}
+function claimGuidanceReply(answer){
+ const s=String(answer||''),q=normalizedQuery(s);
+ if(/＿＿|____|待填/.test(s))return '把空格補成具體的人、能力或情境，再用自己的語句說明原因。你會如何填上這兩處？\n\n'+taskQuestion();
+ const focus=[[/工作|職業|就業/,'哪一類工作需要甚麼知識或技能'],[/解難|問題|創意/,'學習如何幫助你分析和處理一個具體問題'],[/資訊|資料|判斷|證據/,'讀書如何幫助你比較資料或判斷證據'],[/適應|變化|科技|更新技能/,'甚麼改變令你需要更新技能'],[/興趣|長處|自我認識/,'你如何從學習或活動中發現自己的興趣或長處'],[/社會|公平|機會/,'教育機會如何影響不同背景的人'],[/健康|生活/,'哪種生活情境需要相關知識'],[/公民|社區|公共/,'哪個公共議題需要理解和參與']].find(([p])=>p.test(q));
+ return '這個分論點目前還比較籠統。'+(focus?'你選了這個方向，請想一想：'+focus[1]+'？':'先想：學習幫助誰？培養甚麼能力？這種能力在甚麼情況下有用？')+'下方角度只是思考提示，請把它發展成自己的理由。\n\n'+taskQuestion();
+}
+function isClaimHelpRequest(text){return /(不知道|唔知|想不到|想不出|沒有想法|如何構思|怎樣構思|給我提示|提示一下|有甚麼角度|有什麼角度|哪個角度)/.test(String(text||''));}
 function angleFeedback(text){
  const q=normalizedQuery(text);
- const replies=[
-  [/工作|就業|職業|出路|收入|前途/,'你選的是「職涯選擇」角度。把主張寫成「學習能提供部分職業所需的知識或資格」，避免說讀書一定帶來工作或高薪。可用OECD就業資料支持趨勢，並交代地區和科目差異。'],
-  [/解難|解決問題|問題解決|創意|創新|實踐/,'你選的是「解難與創意」角度。可說明學習如何讓人提出、檢視和改良方法；OECD的PISA創意思考評估包含科學及社會解難情境，但不能把評估結果說成某種課堂必然造成的效果。'],
-  [/資訊|資料|批判|判斷|真假|辨別|證據|讀寫|閱讀理解/,'你選的是「判斷資訊」角度。請舉出需要比較來源、理解數據或檢查證據的情境。OECD成人技能調查測量讀寫、數理和適應性解難，資料反映群體能力，不是學校教育的單一因果證明。'],
-  [/適應|變化|科技|轉型|持續學習|終身|長遠|未來|更新技能/,'你選的是「適應變化與持續學習」角度。可把長遠價值說具體，例如工作內容改變時更新技能。UNESCO資料支持終身學習的重要性，屬政策綜述，不代表人人必然獲得同一職涯結果。'],
-  [/興趣|長處|自我認識|目標|方向|自信/,'你選的是「自我認識」角度。可用自己接觸學科、活動或實作後發現興趣的經歷；這類個人例子能說明可能性，不宜推論所有學生都會有相同經歷。'],
-  [/社會流動|家庭背景|公平|平等|機會|弱勢|資源|貧富/,'你選的是「教育機會與社會流動」角度。可同時指出教育能打開部分升學和職業路徑，以及家庭資源仍造成差距。OECD 2025的跨國數據可作背景，但不是香港個別學生的預測。'],
-  [/健康|生活|身心|風險|健康素養/,'你選的是「健康與生活素養」角度。請說明讀寫、數據理解或健康知識怎樣幫助人作知情選擇；不要把教育說成健康結果的唯一原因。'],
-  [/公民|社會參與|社區|公共|責任|全球議題|合作/,'你選的是「公民參與與社會責任」角度。可說明學習如何幫助理解公共議題、評估不同立場或參與社區。UNESCO資料顯示相關學習活動與學生的議題認識及行動力有關，屬觀察關聯。'],
-  [/學費|成本|壓力|補習|考試|學歷不等於|文憑|課程|不實用|脫節/,'你提出的是對教育限制的角度。把範圍說清楚：你批評的是學費、考試壓力、只重文憑，還是課程和實際需要不匹配？OECD也提醒，資格提升不必然代表成人技能同步提升；論證時避免把「部分教育無效」說成「所有學習無用」。']
- ];
- const found=replies.find(([pattern])=>pattern.test(q));
- return found?found[1]:'這個角度可以再收窄：指出哪一類人、哪種學習或哪項具體影響，再選一件能支持它的事例或資料。';
+ const focus=[[/工作|就業|職業|出路|收入/,'職涯選擇'],[/解難|解決問題|創意|創新/,'解難能力'],[/資訊|資料|判斷|證據|讀寫/,'資訊判斷'],[/適應|變化|科技|終身|技能/,'適應變化'],[/興趣|長處|自我認識/,'自我認識'],[/社會流動|公平|平等|機會/,'教育機會'],[/健康|生活/,'生活素養'],[/公民|社區|公共/,'社會參與']].find(([p])=>p.test(q));
+ return '你提出了「'+(focus?focus[1]:'這個方向')+'」這個分論點。想一想：學習透過甚麼過程帶來這種影響？下一步請先自己找一件能檢驗這個理由的真實事件。';
 }
 const STATIC_KNOWLEDGE=[
  {"keywords":["更多角度","幾種角度","其他角度","寫作角度","分論點角度","讀書角度","讀書的好處","學習的價值","工作機會","解決問題的能力","批判思考","資訊判斷","適應變化","終身學習","自我認識","社會流動","健康素養","公民參與","有甚麼角度","有什麼角度"],"answer":"可以從以下不同角度選兩個，並避免重複：\\n\\n1. 職涯選擇：學習可提供部分職業所需知識與資格；不代表保證工作或高薪。OECD 2025資料顯示教育程度與就業率相關，但各領域和地區有差異。\\n2. 解難與創意：學習讓人練習提出、檢視和改良方法。OECD PISA 2022評估了科學及社會解難等創意思考能力。\\n3. 判斷資訊：讀寫、數理和理解證據有助處理生活資訊；OECD成人技能調查測量這些資訊處理能力，但不能證明只靠學校課堂便能培養。\\n4. 適應變化：持續學習和更新技能有助面對科技及職場轉變；UNESCO把終身學習視為重要方向，這屬政策綜述，不是就業保證。\\n5. 自我認識：接觸不同學科和活動，能幫助學生發現興趣與長處；可用個人經歷說明，但不要把個案說成人人相同。\\n6. 社會流動：教育資格可能打開部分升學和職業機會；OECD資料同時顯示家庭背景仍造成明顯差距。\\n7. 健康與生活素養：理解健康、數據和風險資訊，有助作較知情的生活選擇；不等於教育單獨決定健康。\\n8. 社會參與：公民教育與全球議題學習可提升認識和參與意願；UNESCO資料顯示兩者有關聯，不能直接說成因果。\\n\\n可改寫成分論點：「學習不只為了考試，還能訓練我們評估證據、解決實際問題。」或「持續學習能讓人按工作和社會變化更新技能。」反方可指出學費、壓力或學歷不等於能力；駁論時先承認這些限制，再主張學習也包括職業訓練、實作和終身進修。","next":"選兩個不同角度，分別完成：「學習能幫助＿＿，因為＿＿。」再告訴我你想先找哪一類資料。"},
@@ -651,9 +670,9 @@ function findStaticKnowledge(text){
 }
 function historicalEvidenceAnswer(text){
  const t=currentTask(),claim=t.stage===2?store.draft.points[t.index].claim:store.draft.points.map(p=>p.claim).filter(Boolean).join(' ');
- const records=evidenceFor('',claim,text,true);
- if(!records.length)return '我已按你的分論點和指定範圍搜尋本機20件附來源事件；目前沒有足夠相關的已核實材料。請把分論點寫得更具體，或請老師協助核對其他原始資料，我不會猜造例子。';
- return '以下是按你的分論點挑選的已核對歷史事件。請只把它當作事例候選，並說明事件如何支持主張：\n\n'+records.map((e,i)=>(i+1)+'）'+e.title+'（'+e.kind+'）\n'+e.facts+'\n思考提示：'+e.question+'\n使用限制：'+e.limits+'\n來源：'+e.publisher+'，《'+e.sourceTitle+'》\n'+e.url).join('\n\n');
+ const records=relatedHistoricalEvidence(claim);
+ if(!records.length)return '我暫時未找到能直接配對這個分論點的已核實歷史事件。請把分論點中的關鍵詞寫得更具體，或告訴我你想討論哪種能力；我不會猜造事例。';
+ return '先不要急着把事例放進大綱。以下是按你的分論點找到的閱讀資料，請先讀一則，再想想它和你的理由有甚麼關係；你來判斷它是否切題：\n\n'+records.map((e,i)=>(i+1)+'）'+e.title+'（'+e.kind+'）\n'+e.facts+'\n思考提示：'+e.question+'\n使用限制：'+e.limits+'\n來源：'+e.publisher+'，《'+e.sourceTitle+'》\n'+e.url).join('\n\n');
 }
 function researchEvidenceAnswer(text){
  const t=currentTask(),claim=t.stage===2?store.draft.points[t.index].claim:store.draft.points.map(p=>p.claim).filter(Boolean).join(' ');
@@ -667,13 +686,15 @@ function answerStudentQuestion(text){
  const wants=/請|可否|能否|提供|找|給我|俾我|推薦|有沒有|有冇|想要|需要|想知道|介紹|列出|哪些|哪個|甚麼|什麼|幫我/.test(s);
  const asks=/[？?]|嗎|請問|解釋|說明|介紹|提供|可否|能否|如何|怎樣|為甚麼|為什麼|點解|有甚麼|有什麼|有沒有|是否|何謂|我想知道|我不懂|幫我|更多|幾種|其他/.test(s);
  const found=findStaticKnowledge(s);
+ if(currentTask().stage===1&&wants&&(historyWords.test(s)||researchWords.test(s)))return '先把分論點寫清楚，再找論據會更容易判斷資料是否切題。你現在想主張學習能帶來哪一種具體影響？';
  if(wants&&historyWords.test(s))return historicalEvidenceAnswer(s);
  if(wants&&researchWords.test(s))return researchEvidenceAnswer(s);
  if(!asks&&!(s.length<=20&&found&&/(寫作|分論|駁論|段落|引用|論據)/.test(s)))return '';
+ if(found&&currentTask().stage===1)return '我先不替你選分論點。你比較想討論哪個實際情境？學習在那個情境中讓人多了甚麼能力？';
  if(found)return found.item.answer+'\n\n'+found.item.next;
  const t=currentTask();
  if(t.stage===0)return '你可以選「同意、不同意、部分同意」，再加一個原因。先寫：「我（部分）同意／不同意……，因為……。」';
- if(t.stage===1)return '分論點可從個人能力、工作選擇、資訊判斷、社會影響或長短期價值等角度構思。請選一個角度，寫成支持立場的一句理由。';
+ if(t.stage===1)return '先從你熟悉的生活或工作情境想一想：學習可能幫助人做甚麼？你認為原因是甚麼？先用自己的話說一個理由。';
  if(t.stage===2)return '先把分論點中的關鍵詞說清楚。我會按你的要求配對已核實歷史事件或研究資料，並標明資料種類與限制。';
  if(t.stage===3&&t.index===0)return '先用「有人認為……」公平概括反方理由；不用急着反駁，下一步再寫你的回應。';
  if(t.stage===3)return '可先承認反方在哪種情況下有道理，再指出它的限制，最後連回你的立場。';
@@ -744,7 +765,7 @@ function stagePlainExplanation(task){
 }
 function stageHelp(task){
  if(task.stage===0)return '先不用想很複雜。選一項：同意、不同意、部分同意。再補上「因為……」。\n\n'+taskQuestion();
- if(task.stage===1)return '可從八個方向選：工作、解難、資訊判斷、適應變化、自我認識、社會流動、健康、公民參與。挑一個你最能解釋的角度。\n\n'+taskQuestion();
+ if(task.stage===1)return '先用自己的話說明一個支持立場的理由。想想學習幫助誰、培養甚麼能力，以及這種能力何時有用；若答案仍籠統，我再提供角度提示。\n\n'+taskQuestion();
  if(task.stage===2)return '先看你的分論點中的關鍵詞，再從已載入的事件資料中找相關人物、制度或事件。你也可以直接要求我提供已核實事件候選。\n\n'+taskQuestion();
  if(task.stage===3&&task.index===0)return '想像持相反立場的人會擔心甚麼，例如成本、壓力、機會不均或學歷和能力不相等。先公平寫一個理由。\n\n'+taskQuestion();
  if(task.stage===3)return '先承認反方在哪些情況下有道理，再指出條件或限制，最後解釋為何你的立場仍成立。\n\n'+taskQuestion();
@@ -766,7 +787,7 @@ function isDraftAnswerCandidate(task,text){
  if(!compact||/[？?]|嗎|請問|可否|能否|可以嗎|是否|怎樣|如何|為甚麼|為什麼|點解|解釋|介紹|提供|有甚麼|有什麼|幫我|想知道/.test(value))return false;
  if(/^(好|好的|嗯+|哦+|喔+|是|係|對|明白|知道了|收到|謝謝|唔該|ok|okay|yes|no|thanks)$/i.test(compact)||vagueAnswer(value))return false;
  if(task.stage===0)return compact.length>=3&&/(同意|不同意|部分認同|贊成|反對|支持|不支持|認為|立場|讀書有用|讀書無用)/.test(value);
- if(task.stage===1)return compact.length>=8&&/(因為|可以|能夠|有助|令|使|讓|學到|培養|提高|增加|改善|促進|提供|有利|重要|價值|機會|能力)/.test(value);
+ if(task.stage===1)return compact.length>=8&&/(因為|可以|能夠|有助|令|使|讓|學到|培養|提高|增加|改善|促進|提供|有利|重要|價值|機會|能力)/.test(value)&&!isShallowClaim(value);
  if(task.stage===2)return compact.length>=6&&/(\d{3,4}|事件|戰役|戰爭|改革|制度|革命|運動|協定|法案|發明|成立|建立|頒布|推行|提出|發現|創立|朝|年|世紀|王|帝|文藝復興|工業革命|科舉|啟蒙)/.test(value);
  if(task.stage===3&&task.index===0)return compact.length>=8&&/(有人|反方|認為|會說|因為|理由|可能|雖然|但是|不過|可是|然而|但)/.test(value);
  if(task.stage===3&&task.index===1)return compact.length>=8&&/(因為|但是|不過|可是|然而|但|雖然|即使|仍然|不能|未必|不一定|只要|所以|因此|回應|問題)/.test(value);
@@ -830,7 +851,14 @@ function askCoach(text){
  coachBusy=true;store.messages.push({from:'student',text:answer});store.helpLevel=0;save();render();
  const task=currentTask();
  let reply='';
- if(isDraftAnswerCandidate(task,answer))reply=acceptedDraftReply(task,answer);
+ if(task.stage===0&&isDraftAnswerCandidate(task,answer))reply=acceptedDraftReply(task,answer);
+ else if(task.stage===1&&isClaimHelpRequest(answer)){
+   store.helpLevel=1;reply=claimGuidanceReply(answer);
+ }else if(task.stage===1&&isShallowClaim(answer)&&(/(讀書|學習|教育|知識|技能|工作|解難|能力|資訊|判斷|適應|興趣|社會|健康|公民|有用|無用|重要|角度|分論點|好處)/.test(answer)||String(answer).trim().length<12)&&!/^(你好|您好|好|好的|收到|謝謝|多謝|唔該|hi|hello|ok|okay)$/i.test(String(answer).trim())){
+   store.helpLevel=1;reply=claimGuidanceReply(answer);
+ }else if(task.stage===2&&(isEvidenceHelpRequest(answer)||(isEvidenceAnswerAttempt(answer)&&(evidenceNeedsReading(answer,store.draft.points[task.index].claim)||!isDraftAnswerCandidate(task,answer))))){
+   store.helpLevel=1;reply=historicalEvidenceAnswer(answer);
+ }else if(isDraftAnswerCandidate(task,answer))reply=acceptedDraftReply(task,answer);
  else reply=localScenarioReply(answer,task)||answerStudentQuestion(answer)||localFallback(task);
  store.stage=currentTask().stage;
  store.messages.push({from:'coach',move:talkMoves[store.stage].label,text:reply});
@@ -882,16 +910,26 @@ function celebrateProgress(){
 
 function mobileNav(){const links=store.role==='teacher'?[['settings','題目設定'],['reports','學習報告']]:[['coach','對話引導'],['draft','我的架構']];return '<nav class="mobile-nav">'+links.map(([id,label])=>'<button data-action="view" data-view="'+id+'" class="'+(store.view===id?'active':'')+'">'+label+'</button>').join('')+'</nav>';}
 function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} 情境式對答</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} 我的論證架構</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE · 01</div><h1>把想法，寫成論證。</h1><p>不代你寫答案，只幫你把思考說清楚。</p></div><div class="head-meta"><strong>${p}%</strong>架構完成度<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">本次練習題目</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} 兩個分論點＋一個駁論</span><span class="tag">${icon('check')} 教師已設定評分參考</span></div></div><div class="steps">${['立場','分論點','事例','駁論','完成'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,4)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'✓ ':''}${s}</strong>${['表明看法','構思兩項理由','配對真實事件','回應反方觀點','檢查大綱'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">草稿和對話儲存在目前使用的瀏覽器；提交後可在「學生學習報告」查看。請避免輸入敏感個人資料。</p></main></div>`;}
+function relatedHistoricalEvidence(claim){
+ const historyKinds=['中國古代事件','中國現代事件','西方古代事件','西方現代事件'];
+ return evidenceFor(store.config.topic,claim,'',true).filter(e=>historyKinds.includes(e.kind));
+}
 function suggestedAnswerChoices(){
  const t=currentTask();
- if(t.stage===0)return ['我同意，因為學習能培養實用能力。','我不同意，因為知識能幫助解決生活問題。','我部分同意，學歷不保證成功，但學習仍有價值。'];
- if(t.stage===1)return ['學習能訓練分析和解決問題的能力。','持續學習能增加適應工作變化的機會。','讀書能幫助判斷資訊和證據。','教育能拓闊個人的升學及職業選擇。'];
- if(t.stage===2){const claim=store.draft.points[t.index]?.claim||'';const records=evidenceFor(store.config.topic,claim,'',true);return records.length?records.map(e=>'我想用「'+e.title+'」這件歷史事件作為事例。'):['請提供與這個分論點有關的中國古代事件。','請提供與這個分論點有關的中國現代事件。','請提供與這個分論點有關的西方歷史事件。'];}
- if(t.stage===3&&t.index===0)return ['有人認為學歷不一定代表實際能力。','有人認為升學費用和時間成本太高。','有人認為成功也可以來自工作經驗。'];
- if(t.stage===3)return ['雖然學歷不保證成功，但學習能培養實際能力。','這種情況確實存在，但不能代表所有學習都沒有價值。','因此應重視實作和持續進修，而非只看學歷。'];
- return ['請幫我檢查兩個分論點有沒有重複。','請幫我檢查事例如何支持分論點。','請幫我檢查駁論有沒有回應反方。'];
+ if(t.stage===0)return ['我同意讀書無用','我不同意讀書無用','我部分同意讀書無用'];
+ if(t.stage===1&&store.helpLevel>0)return ['工作技能：學習能幫助＿＿，因為＿＿。','解難能力：學習能幫助＿＿，因為＿＿。','資訊判斷：讀書能幫助＿＿，因為＿＿。','適應變化：持續學習能幫助＿＿，因為＿＿。','自我認識：學習能幫助＿＿，因為＿＿。'];
+ if(t.stage===2&&store.helpLevel>0){
+   const records=relatedHistoricalEvidence(store.draft.points[t.index]?.claim||'');
+   return records.map(e=>'請提供「'+e.title+'」相關的事件閱讀資料。');
+ }
+ return [];
 }
-function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>本機情境對答 · 靜態資料</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose"><div class="suggested-answers"><span>你可以自由回答，或選一個建議：</span><div class="suggested-answer-list">${suggestedAnswerChoices().map(x=>'<button type="button" data-action="quick" data-submit="true" data-text="'+esc(x)+'">'+esc(x)+'</button>').join('')}</div></div><div class="quick-prompts"><button data-action="quick" data-text="我想知道怎樣表明立場。">先寫立場</button><button data-action="quick" data-text="請給我多幾種不同角度。">看看不同角度</button><button data-action="quick" data-text="我想不到相關事例，請提供閱讀資料">找事例資料</button><button data-action="quick" data-text="請教我如何回應反方觀點。">學習駁論</button><button data-action="quick" data-text="請檢查兩個分論點是否重複。">檢查論點</button></div><div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
+function suggestedAnswerPanel(){
+ const choices=suggestedAnswerChoices();if(!choices.length)return '';
+ const label=currentTask().stage===0?'可選一項立場，也可以自由輸入：':'先自由思考；需要提示時，可選一個方向：';
+ return '<div class="suggested-answers"><span>'+label+'</span><div class="suggested-answer-list">'+choices.map(x=>'<button type="button" data-action="quick" data-text="'+esc(x)+'">'+esc(x)+'</button>').join('')+'</div></div>';
+}
+function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>本機情境對答 · 靜態資料</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose">${suggestedAnswerPanel()}<div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
 function openDraftEditor(field){
  const dialog=$('#draft-edit-dialog');if(!dialog)return;
  const title=$('#draft-edit-title'),value=$('#draft-edit-value'),key=$('#draft-edit-key'),note=$('#draft-edit-note');
