@@ -1034,7 +1034,8 @@ document.addEventListener('click',e=>{
     const allowed=store.role==='teacher'?['settings','reports']:['coach','draft'];
     if(allowed.includes(b.dataset.view)){store.view=b.dataset.view;render();}
   }else if(a==='send'&&store.role==='student'){const input=$('#coach-input');if(input?.value.trim())askCoach(input.value.trim());}
-  else if(a==='quick'&&store.role==='student'){const input=$('#coach-input'),text=b.dataset.text||'';if(b.dataset.submit==='true'){askCoach(text);}else if(input){input.value=text;input.focus();}}\n  else if(a==='evidence-select'&&store.role==='student'){selectEvidenceChoice(b.dataset.text||'');}
+  else if(a==='quick'&&store.role==='student'){const input=$('#coach-input'),text=b.dataset.text||'';if(b.dataset.submit==='true'){askCoach(text);}else if(input){input.value=text;input.focus();}}
+  else if(a==='evidence-select'&&store.role==='student'){selectEvidenceChoice(b.dataset.text||'');}
   else if(a==='report'&&store.role==='student')submitReport();
   else if(a==='reset'&&store.role==='student'&&!coachBusy){if(window.confirm('重新開始會清除本次對話、立場、分論點、事例和駁論；已儲存的報告及題目設定會保留。確定重新開始？'))resetDraft();}
   else if(store.role==='teacher'){
