@@ -50,7 +50,7 @@
 </section></div>
 <div id="celebration"></div>
 <div id="essay-toast" role="status" aria-live="polite"></div>
-<script src="./gemini-config.js"></script>
+
 <script>window.addEventListener('error',function(e){var el=document.getElementById('boot-status');if(el)el.textContent='載入未完成：'+e.message+'。請將本檔下載後用 Chrome 或 Edge 開啟。';});</script>
 
 <script>
@@ -215,7 +215,7 @@ function evidenceFor(topic,claim='',response='',historicalOnly=false){
 
 
 const ESSAY_STORE='fsk-essay-studio-local-trial-v2';
-const defaultConfig={topic:"俗語說「萬般皆下品，惟有讀書高」，也有人說「讀書無用」。試寫作文章一篇，談談你對「讀書無用」的看法。",prompt:'請表明立場，構思兩個相關分論點並各配一件真實事例，再提出一個反方觀點及回應，完成一個駁論。',rubrics:['立場清晰，回應題旨','兩個分論點有層次，互不重複','事例真實並切合分論點','駁論能回應反方觀點'],target:'two-plus-rebuttal',model:'gemini-3.5-flash-lite'};
+const defaultConfig={topic:"俗語說「萬般皆下品，惟有讀書高」，也有人說「讀書無用」。試寫作文章一篇，談談你對「讀書無用」的看法。",prompt:'請表明立場，構思兩個相關分論點並各配一件真實事例，再提出一個反方觀點及回應，完成一個駁論。',rubrics:['立場清晰，回應題旨','兩個分論點有層次，互不重複','事例真實並切合分論點','駁論能回應反方觀點'],target:'two-plus-rebuttal',model:'static-dialogue-v1'};
 let saved;
 try{saved=JSON.parse(localStorage.getItem(ESSAY_STORE))||{};}catch{saved={};}
 const store={config:{...defaultConfig,...(saved.config||{})},draft:saved.draft||{position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}},messages:saved.messages||[],stage:saved.stage||0,reports:saved.reports||[],studentLabel:saved.studentLabel||'',view:'coach',role:'student',expandedReport:null};
@@ -254,10 +254,10 @@ function depthQuestion(text){
 
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function studentProgressKey(account){return ESSAY_STORE+':student:'+account;}
-function saveStudentProgress(account){if(!account)return;try{localStorage.setItem(studentProgressKey(account),JSON.stringify({draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,flowVersion:4}));}catch{}}
+function saveStudentProgress(account){if(!account)return;try{localStorage.setItem(studentProgressKey(account),JSON.stringify({draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,flowVersion:5}));}catch{}}
 function readStudentProgress(account){try{return JSON.parse(localStorage.getItem(studentProgressKey(account))||'null');}catch{return null;}}
 function emptyStudentDraft(){return {position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};}
-const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,studentLabel:store.studentLabel,flowVersion:4}));if(store.role==='student')saveStudentProgress(store.studentLabel);}catch{}};
+const save=()=>{try{localStorage.setItem(ESSAY_STORE,JSON.stringify({config:store.config,draft:store.draft,messages:store.messages,stage:store.stage,helpLevel:store.helpLevel,helpStage:store.helpStage,reports:store.reports,studentLabel:store.studentLabel,flowVersion:5}));if(store.role==='student')saveStudentProgress(store.studentLabel);}catch{}};
 const toast=msg=>{const el=$('#essay-toast');el.textContent=msg;el.className='toast show';clearTimeout(toast.t);toast.t=setTimeout(()=>el.className='toast',2600)};
 function icon(n){return ({spark:'✦',chat:'◌',book:'▤',chart:'◒',settings:'⚙',file:'▧',arrow:'→',check:'✓',plus:'＋',download:'↓',reset:'↻'})[n]||'•';}
 function progress(){const d=store.draft,points=d.points.slice(0,2);const count=(d.position.trim()?1:0)+points.reduce((n,p)=>n+(p.claim.trim()?1:0)+(p.claim.trim()&&p.evidence.trim()?1:0),0)+(d.rebuttal.opposing.trim()?1:0)+(d.rebuttal.response.trim()?1:0);return Math.round(count/7*100);}
@@ -281,13 +281,6 @@ function angleFeedback(text){
  const found=replies.find(([pattern])=>pattern.test(q));
  return found?found[1]:'這個角度可以再收窄：指出哪一類人、哪種學習或哪項具體影響，再選一件能支持它的事例或資料。';
 }
-function coachReply(text){
- const before=currentTask();infer(text);store.stage=currentTask().stage;
- const feedback=before.stage===1?angleFeedback(text):'';
- return {move:talkMoves[store.stage].label,text:(feedback?feedback+'\n\n':'')+taskQuestion()};
-}
-
-
 const STATIC_KNOWLEDGE=[
  {"keywords":["更多角度","幾種角度","其他角度","寫作角度","分論點角度","讀書角度","讀書的好處","學習的價值","工作機會","解決問題的能力","批判思考","資訊判斷","適應變化","終身學習","自我認識","社會流動","健康素養","公民參與","有甚麼角度","有什麼角度"],"answer":"可以從以下不同角度選兩個，並避免重複：\\n\\n1. 職涯選擇：學習可提供部分職業所需知識與資格；不代表保證工作或高薪。OECD 2025資料顯示教育程度與就業率相關，但各領域和地區有差異。\\n2. 解難與創意：學習讓人練習提出、檢視和改良方法。OECD PISA 2022評估了科學及社會解難等創意思考能力。\\n3. 判斷資訊：讀寫、數理和理解證據有助處理生活資訊；OECD成人技能調查測量這些資訊處理能力，但不能證明只靠學校課堂便能培養。\\n4. 適應變化：持續學習和更新技能有助面對科技及職場轉變；UNESCO把終身學習視為重要方向，這屬政策綜述，不是就業保證。\\n5. 自我認識：接觸不同學科和活動，能幫助學生發現興趣與長處；可用個人經歷說明，但不要把個案說成人人相同。\\n6. 社會流動：教育資格可能打開部分升學和職業機會；OECD資料同時顯示家庭背景仍造成明顯差距。\\n7. 健康與生活素養：理解健康、數據和風險資訊，有助作較知情的生活選擇；不等於教育單獨決定健康。\\n8. 社會參與：公民教育與全球議題學習可提升認識和參與意願；UNESCO資料顯示兩者有關聯，不能直接說成因果。\\n\\n可改寫成分論點：「學習不只為了考試，還能訓練我們評估證據、解決實際問題。」或「持續學習能讓人按工作和社會變化更新技能。」反方可指出學費、壓力或學歷不等於能力；駁論時先承認這些限制，再主張學習也包括職業訓練、實作和終身進修。","next":"選兩個不同角度，分別完成：「學習能幫助＿＿，因為＿＿。」再告訴我你想先找哪一類資料。"},
  {keywords:["中心論點","中心立場","表明立場","同意","不同意","部分同意"],answer:"中心立場要直接回應題目，寫清楚你同意、不同意或部分同意，並限定討論範圍。可用：「我部分同意……，因為……；不過，……。」接着用兩個不同角度支持立場。",next:"試用一句話寫出你的立場。"},
@@ -359,6 +352,81 @@ function answerStudentQuestion(text){
  return '我可以協助整理議論文、論據和駁論。告訴我你目前卡在立場、分論點、事例還是駁論，我會按該步驟提供提示。';
 }
 
+
+const LOCAL_DIALOGUE_SCENARIOS=[
+ [/^(你好|您好|hi|hello|哈囉|嗨)[！!。．\s]*$/i,t=>pickLocal(["你好！我們可以先整理立場，再逐步完成兩個分論點、配對事例和一個駁論。","你好，隨時可以提問或寫下想法。我會按目前步驟給提示。"])+"\n\n"+taskQuestion()],
+ [/^(多謝|謝謝|唔該|thanks|thank you)[！!。．\s]*$/i,t=>pickLocal(["不客氣。你可以繼續寫目前這一步，或問我題目、例子和論證方法。","不用客氣！我們逐步來。"])+"\n\n"+taskQuestion()],
+ [/^(好|好的|嗯+|哦+|喔+|收到|明白|知道了|ok|okay|yes|係|是|對)[！!。．\s]*$/i,t=>"收到。這類簡短回應不會被放進論證架構。你可以補充一個完整想法，或直接問我問題。\n\n"+taskQuestion()],
+ [/(你是誰|你是人工智能|你是AI|你是真人|生成式|即時生成|會不會上網|有沒有連網)/i,t=>"我是寫作研習室的情境式寫作教練。回覆由預先編寫的對答情景和本機資料提供，不會使用生成式 AI，也不會即時搜尋網頁；未收錄的資料我會說明限制。"],
+ [/(你可以做什麼|你能做什麼|怎樣使用|如何使用|怎麼用|可以問什麼|有什麼功能)/i,t=>"你可以請我解釋立場、分論點、事例、論據、來源和駁論，也可以問不同寫作角度或要求重複說明。我會依你的問題和目前步驟回應；真實事件只從內置資料中挑選。"],
+ [/(再說一次|重複|再講一次|聽不懂|看不懂|不明白|不太明白|解釋簡單一點|簡單點|白話一點)/i,t=>"可以，我換個說法："+stagePlainExplanation(t)+"\n\n"+taskQuestion()],
+ [/(我不知道|我不懂|不會|不曉得|唔識|唔知|想不到|想不出|沒想法|沒有想法|卡住|卡關|不知道怎麼寫|無從入手)/i,t=>stageHelp(t)],
+ [/(兩邊都有道理|各有道理|有好有壞|很難選|不知道同意哪一邊|不知選哪一邊)/i,t=>"可以採取「部分同意」，並說明適用條件。先界定你認同哪一部分、保留哪一部分，再用兩個不同理由支持立場。"+(t.stage===0?"\n\n例如：「我部分同意……，因為……；不過，若……，情況便不同。」":"\n\n"+taskQuestion())],
+ [/(為什麼要|為何要|為何要先|為什麼先|一定要|必須要|流程|步驟)/i,t=>"分步是為了讓每個部分各有用途：立場回應題目；兩個分論點提供不同理由；事例支持各自的理由；駁論則公平回應反方。你不必一次寫完整文章。"],
+ [/(要寫整篇|直接幫我寫|替我寫|幫我完成全文|給我答案|直接給答案)/i,t=>"我不會替你完成整篇文章，但可以提供句式、提示和已核對的事例資料。你先寫自己的想法，我再幫你檢查是否切題和有沒有說明理由。"],
+ [/(可以用自己的經歷|個人經歷|我的經歷|身邊例子|生活例子|個人例子)/i,t=>"個人經歷可作例子，尤其適合說明個人感受或日常情境；但它未必能證明所有人都一樣。若題目要求真實歷史事件，請用有可靠來源的公開事件，並清楚連回分論點。"],
+ [/(例子不相關|不切題|不相關|牽強|如何扣題|怎樣扣題|如何連回|怎樣連回)/i,t=>"檢查三點：例子是否真的呈現分論點所說的影響？事件結果是否有可靠來源？你有沒有用一句話說明兩者關係？可用「這件事顯示……，因此支持……」連回主張。"],
+ [/(例子太少|多給幾個例子|多幾個事例|另一個例子|其他例子)/i,t=>"內置資料會按你目前的分論點挑選合適材料；有時只找到一件切合且已核實的事件，未必適合硬湊多件。你可先提供更具體的分論點或指定事件範圍。"],
+ [/(這是真的嗎|真不真|有來源嗎|來源在哪|出處在哪|可以查證嗎|如何核實|怎樣核實)/i,t=>"真實材料應核對發布機構、原文、日期和事件內容。我提供的事件卡會附來源網址及使用限制；若本機資料沒有合適來源，我不會把猜測說成史實。"],
+ [/(歷史事件和研究|歷史事件還是研究|事例和數據|事件和數據|論據種類|哪種論據)/i,t=>"歷史事件可以呈現具體人物、制度或發展；研究和統計則呈現群體趨勢。使用時要標明材料類型、年份和限制，不能把個案當普遍證明，也不能把相關性說成因果。"],
+ [/(反方要怎樣|怎樣寫反方|如何寫反方|反方觀點是什麼|反方觀點怎麼找)/i,t=>"先想像一位合理的反對者會提出甚麼理由，公平寫出對方的擔心，不要故意把它說得愚蠢。可用「有人認為……，因為……」開頭。"],
+ [/(怎樣駁論|如何駁論|怎樣反駁|如何反駁|怎樣回應反方|回應反方)/i,t=>"駁論可以分三步：先準確寫出反方理由；再承認它在甚麼情況下有道理；最後指出限制或補充條件，說明自己的立場仍然成立。可用「雖然……，但……，因此……」。"],
+ [/(讓步是什麼|什麼是讓步|讓步意思|要承認對方嗎)/i,t=>"讓步是承認反方在某些條件下有道理，並不等於放棄自己的立場。之後要說明反方理由的範圍或限制，再扣回中心立場。"],
+ [/(駁論和反駁|駁論與反駁|駁論是不是|駁論是什麼|什麼是駁論)/i,t=>"駁論不只是說「我不同意」。它要呈現反方觀點，並以理由、條件或事例回應，讓讀者看見為何你的立場仍較有說服力。"],
+ [/(分論點是什麼|什麼是分論點|分論點意思|主論點和分論點|中心論點和分論點)/i,t=>"中心立場是你對整道題目的主要取態；分論點是支持這個取態的主要理由。每個分論點再用相應事例支持，兩點要避免重複。"],
+ [/(事例是什麼|什麼是論據|論據和論點|論點與論據)/i,t=>"論點是你要讀者接受的主張；論據是支持主張的材料，例如有來源的歷史事件或研究資料。舉例後還要解釋它怎樣支持分論點。"],
+ [/(中心立場|立場怎麼寫|立場如何寫|怎樣表明立場|如何表明立場)/i,t=>"立場要直接回應題目，可以同意、不同意或部分同意，並說清楚討論範圍。試用：「我（部分）同意／不同意……，因為……。」"],
+ [/(分論點重複|兩點重複|兩個分論點相同|如何避免重複|怎樣避免重複)/i,t=>"把兩點的關鍵詞並排比較。如果兩點都只說「有幫助」，就要拆成不同作用，例如一點談實際解難，另一點談職涯選擇或資訊判斷。"],
+ [/(論點太大|太絕對|人人|所有人|一定成功|必定|絕對|唯一原因)/i,t=>"試加上適用條件，避免把個案說成人人如此，或把相關因素說成唯一原因。可補上「部分人」、「在某些情況下」、「有助但不保證」等範圍詞。"],
+ [/(沒有高學歷|不讀書也成功|退學成功|名人退學|喬布斯|賈伯斯)/i,t=>"名人個案只能說明一種可能，不能證明所有人都不需要教育。要分清「沒有完成學位」和「停止學習」，並查核人物本人或可靠機構的原始資料。"],
+ [/(學歷不等於能力|文憑不代表|學歷無用|讀書無用|讀書有用)/i,t=>"可把問題拆開：學歷是否保證能力？學習本身是否有用？取得資格和學到知識並非完全相同。先說清你批評的是學歷、考試壓力，還是所有學習。"],
+ [/(讀書有什麼角度|讀書的角度|學習有哪些角度|分論點角度|多幾種角度|更多角度|其他角度)/i,t=>"可選不同角度：職涯選擇、解難與創意、判斷資訊、適應變化、自我認識、社會流動、健康素養、公民參與。選兩個後，寫清楚學習如何產生該作用，避免兩點重複。"],
+ [/(怎樣找工作機會角度|工作機會|就業角度|讀書與工作|讀書對工作)/i,t=>"職涯角度可寫「學習提供部分職業需要的知識或資格」，不要說讀書保證高薪或工作。要交代行業、所需技能和地區差異，再配合有來源的資料或事件。"],
+ [/(解難能力|解決問題能力|創意思考|創新角度)/i,t=>"解難角度可說明學習如何讓人練習提出問題、比較方法和修正方案。找事例時要指出具體學習或知識如何被應用，而不是只寫某人很聰明。"],
+ [/(資訊判斷|辨別真假|批判思考|媒體素養|假新聞)/i,t=>"資訊判斷角度可以談查核來源、理解數據、辨別證據和比較不同說法。分論點要寫出學習如何幫助這些行動，事例要呈現具體判斷過程。"],
+ [/(適應變化|科技轉變|終身學習|持續學習|長遠價值)/i,t=>"可從持續學習和更新技能切入：當科技、職務或社會需要改變，人可以再學新知識。注意不要推論每個人都會因此成功，並說明具體改變及應對方式。"],
+ [/(健康素養|健康資訊|醫療知識|身心健康)/i,t=>"健康素養角度可談閱讀醫療資訊、理解風險和作知情選擇。不要把教育說成健康結果的唯一原因；須交代資料對象和適用範圍。"],
+ [/(公民參與|社會責任|公共議題|社區參與)/i,t=>"這個角度可談學習如何幫助理解公共議題、評估不同立場或參與社區。要避免把關聯直接說成因果，並配合具體活動或可靠資料。"],
+ [/(學費太貴|教育成本|補習壓力|考試壓力|讀書壓力|學習壓力)/i,t=>"這可以作反方角度。先承認成本或壓力在某些情況下真實存在，再說明問題來自哪些制度或資源差異，最後回應這是否代表所有學習都沒有價值。"],
+ [/(兩個理由|兩個分論|第二個分論|第一個分論)/i,t=>"兩個分論點要從不同層面支持同一立場。可以用「第一點影響個人能力；第二點關乎社會或長期適應」來檢查是否有層次。"],
+ [/(引言|開頭|開首|開篇)/i,t=>"引言可簡短帶出題目、界定關鍵詞並表明立場。避免未經查證的統計或太空泛的「自古以來」。"],
+ [/(結論|結尾|總結)/i,t=>"結論重申立場，概括兩個分論點和駁論的結果；不要突然加入未討論的新論點或新事例。"],
+ [/(連接詞|過渡詞|承上啟下)/i,t=>"先判斷兩句之間是補充、轉折、因果還是舉例，再選「此外」、「然而」、「因此」或「例如」。連接詞不能代替內容本身的邏輯。"],
+ [/(peel|段落結構|主題句|論證段)/i,t=>"論證段可依次寫主張、解釋、例證和連結分析。不同老師對 PEEL 字母的解釋可能不同，重點是材料後有扣回分論點。"],
+ [/(我不同意|我不認同|例子不對|這個例子錯|不同意這個)/i,t=>"你可以提出疑問。先指出你認為不準確的是人物、年代、事件結果，還是例子和分論點的關係；本機只會以內置來源資料回覆，仍要核對原文。"],
+ [/(我休息|先停|下次再寫|暫停|累了|好累)/i,t=>"可以先停在這裏。草稿會保存在目前瀏覽器；下次使用同一裝置和瀏覽器登入同一帳戶，便可接着整理。"],
+ [/(你可以即時搜尋|幫我上網|查最新|今天的資料|最新數據|即時資料)/i,t=>"這個靜態版本不會即時上網搜尋。你可以使用內置且附來源的材料；若要最新數據，請自行查閱原始機構網站並核對年份，或請老師協助。"],
+ [/(其他題目|我的題目是|題目不是讀書|換一個題目|不同題目)/i,t=>"目前已載入的示範材料主要配合本次題目。若你的題目不同，仍可用我提供的立場、分論點、證據和駁論寫作方法；事件是否切合，請按你的題目逐項核對。"],
+ [/(好像沒有回答|答非所問|答錯|回應不當|不是我問的)/i,t=>"謝謝提醒。這是預先編寫的情境式對答，不像生成式 AI 能理解所有新問題。請把問題縮窄成一個重點，例如「如何避免兩個分論點重複？」或「這件事怎樣支持主張？」"],
+ [/(敏感資料|私隱|個人資料|帳戶安全)/i,t=>"請勿在對話輸入姓名、電話、地址、密碼或其他敏感資料。草稿儲存在目前瀏覽器的本機資料中，使用共用裝置後請登出。"],
+ [/(人工智能|生成式AI|生成式人工智能|聊天機械人)/i,t=>"談生成式人工智能可分開討論效率、學習成效、準確度、依賴和私隱。工具可以提供提示，但內容須核對；學生仍需理解並自行完成作業。"]
+];
+function pickLocal(options){
+ const turns=store.messages.filter(m=>m.from==='student').length;
+ return options[(turns-1+options.length)%options.length];
+}
+function stagePlainExplanation(task){
+ if(task.stage===0)return '先回答你對題目的看法：同意、不同意，或部分同意，並寫一個原因。';
+ if(task.stage===1)return '分論點就是支持你立場的一個主要理由，而且要和另一點不同。';
+ if(task.stage===2)return '事例是支持分論點的具體材料。請找真實事件，並說明它和主張的關係。';
+ if(task.stage===3&&task.index===0)return '先公平寫出反方會怎樣想，暫時不用反駁。';
+ if(task.stage===3)return '指出反方哪裏有道理，再說明它的限制，最後扣回你的立場。';
+ return '大綱已完成，請檢查每個理由是否有相應材料，以及駁論是否回答反方。';
+}
+function stageHelp(task){
+ if(task.stage===0)return '先不用想很複雜。選一項：同意、不同意、部分同意。再補上「因為……」。\n\n'+taskQuestion();
+ if(task.stage===1)return '可從八個方向選：工作、解難、資訊判斷、適應變化、自我認識、社會流動、健康、公民參與。挑一個你最能解釋的角度。\n\n'+taskQuestion();
+ if(task.stage===2)return '先看你的分論點中的關鍵詞，再從已載入的事件資料中找相關人物、制度或事件。你也可以直接要求我提供已核實事件候選。\n\n'+taskQuestion();
+ if(task.stage===3&&task.index===0)return '想像持相反立場的人會擔心甚麼，例如成本、壓力、機會不均或學歷和能力不相等。先公平寫一個理由。\n\n'+taskQuestion();
+ if(task.stage===3)return '先承認反方在哪些情況下有道理，再指出條件或限制，最後解釋為何你的立場仍成立。\n\n'+taskQuestion();
+ return '目前大綱已完成。你可以要求我檢查重複、扣題、事例和駁論。';
+}
+function localScenarioReply(text,task){
+ const s=String(text||'').trim();
+ const found=LOCAL_DIALOGUE_SCENARIOS.find(([pattern])=>pattern.test(s));
+ return found?found[1](task):'';
+}
+
 function vagueAnswer(text){
  const s=text.trim().replace(/[，。！？,.!?\s]/g,'');
  if(/^(我)?(同意|不同意|部分同意|贊成|反對|支持|不支持|同意一部分)[啊呀呢吧]*$/.test(s))return false;
@@ -407,52 +475,42 @@ function supportReply(){
   if(store.helpLevel>=3)question=evidence.length?'先讀下面的已核實材料，選出與目前想法相關的一件事或一項發現，用自己的話記下「對象、事情或發現、來源」。':'目前沒有切合這個分論點的已核實閱讀材料。請先指出例子需要呈現哪一項具體影響，並請老師協助尋找原文。';
   return {from:'coach',text:question,support:{level:store.helpLevel,evidenceIds:evidence.map(e=>e.id)}};
 }
-function geminiEndpoint(path){
-  const configured=String(window.GEMINI_API_ENDPOINT||'').trim().replace(/\/+$/,'');
-  if(!configured)return '';
-  const apiPath='/api/'+path;
-  return configured.endsWith(apiPath)?configured:configured+apiPath;
+function acceptedDraftReply(task,text){
+ const before=task.stage,index=task.index;
+ infer(text);store.stage=currentTask().stage;
+ const clean=text.trim();
+ let lead='';
+ if(before===0)lead='已記下你的立場：「'+clean+'」。立場先回應題目即可，下一步構思支持它的第一個理由。';
+ else if(before===1){
+   const feedback=angleFeedback(text);
+   lead='這句已先記作分論點草稿。'+feedback;
+ }
+ else if(before===2)lead='已先把你提出的事件記作分論點 '+(index+1)+' 的事例草稿。請核對事件和來源，再說明它如何支持這個分論點。';
+ else if(before===3&&index===0)lead='已記下反方觀點。寫得公平、具體，駁論才有清楚對象。';
+ else if(before===3)lead='已記下你的駁論回應。檢查它有沒有回應剛才的反方理由，並扣回自己的立場。';
+ return lead+'\n\n'+taskQuestion();
 }
-async function askCoach(text){
-  const answer=String(text||'').trim();
-  if(!answer||coachBusy)return;
-  coachBusy=true;
-  store.messages.push({from:'student',text:answer});
-  store.helpLevel=0;
-  save();
-  render();
-  try{
-    const endpoint=geminiEndpoint('essay-coach');
-    if(!endpoint)throw new Error('AI 服務網址尚未設定。請在 GitHub「Settings → Secrets and variables → Actions → Variables」加入 GEMINI_API_ENDPOINT，填入 Cloudflare Worker 網址。');
-    const task=currentTask();
-    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      message:answer,
-      messages:store.messages.slice(0,-1).slice(-12),
-      topic:store.config.topic,
-      prompt:store.config.prompt,
-      rubrics:store.config.rubrics,
-      stage:task.stage,
-      pointIndex:task.index,
-      draft:store.draft
-    })});
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(data.error||('AI 服務回應失敗（HTTP '+response.status+'）。'));
-    if(typeof data.message!=='string'||!data.message.trim())throw new Error('AI 沒有傳回文字答案，請重試。');
-    if(data.advanceDraft===true&&isDraftAnswerCandidate(task,answer))infer(answer);
-    store.stage=currentTask().stage;
-    store.messages.push({from:'coach',move:talkMoves[store.stage].label,text:data.message.trim()});
-  }catch(error){
-    store.messages.push({from:'coach',text:'這次未能取得 AI 回覆，學習階段沒有前進。'+(error&&error.message?'\n\n'+error.message:'請檢查 Worker 網址及服務設定後重試。')});
-  }finally{
-    coachBusy=false;
-    save();
-    render();
-    celebrateProgress();
-    const log=document.querySelector('#chat-log');
-    if(log)log.scrollTop=log.scrollHeight;
-  }
+function localFallback(task){
+ if(task.stage===0)return '我先不把這句當作立場。請選「同意、不同意、部分同意」，再加一個原因，例如：「我部分同意……，因為……」。';
+ if(task.stage===1)return '我先不把這句存成分論點。分論點要是一個支持立場的完整理由，可用：「學習能幫助＿＿，因為＿＿。」';
+ if(task.stage===2)return '我先不把這句存成事例。請提供一件具體事件或研究名稱；如果想不到，可直接說「請提供相關事例」。';
+ if(task.stage===3&&task.index===0)return '我先不把這句存成反方觀點。試用「有人認為……，因為……」公平地寫出一個反對理由。';
+ if(task.stage===3)return '我先不把這句存成駁論回應。試用「雖然……，但……，因此……」回應剛才的反方觀點。';
+ return '大綱已完成。你可以問我如何檢查論點、事例、扣題或駁論，也可以編輯左側內容。';
 }
-
+function askCoach(text){
+ const answer=String(text||'').trim();
+ if(!answer||coachBusy)return;
+ coachBusy=true;store.messages.push({from:'student',text:answer});store.helpLevel=0;save();render();
+ const task=currentTask();
+ let reply='';
+ if(isDraftAnswerCandidate(task,answer))reply=acceptedDraftReply(task,answer);
+ else reply=localScenarioReply(answer,task)||answerStudentQuestion(answer)||localFallback(task);
+ store.stage=currentTask().stage;
+ store.messages.push({from:'coach',move:talkMoves[store.stage].label,text:reply});
+ coachBusy=false;save();render();celebrateProgress();
+ const log=document.querySelector('#chat-log');if(log)log.scrollTop=log.scrollHeight;
+}
 let loginPortal=(typeof location!=='undefined'&&String(location.search||'').includes('portal=teacher'))?'teacher':'student';
 store.role=null;
 function loginScreen(){
@@ -497,8 +555,8 @@ function celebrateProgress(){
 }
 
 function mobileNav(){const links=store.role==='teacher'?[['settings','題目設定'],['reports','學習報告']]:[['coach','對話引導'],['draft','我的架構']];return '<nav class="mobile-nav">'+links.map(([id,label])=>'<button data-action="view" data-view="'+id+'" class="'+(store.view===id?'active':'')+'">'+label+'</button>').join('')+'</nav>';}
-function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} AI 對話引導</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} 我的論證架構</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE · 01</div><h1>把想法，寫成論證。</h1><p>不代你寫答案，只幫你把思考說清楚。</p></div><div class="head-meta"><strong>${p}%</strong>架構完成度<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">本次練習題目</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} 兩個分論點＋一個駁論</span><span class="tag">${icon('check')} 教師已設定評分參考</span></div></div><div class="steps">${['立場','分論點','事例','駁論','完成'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,4)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'✓ ':''}${s}</strong>${['表明看法','構思兩項理由','配對真實事件','回應反方觀點','檢查大綱'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">草稿和對話儲存在目前使用的瀏覽器；提交後可在「學生學習報告」查看。請避免輸入敏感個人資料。</p></main></div>`;}
-function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>Gemini 3.5 Flash-Lite · 即時 AI</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose"><div class="quick-prompts"><button data-action="quick" data-text="我對題目的立場是……，因為……">我想先試寫立場</button><button data-action="quick" data-text="我還想到另一個角度：……">再加一個分論點</button><button data-action="quick" data-text="我想不到相關事例，請提供閱讀資料">找一項具體論據</button></div><div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下你的想法，教練會追問下一步……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
+function studentView(){ensureMessages();const p=progress();return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Learning space</p><nav class="side-nav"><button data-action="view" data-view="coach" class="${store.view==='coach'?'active':''}">${icon('spark')} 情境式對答</button><button data-action="view" data-view="draft" class="${store.view==='draft'?'active':''}">${icon('book')} 我的論證架構</button></nav></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">STUDENT WORKSPACE · 01</div><h1>把想法，寫成論證。</h1><p>不代你寫答案，只幫你把思考說清楚。</p></div><div class="head-meta"><strong>${p}%</strong>架構完成度<br><span>${esc(stageLabel())}</span></div></div><div class="assignment"><div class="eyebrow">本次練習題目</div><h3>${esc(store.config.topic)}</h3><p>${esc(store.config.prompt)}</p><div class="assignment-tags"><span class="tag active">${icon('spark')} 兩個分論點＋一個駁論</span><span class="tag">${icon('check')} 教師已設定評分參考</span></div></div><div class="steps">${['立場','分論點','事例','駁論','完成'].map((s,i)=>`<div class="step ${i===Math.min(store.stage,4)?'active':i<store.stage?'done':''}"><strong>${i<store.stage?'✓ ':''}${s}</strong>${['表明看法','構思兩項理由','配對真實事件','回應反方觀點','檢查大綱'][i]}</div>`).join('')}</div>${store.view==='coach'?`<div class="grid-2"><section class="panel canvas">${canvas()}</section><section class="panel chat-panel">${chatPanel()}</section></div>`:`<section class="panel canvas" style="position:static">${canvas(true)}</section>`}<p class="footer-note">草稿和對話儲存在目前使用的瀏覽器；提交後可在「學生學習報告」查看。請避免輸入敏感個人資料。</p></main></div>`;}
+function chatPanel(){const latest=store.messages.map(m=>m.from).lastIndexOf('coach');return `<div class="chat-head"><div class="coach-id"><div class="coach-avatar">論</div><div><strong>論證教練</strong><small>逐步提問 · 整理想法</small></div></div><div class="chat-head-actions"><span class="online"><i></i>本機情境對答 · 靜態資料</span><button class="btn ghost" data-action="reset" ${coachBusy?'disabled':''}>重新開始對話</button></div></div><div class="chat-log" id="chat-log">${store.messages.map((m,i)=>`<div class="bubble-row ${m.from==='student'?'me':''} ${i===latest?'latest-coach':''}"><div class="bubble">${coachText(m.text)}${supportMarkup(m)}</div></div>`).join('')}</div><div class="typing" id="typing"></div><div class="chat-compose"><div class="quick-prompts"><button data-action="quick" data-text="我想知道怎樣表明立場。">先寫立場</button><button data-action="quick" data-text="請給我多幾種不同角度。">看看不同角度</button><button data-action="quick" data-text="我想不到相關事例，請提供閱讀資料">找事例資料</button><button data-action="quick" data-text="請教我如何回應反方觀點。">學習駁論</button><button data-action="quick" data-text="請檢查兩個分論點是否重複。">檢查論點</button></div><div class="compose-row"><textarea id="coach-input" rows="2" placeholder="寫下想法、提問，或選下方情境……"></textarea><button class="btn primary" data-action="send" ${coachBusy?'disabled':''}>${coachBusy?'思考中…':'送出'} ${icon('arrow')}</button></div></div>`;}
 function openDraftEditor(field){
  const dialog=$('#draft-edit-dialog');if(!dialog)return;
  const title=$('#draft-edit-title'),value=$('#draft-edit-value'),key=$('#draft-edit-key'),note=$('#draft-edit-note');
@@ -523,8 +581,8 @@ function saveDraftEdit(field,value){
 }
 function draftEditDialog(){return `<dialog class="edit-dialog" id="draft-edit-dialog"><form id="draft-edit-form"><h2 id="draft-edit-title">編輯內容</h2><p id="draft-edit-note">只會修改這一部分，其餘內容會保留。</p><input id="draft-edit-key" type="hidden"><textarea id="draft-edit-value" required aria-label="修改內容"></textarea><div class="edit-dialog-actions"><button type="button" class="btn ghost" data-action="cancel-edit">取消</button><button type="submit" class="btn primary">儲存修改</button></div></form></dialog>`;}
 function canvas(full=false){const d=store.draft;return `<div class="canvas-head"><div><h2>論證架構</h2><p>立場、兩個分論點、各自事例及一個駁論。</p></div><div class="completion">${progress()}%<div class="completion-bar"><span style="width:${progress()}%"></span></div></div></div><div class="draft-card position"><h3>中心立場</h3><p>${esc(d.position||'先寫出你的立場。')}</p></div>${d.points.slice(0,2).map((p,i)=>`<div class="draft-card point"><h3>分論點 ${i+1}<span class="draft-inline-actions"><button class="btn ghost mini-edit" data-action="edit-field" data-field="point-${i}-claim">編輯分論點</button><button class="btn ghost mini-edit" data-action="edit-field" data-field="point-${i}-evidence">編輯事例</button></span></h3><p>${esc(p.claim||'待構思')}</p><div class="mini-line"><b>事例（論據）：</b>${esc(p.evidence||'待配對真實事件')}</div></div>`).join('')}<div class="draft-card rebuttal"><h3>駁論<span class="draft-inline-actions"><button class="btn ghost mini-edit" data-action="edit-field" data-field="rebuttal-opposing">編輯反方觀點</button><button class="btn ghost mini-edit" data-action="edit-field" data-field="rebuttal-response">編輯回應</button></span></h3><p><b>反方觀點：</b>${esc(d.rebuttal.opposing||'待提出反方觀點')}</p><div class="mini-line"><b>駁論回應：</b>${esc(d.rebuttal.response||'待回應反方觀點')}</div></div><div class="card-actions">${full?'<button class="btn ghost" data-action="reset">重新開始對話</button>':''}<button class="btn gold" data-action="report">儲存學習報告</button></div>${draftEditDialog()}`;}
-function teacherView(){return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Teaching space</p><nav class="side-nav"><button data-action="view" data-view="settings" class="${store.view==='settings'?'active':''}">${icon('settings')} 題目與評分設定</button><button data-action="view" data-view="reports" class="${store.view==='reports'?'active':''}">${icon('chart')} 學生學習報告</button></nav><div class="side-note"><strong>教師後台</strong>本機試行：設定題目與目標結構，體驗提問及報告流程。</div></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">TEACHER CONSOLE · LOCAL DEMO</div><h1>${store.view==='reports'?'看見學生怎樣思考。':'設定一個好的追問路線。'}</h1><p>${store.view==='reports'?'從對話歷程和論證架構了解學生的學習情況。':'題目和評分參考會傳給 Gemini API，作為寫作教練的提問脈絡。'}</p></div><div class="head-meta"><strong>${store.reports.length}</strong>份已儲存報告<br><span>教師測試版</span></div></div>${store.view==='reports'?reportsView():settingsView()}<p class="footer-note">後台現時以示範資料運作；對話由 Gemini API 即時生成；草稿及報告仍儲存在本機瀏覽器。</p></main></div>`;}
-function settingsView(){const c=store.config;return `<section class="teacher-section panel panel-pad"><h2>題目與評分參考</h2><p class="section-sub">這些設定會影響學生看到的題目、本機教練的提問方向和報告中的評估項目。</p><div class="model-card"><div><strong>建議模型：GPT-5 mini</strong><p>適合高頻率的中文追問、結構化回應和學習紀錄；需要更複雜的長文評析時，可改用 GPT-5。</p></div><span class="model-badge">可替換</span></div><form id="settings-form" style="margin-top:20px"><div class="form-grid"><div class="form-field full"><label for="setting-topic">議論文題目</label><input id="setting-topic" name="topic" value="${esc(c.topic)}" required></div><div class="form-field full"><label for="setting-prompt">寫作要求／背景</label><textarea id="setting-prompt" name="prompt" required>${esc(c.prompt)}</textarea></div><div class="form-field"><label for="setting-target">目標結構</label><select id="setting-target" name="target"><option value="two-plus-rebuttal" selected>兩個分論點＋一個駁論</option></select></div><div class="form-field"><label for="setting-model">AI 模型</label><select id="setting-model" name="model"><option value="gpt-5-mini" ${c.model==='gpt-5-mini'?'selected':''}>GPT-5 mini（建議）</option><option value="gpt-5">GPT-5（較深度分析）</option><option value="mock">示範模式（無 API）</option></select></div><div class="form-field full"><div class="rubric-box"><h3>評分參考（會顯示在教師報告）</h3><div class="check-grid">${defaultConfig.rubrics.map((r,i)=>`<label class="check"><input type="checkbox" name="rubric" value="${esc(r)}" ${(c.rubrics||[]).includes(r)?'checked':''}>${esc(r)}</label>`).join('')}</div></div></div></div><div class="form-actions"><button type="button" class="btn ghost" data-action="reset-config">還原示範題目</button><button class="btn primary" type="submit">儲存設定 ${icon('check')}</button></div></form></section>`;}
+function teacherView(){return `<div class="layout"><aside class="sidebar"><p class="side-kicker">Teaching space</p><nav class="side-nav"><button data-action="view" data-view="settings" class="${store.view==='settings'?'active':''}">${icon('settings')} 題目與評分設定</button><button data-action="view" data-view="reports" class="${store.view==='reports'?'active':''}">${icon('chart')} 學生學習報告</button></nav><div class="side-note"><strong>教師後台</strong>本機試行：設定題目與目標結構，體驗提問及報告流程。</div></aside><main class="main">${mobileNav()}<div class="page-head"><div><div class="eyebrow">TEACHER CONSOLE · LOCAL DEMO</div><h1>${store.view==='reports'?'看見學生怎樣思考。':'設定一個好的追問路線。'}</h1><p>${store.view==='reports'?'從對話歷程和論證架構了解學生的學習情況。':'題目和評分設定只在本機使用；聊天不會連接生成式 AI 或即時搜尋。'}</p></div><div class="head-meta"><strong>${store.reports.length}</strong>份已儲存報告<br><span>教師測試版</span></div></div>${store.view==='reports'?reportsView():settingsView()}<p class="footer-note">本機靜態版本：對答來自預先編寫的情境和內置資料；草稿及報告儲存在目前瀏覽器。</p></main></div>`;}
+function settingsView(){const c=store.config;return `<section class="teacher-section panel panel-pad"><h2>題目與評分參考</h2><p class="section-sub">這些設定會影響學生看到的題目、本機教練的提問方向和報告中的評估項目。</p><div class="model-card"><div><strong>本機情境式對答</strong><p>不連接生成式 AI、Worker 或即時搜尋。網站會按常見提問、目前學習步驟和已載入資料提供對答；未收錄的問題會說明限制。</p></div><span class="model-badge">靜態模式</span></div><form id="settings-form" style="margin-top:20px"><div class="form-grid"><div class="form-field full"><label for="setting-topic">議論文題目</label><input id="setting-topic" name="topic" value="${esc(c.topic)}" required></div><div class="form-field full"><label for="setting-prompt">寫作要求／背景</label><textarea id="setting-prompt" name="prompt" required>${esc(c.prompt)}</textarea></div><div class="form-field"><label for="setting-target">目標結構</label><select id="setting-target" name="target"><option value="two-plus-rebuttal" selected>兩個分論點＋一個駁論</option></select></div><div class="form-field"><label>聊天模式</label><p class="field-note">本機預設情境對答，不需設定 API。</p></div><div class="form-field full"><div class="rubric-box"><h3>評分參考（會顯示在教師報告）</h3><div class="check-grid">${defaultConfig.rubrics.map((r,i)=>`<label class="check"><input type="checkbox" name="rubric" value="${esc(r)}" ${(c.rubrics||[]).includes(r)?'checked':''}>${esc(r)}</label>`).join('')}</div></div></div></div><div class="form-actions"><button type="button" class="btn ghost" data-action="reset-config">還原示範題目</button><button class="btn primary" type="submit">儲存設定 ${icon('check')}</button></div></form></section>`;}
 function reportsView(){if(!store.reports.length)return `<section class="panel empty">尚未有學生報告。先切換到「學生端」完成一次示範，再回來查看報告。</section>`;return `<div class="stats"><div class="stat"><span>已提交報告</span><strong>${store.reports.length}</strong><small>份學習紀錄</small></div><div class="stat"><span>平均完成度</span><strong>${Math.round(store.reports.reduce((a,r)=>a+r.progress,0)/store.reports.length)}%</strong><small>架構建立情況</small></div><div class="stat"><span>已填立場</span><strong>${store.reports.filter(r=>r.position).length}</strong><small>學生能表明取態</small></div><div class="stat"><span>事例齊備</span><strong>${store.reports.filter(r=>(r.examples||[]).filter(Boolean).length===2).length}</strong><small>兩個分論點均有事例</small></div></div><section class="report-list">${store.reports.map((r,i)=>`<article class="panel report-row"><div><h3>${esc(r.student||'示範學生')}</h3><p>${esc(r.topic)} · ${esc(r.time)}</p></div><div><div class="report-progress"><span style="width:${r.progress}%"></span></div><p style="margin-top:6px">${r.progress}% 架構完成度</p></div><div class="report-score">${r.points}<small>個分論點已捕捉</small></div><span class="report-chip">${(r.examples||[]).filter(Boolean).length===2?'事例齊備':'仍需補充事例'}</span><button class="btn ghost" data-action="toggle-report" data-index="${i}">查看詳情 ${icon('arrow')}</button>${store.expandedReport===i?`<div class="report-detail"><b>立場：</b>${esc(r.position||'尚未填寫')}<br><b>分論點：</b>${esc(r.claims.join('；')||'尚未填寫')}<br><b>配對事例：</b>${esc((r.examples||[]).map((v,i)=>'分論點'+(i+1)+'：'+(v||'待補充')).join('；')||'舊報告未記錄事例')}<br><b>教學建議：</b>${esc(r.suggestion)}</div>`:''}</article>`).join('')}</section><div class="form-actions"><button class="btn primary" data-action="export-reports">${icon('download')} 匯出 CSV</button><button class="btn danger" data-action="clear-reports">清除示範報告</button></div>`;}
 function submitReport(){const d=store.draft;const report={student:'student01（示範）',topic:store.config.topic,time:new Intl.DateTimeFormat('zh-HK',{dateStyle:'medium',timeStyle:'short'}).format(new Date()),progress:progress(),points:d.points.filter(p=>p.claim).length,position:d.position,claims:d.points.map(p=>p.claim),examples:d.points.map(p=>p.evidence),suggestion:progress()<100?'請補齊分論點及對應的具體事例。':'請檢查兩個分論點是否互不重複，駁論是否回應反方，以及事例是否適切。'};store.reports=[report,...store.reports.filter(r=>r.student!=='student01（示範）')];save();toast('已儲存學習報告。');render();}
 function resetDraft(){rewardedMilestones.clear();store.draft={position:'',points:[{claim:'',evidence:'',reasoning:''},{claim:'',evidence:'',reasoning:''}],rebuttal:{opposing:'',response:''}};store.messages=[];store.stage=0;store.helpLevel=0;store.helpStage=0;save();render();toast('已重新開始對話。');}
@@ -579,7 +637,7 @@ document.addEventListener('submit',e=>{
   }
   if(e.target.id!=='settings-form'||store.role!=='teacher')return;
   e.preventDefault();const fd=new FormData(e.target);
-  store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'two-plus-rebuttal',model:'gemini-3.5-flash-lite',rubrics:fd.getAll('rubric')};
+  store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'two-plus-rebuttal',model:'static-dialogue-v1',rubrics:fd.getAll('rubric')};
   save();toast('題目與評分參考已儲存。');render();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&e.target.id==='coach-input'){e.preventDefault();const b=document.querySelector('[data-action="send"]');b?.click();}});
@@ -590,7 +648,7 @@ store.config.rubrics=(store.config.rubrics||[]).filter(x=>!['能說明論據如�
 if(!store.config.rubrics.includes('事例能支持對應分論點'))store.config.rubrics.push('事例能支持對應分論點');
 if(store.config.prompt.includes('具體論據及完整論證'))store.config.prompt=defaultConfig.prompt;
 store.stage=currentTask().stage;
-if(saved.flowVersion!==4&&store.messages.some(m=>m.from==='student'))store.messages.push({from:'coach',text:'學習流程已更新為立場、分論點及配對事例。'+taskQuestion()});
+if(saved.flowVersion!==5&&store.messages.some(m=>m.from==='student'))store.messages.push({from:'coach',text:'網站已切換為本機情境式對答，不會連接生成式 AI 或即時搜尋。舊草稿和對話已保留；新的回覆會由內置情境和資料提供。'});
 
 store.messages=store.messages.map(m=>m.support&&!Array.isArray(m.support.evidenceIds)?{...m,text:'過往的閱讀提示已停用。請重新要求閱讀資料，以查看附有已核對來源的材料。',support:null}:m);
 rewardedMilestones=new Set(milestoneKeys());
@@ -600,18 +658,16 @@ if(store.config.topic==='中學生應否限制使用生成式人工智能？'&&!
 }
 if(!store.messages.some(m=>m.from==='student'))store.messages=initialMessages();
 else store.messages=store.messages.map(m=>m.move==='Welcome'?initialMessages()[0]:m);
-store.config.model='gemini-3.5-flash-lite';
+store.config.model='static-dialogue-v1';
 const originalRender=render;
 render=function(){
   originalRender();
   const card=document.querySelector('.model-card strong');
-  if(card)card.textContent='Gemini 3.5 Flash-Lite';
+  if(card)card.textContent='本機情境式對答';
   const note=document.querySelector('.model-card p');
-  if(note)note.textContent='網站已連接 Cloudflare Worker，使用 Gemini 3.5 Flash-Lite 即時回答。真實事件或最新資料會透過 Google 搜尋核對來源。';
+  if(note)note.textContent='不連接生成式 AI、Worker 或即時搜尋。網站會按常見提問、目前學習步驟和已載入資料提供對答；未收錄的問題會說明限制。';
   const badge=document.querySelector('.model-badge');
-  if(badge)badge.textContent='Gemini API';
-  const select=document.querySelector('#setting-model');
-  if(select){select.innerHTML='<option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>';select.value='gemini-3.5-flash-lite';}
+  if(badge)badge.textContent='靜態模式';
 };
 render();
 })();
