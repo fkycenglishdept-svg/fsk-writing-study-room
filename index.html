@@ -586,7 +586,7 @@ document.addEventListener('submit',e=>{
   }
   if(e.target.id!=='settings-form'||store.role!=='teacher')return;
   e.preventDefault();const fd=new FormData(e.target);
-  store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'two-plus-rebuttal',model:'gemini-3.5-flash-lite',rubrics:fd.getAll('rubric')};
+  store.config={topic:fd.get('topic').trim(),prompt:fd.get('prompt').trim(),target:'two-plus-rebuttal',model:'@cf/qwen/qwen3.8-27b',rubrics:fd.getAll('rubric')};
   save();toast('題目與評分參考已儲存。');render();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey&&e.target.id==='coach-input'){e.preventDefault();const b=document.querySelector('[data-action="send"]');b?.click();}});
@@ -607,7 +607,7 @@ if(store.config.topic==='中學生應否限制使用生成式人工智能？'&&!
 }
 if(!store.messages.some(m=>m.from==='student'))store.messages=initialMessages();
 else store.messages=store.messages.map(m=>m.move==='Welcome'?initialMessages()[0]:m);
-store.config.model='gemini-3.5-flash-lite';
+store.config.model='@cf/qwen/qwen3.8-27b';
 const originalRender=render;
 render=function(){
   originalRender();
@@ -618,7 +618,7 @@ render=function(){
   const badge=document.querySelector('.model-badge');
   if(badge)badge.textContent='Cloudflare Workers AI';
   const select=document.querySelector('#setting-model');
-  if(select){select.innerHTML='<option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>';select.value='gemini-3.5-flash-lite';}
+  if(select){select.innerHTML='<option value="@cf/qwen/qwen3.8-27b">Qwen 3.8 27B</option>';select.value='@cf/qwen/qwen3.8-27b';}
   if(liveRefreshTimer){clearInterval(liveRefreshTimer);liveRefreshTimer=null;}
   if(store.role==='teacher'&&store.view==='reports'){refreshLiveSessions();liveRefreshTimer=setInterval(()=>{if(document.visibilityState!=='hidden')refreshLiveSessions();},10000);}
 };
