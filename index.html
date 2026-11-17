@@ -635,7 +635,7 @@ function currentTask(){
 }
 function taskQuestion(){
  const t=currentTask();
- if(t.stage===0)return '先分清「取得學歷」和「學到知識」：你同意、不同意，還是部分同意「讀書無用」？請用一句話表明立場。';
+ if(t.stage===0)return '你同意、不同意，還是部分同意「讀書無用」？請用一句話表明立場。';
  if(t.stage===1)return t.index===0?'請先提出第一個支持你立場的分論點。':'請提出第二個支持你立場的分論點。';
  if(t.stage===2)return '你提出「'+store.draft.points[t.index].claim+'」。請找一件能支持這個分論點的真實歷史事件；想不到時，說「請提供相關事件例子」。';
  if(t.stage===3&&t.index===0)return '先公平地寫出一個反方可能提出的理由（例如「有人認為……」）。下一步再寫你如何回應它。';
@@ -662,7 +662,7 @@ const toast=msg=>{const el=$('#essay-toast');el.textContent=msg;el.className='to
 function icon(n){return ({spark:'✦',chat:'◌',book:'▤',chart:'◒',settings:'⚙',file:'▧',arrow:'→',check:'✓',plus:'＋',download:'↓',reset:'↻'})[n]||'•';}
 function progress(){const d=store.draft,points=d.points.slice(0,2);const count=(d.position.trim()?1:0)+points.reduce((n,p)=>n+(p.claim.trim()?1:0)+(p.claim.trim()&&p.evidence.trim()?1:0),0)+(d.rebuttal.opposing.trim()?1:0)+(d.rebuttal.response.trim()?1:0);return Math.round(count/7*100);}
 function stageLabel(){return talkMoves[currentTask().stage].title;}
-function initialMessages(){return [{from:'coach',move:'Welcome',text:`題目：${store.config.topic}\n\n我會一步一步指引你構思立場、分論點及合適的事例。`},{from:'coach',text:taskQuestion()}];}
+function initialMessages(){return [{from:'coach',move:'Welcome',text:'你同意、不同意，還是部分同意「讀書無用」？請用一句話表明立場。'}];}
 function ensureMessages(){if(!store.messages.length)store.messages=initialMessages();}
 function infer(text){const t=currentTask(),value=text.trim();if(t.stage===0)store.draft.position=value;else if(t.stage===1){store.draft.points[t.index].claim=value;store.draft.points[t.index].angleId='';}else if(t.stage===2)store.draft.points[t.index].evidence=value;else if(t.stage===3&&t.index===0){const m=value.match(/^(?:有人認為|反方認為|有人會說|有人或會認為)?[：:，,\s]*(.+?)(?:；|。|，)?(?:然而|但是|不過|可是|但)[，,]?(.*)$/);if(m){store.draft.rebuttal.opposing=m[1].trim();store.draft.rebuttal.response=m[2].trim();}else store.draft.rebuttal.opposing=value;}else if(t.stage===3)store.draft.rebuttal.response=value;}
 function mentionedHistoricalEvidence(text){
@@ -695,6 +695,12 @@ function claimGuidanceReply(answer){
 }
 
 function isClaimHelpRequest(text){return /(需要幫助|再需要幫助|仍需要幫助|更多幫助|不知道|唔知|想不到|想不出|沒有想法|如何構思|怎樣構思|給我提示|提示一下|有甚麼角度|有什麼角度|哪個角度|不同角度|幾個角度|幾種角度|多些角度|多幾個角度)/.test(String(text||''));}
+function isRebuttalHelpRequest(text){return /(需要幫助|不知道|唔知|想不到|想不出|如何構思|怎樣構思|給我提示|提示一下)/.test(String(text||''));}
+function rebuttalGuidanceReply(){
+ const t=currentTask();
+ if(t.index===0)return '先公平寫出反方最有力的理由：對方會如何解釋讀書的價值？可想「學歷帶來工作選擇」、「專業工作需要訓練」或「知識能解決問題」。下方有可直接採用或改寫的反方觀點。';
+ return '先承認反方在甚麼情況下有道理，再指出它的限制，最後扣回自己的立場。可用「雖然……，但若……，因此……」的結構。下方有可直接採用或改寫的駁論回應。';
+}
 
 function angleFeedback(text){
  const q=normalizedQuery(text);
@@ -954,6 +960,8 @@ function askCoach(text){
    store.helpLevel=Math.min(previousHelpLevel+1,2);store.helpStage=helpKey;reply=claimGuidanceReply(answer);
  }else if(task.stage===1&&isShallowClaim(answer)&&(/(讀書|學習|教育|知識|技能|工作|解難|能力|資訊|判斷|適應|興趣|社會|健康|公民|有用|無用|重要|角度|分論點|好處)/.test(answer)||String(answer).trim().length<12)&&!/^(你好|您好|好|好的|收到|謝謝|多謝|唔該|hi|hello|ok|okay)$/i.test(String(answer).trim())){
    store.helpLevel=1;store.helpStage=helpKey;reply=claimGuidanceReply(answer);
+ }else if(task.stage===3&&isRebuttalHelpRequest(answer)){
+   store.helpLevel=1;store.helpStage=helpKey;reply=rebuttalGuidanceReply();
  }else if(task.stage===2&&isMoreEvidenceRequest(answer)){
    store.helpLevel=1;store.helpStage=helpKey;reply=moreHistoricalEvidenceAnswer();
  }else if(task.stage===2&&isEvidenceHelpRequest(answer)){
@@ -1074,9 +1082,9 @@ function suggestedAnswerChoices(){
  return [];
 }
 function suggestedAnswerPanel(){
- const t=currentTask(),choices=suggestedAnswerChoices(),hasHelpButton=t.stage===1||t.stage===2;
+ const t=currentTask(),choices=suggestedAnswerChoices(),hasHelpButton=t.stage===1||t.stage===2||t.stage===3;
  if(!choices.length&&!hasHelpButton)return '';
- const label=t.stage===0?'可選一項立場，也可以自由輸入：':t.stage===2&&choices.length?'點選事例即可記作論據；來源可供核對：':t.stage===1&&store.helpLevel>=2?'選一個完整分論點，直接進入事例配對：':'需要提示時，可使用下方求助選項：';
+ const label=t.stage===0?'可選一項立場，也可以自由輸入：':t.stage===2&&choices.length?'點選事例即可記作論據；來源可供核對：':t.stage===1&&store.helpLevel>=2?'選一個完整分論點，直接進入事例配對：':t.stage===3&&choices.length?'可直接選用或改寫以下駁論回答：':'需要提示時，可使用下方求助選項：';
  let buttons='';
  if(choices.length)buttons=choices.map(x=>{
   if(t.stage===1)return '<button type="button" data-action="claim-select" data-angle-id="'+esc(x.id)+'">'+esc(x.title+'：'+x.answer)+'</button>';
@@ -1085,7 +1093,8 @@ function suggestedAnswerPanel(){
   return '<button type="button" data-action="quick" data-submit="'+(submits?'true':'false')+'" data-text="'+esc(x)+'">'+esc(x)+'</button>';
  }).join('');
  if(t.stage===1&&store.helpLevel<2)buttons+='<button type="button" class="help-choice" data-action="quick" data-submit="true" data-text="需要幫助">'+(store.helpLevel>0?'再需要幫助':'需要幫助')+'</button>';
- if(t.stage===2)buttons+='<button type="button" class="help-choice" data-action="quick" data-submit="true" data-text="'+(store.helpLevel>0?'請再提供更多事件例子':'請提供相關事件例子')+'">'+(store.helpLevel>0?'請再提供更多事件例子':'請提供相關事件例子')+'</button>';
+ if(t.stage===2&&store.helpLevel===0)buttons+='<button type="button" class="help-choice" data-action="quick" data-submit="true" data-text="請提供相關事件例子">請提供相關事件例子</button>';
+ if(t.stage===3&&store.helpLevel===0)buttons+='<button type="button" class="help-choice" data-action="quick" data-submit="true" data-text="需要幫助">需要幫助</button>';
  return '<div class="suggested-answers"><span>'+label+'</span><div class="suggested-answer-list">'+buttons+'</div></div>';
 }
 function selectClaimSuggestion(angleId){
