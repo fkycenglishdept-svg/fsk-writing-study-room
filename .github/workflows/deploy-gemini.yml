@@ -1,4 +1,4 @@
-name: Deploy Cloudflare Workers AI Worker
+name: Deploy Gemini API Worker
 
 on:
   push:
@@ -25,3 +25,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
           command: deploy
+          secrets: |
+            GEMINI_API_KEY
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
