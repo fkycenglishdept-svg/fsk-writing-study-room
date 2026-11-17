@@ -563,7 +563,8 @@ document.addEventListener('submit',e=>{
       
       store.studentLabel=username;save();
     }
-    store.role=loginPortal;store.view=teacher?'settings':'coach';render();return;
+  }
+  store.role=loginPortal;store.view=teacher?'settings':'coach';render();return;
   }
   if(e.target.id!=='settings-form'||store.role!=='teacher')return;
   e.preventDefault();const fd=new FormData(e.target);
