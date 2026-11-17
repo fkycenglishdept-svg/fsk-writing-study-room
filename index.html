@@ -691,7 +691,7 @@ function isShallowClaim(text){
 function claimGuidanceReply(answer){
  const dirs=directionsForPosition();
  if(store.helpLevel<2)return '你的分論點已找到一個起點。請再想一想：這個方向能否說得更具體，指出對象、情況和原因？以下五個思考方向可以幫你再深入一步：\n\n'+dirs.map((d,i)=>(i+1)+'）'+d.title+'：'+d.thinking).join('\n\n')+'\n\n不用急着下結論；先選一個方向，用自己的話補充細節。若仍無法落筆，再按「再需要幫助」，我才提供可直接採用或改寫的完整答案。';
- return '以下五項是扣緊你所選立場的完整分論點。選一項後，系統會直接進入事例配對；每項已配有至少兩件有來源的歷史事例。';
+ return '以下五項是扣緊你所選立場的完整分論點。哪一項與你的構思較為吻合？';
 }
 
 function isClaimHelpRequest(text){return /(需要幫助|再需要幫助|仍需要幫助|更多幫助|不知道|唔知|想不到|想不出|沒有想法|如何構思|怎樣構思|給我提示|提示一下|有甚麼角度|有什麼角度|哪個角度|不同角度|幾個角度|幾種角度|多些角度|多幾個角度)/.test(String(text||''));}
@@ -759,7 +759,7 @@ function historicalEvidenceAnswer(text){
  if(!records.length)return '我暫時沒有可用的已核實歷史事件。請稍後再試或把分論點改得具體一點。';
  store.evidenceOptions=records.map(e=>e.id);
  store.shownEvidenceIds=[...new Set([...(store.shownEvidenceIds||[]),...store.evidenceOptions])];
- return '以下先提供兩件可供你判斷的歷史事例。點選其中一件即可直接記作論據並進入下一步，不必先讀完資料。\n\n'+evidenceRecordsText(records);
+ return '以下先提供兩件可供你判斷的歷史事例。你認為哪項最適合用來論證你的論點﹖\n\n'+evidenceRecordsText(records);
 }
 function isMoreEvidenceRequest(text){
  const s=String(text||'');
