@@ -58,6 +58,19 @@ function cleanHistory(value) {
 function hasChineseHistoricalRequest(text) {
   return /中國|西方|古代|歷史|事件|真實|論據|事例|例子|最新|最近|今天|今年/.test(text);
 }
+function isDraftAnswerCandidate(message, stage, pointIndex) {
+  const value = String(message || "").trim();
+  const compact = value.replace(/\s/g, "").replace(/[，。！？、；：,.!?]/g, "");
+  if (!compact || /[？?]|嗎|請問|可否|能否|可以嗎|是否|怎樣|如何|為甚麼|為什麼|點解|解釋|介紹|提供|有甚麼|有什麼|幫我|想知道/.test(value)) return false;
+  if (/^(好|好的|嗯+|哦+|喔+|是|係|對|明白|知道了|收到|謝謝|唔該|ok|okay|yes|no|thanks)$/i.test(compact)) return false;
+  if (/想不到|想不出|不知道|唔知|沒有例子|沒有事例|未能舉例|不懂/.test(value)) return false;
+  if (stage === 0) return compact.length >= 3 && /同意|不同意|部分認同|贊成|反對|支持|不支持|認為|立場|讀書有用|讀書無用/.test(value);
+  if (stage === 1) return compact.length >= 8 && /因為|可以|能夠|有助|令|使|讓|學到|培養|提高|增加|改善|促進|提供|有利|重要|價值|機會|能力/.test(value);
+  if (stage === 2) return compact.length >= 6 && /\\d{3,4}|事件|戰役|戰爭|改革|制度|革命|運動|協定|法案|發明|成立|建立|頒布|推行|提出|發現|創立|朝|年|世紀|王|帝|文藝復興|工業革命|科舉|啟蒙/.test(value);
+  if (stage === 3 && pointIndex === 0) return compact.length >= 8 && /有人|反方|認為|會說|因為|理由|可能|雖然|但是|不過|可是|然而|但/.test(value);
+  if (stage === 3 && pointIndex === 1) return compact.length >= 8 && /因為|但是|不過|可是|然而|但|雖然|即使|仍然|不能|未必|不一定|只要|所以|因此|回應|問題/.test(value);
+  return false;
+}
 
 export class ClassroomStore {
   constructor(ctx, env) { this.ctx = ctx; this.env = env; }
@@ -160,8 +173,7 @@ export default {
     else contents.push({ role: "user", parts: [{ text: currentText }] });
 
     const needsSearch = eventRequest(message) || hasChineseHistoricalRequest(message);
-    const asksForHelp = /[？?]|請問|可否|能否|怎樣|如何|為甚麼|為什麼|點解|解釋|介紹|提供|有甚麼|有什麼/.test(message);
-    const advanceDraft = !asksForHelp;
+    const advanceDraft = isDraftAnswerCandidate(message, context.stage, context.pointIndex);
     const body = {
       systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
       contents,
